@@ -1,0 +1,23 @@
+{
+  "name": "controle-corte",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node-dev src/server.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.4.0",
+    "express": "^5.2.1",
+    "sqlite3": "^5.1.7",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@types/sqlite3": "^3.1.11"
+  }
+}
