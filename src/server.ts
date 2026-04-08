@@ -42,7 +42,7 @@ app.get("/cortes/:numero/resumo", (req, res) => {
   db.get(
     "SELECT * FROM cortes WHERE numero = ?",
     [numero],
-    (err, corte) => {
+    (err, corte: any) => {
       if (err) {
         console.error(err)
         return res.status(500).json({ erro: "Erro ao buscar corte" })
@@ -58,7 +58,7 @@ app.get("/cortes/:numero/resumo", (req, res) => {
          ORDER BY id DESC
          LIMIT 1`,
         [numero],
-        (err, ultimaProducao) => {
+        (err, ultimaProducao: any) => {
           if (err) {
             console.error(err)
             return res.status(500).json({ erro: "Erro ao buscar produção" })
@@ -74,6 +74,26 @@ app.get("/cortes/:numero/resumo", (req, res) => {
   )
 })
 
+app.get("/cortes/:numero/finalizacao-itens", (req, res) => {
+  const { numero } = req.params
+
+  db.get(
+    "SELECT itens_finalizados FROM cortes WHERE numero = ?",
+    [numero],
+    (err, corte: any) => {
+      if (err) {
+        console.error(err)
+        return res.status(500).json({ erro: "Erro ao buscar finalização dos itens" })
+      }
+
+      if (!corte) {
+        return res.status(404).json({ erro: "Corte não encontrado" })
+      }
+
+      res.json(corte)
+    }
+  )
+})
 
 app.get("/cortes/:numero", (req, res) => {
   const { numero } = req.params
@@ -81,7 +101,7 @@ app.get("/cortes/:numero", (req, res) => {
   db.get(
     "SELECT * FROM cortes WHERE numero = ?",
     [numero],
-    (err, row) => {
+    (err, row: any) => {
       if (err) {
         console.error(err)
         return res.status(500).json({ erro: "Erro ao buscar corte" })
@@ -118,30 +138,50 @@ app.post("/producao", (req, res) => {
     status
   } = req.body
 
-  db.run(
-    `INSERT INTO producao 
-    (data, numero_corte, turno, operador, folha_inicio, folha_parou, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [data, numero_corte, turno, operador, folha_inicio, folha_parou, status],
-    function (err) {
+  db.get(
+    `SELECT * FROM producao
+     WHERE numero_corte = ?
+     ORDER BY id DESC
+     LIMIT 1`,
+    [numero_corte],
+    (err, ultimaProducao: any) => {
       if (err) {
         console.error(err)
-        return res.status(500).json({ erro: "Erro ao cadastrar produção" })
+        return res.status(500).json({ erro: "Erro ao validar produção" })
       }
 
-      res.json({
-        mensagem: "Produção cadastrada com sucesso",
-        producao: {
-          id: this.lastID,
-          data,
-          numero_corte,
-          turno,
-          operador,
-          folha_inicio,
-          folha_parou,
-          status
+      if (ultimaProducao && ultimaProducao.status === "FINALIZADO") {
+        return res.status(400).json({
+          erro: "Este corte já foi finalizado e não pode receber nova produção"
+        })
+      }
+
+      db.run(
+        `INSERT INTO producao 
+        (data, numero_corte, turno, operador, folha_inicio, folha_parou, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [data, numero_corte, turno, operador, folha_inicio, folha_parou, status],
+        function (err) {
+          if (err) {
+            console.error(err)
+            return res.status(500).json({ erro: "Erro ao cadastrar produção" })
+          }
+
+          res.json({
+            mensagem: "Produção cadastrada com sucesso",
+            producao: {
+              id: this.lastID,
+              data,
+              numero_corte,
+              turno,
+              operador,
+              folha_inicio,
+              folha_parou,
+              status
+            }
+          })
         }
-      })
+      )
     }
   )
 })
@@ -155,7 +195,7 @@ app.get("/producao/:numero/ultima", (req, res) => {
      ORDER BY id DESC
      LIMIT 1`,
     [numero],
-    (err, row) => {
+    (err, row: any) => {
       if (err) {
         console.error(err)
         return res.status(500).json({ erro: "Erro ao buscar última produção" })
@@ -170,23 +210,6 @@ app.get("/producao/:numero/ultima", (req, res) => {
       res.json(row)
     }
   )
-})
-
-app.get("/producao", (req, res) => {
-  db.all("SELECT * FROM producao", [], (err, rows) => {
-    if (err) {
-      console.error(err)
-      return res.status(500).json({ erro: "Erro ao buscar produção" })
-    }
-
-    res.json(rows)
-  })
-})
-
-const PORT = process.env.PORT || 3000
-
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`)
 })
 
 app.get("/producao/:numero", (req, res) => {
@@ -206,6 +229,17 @@ app.get("/producao/:numero", (req, res) => {
       res.json(rows)
     }
   )
+})
+
+app.get("/producao", (req, res) => {
+  db.all("SELECT * FROM producao", [], (err, rows) => {
+    if (err) {
+      console.error(err)
+      return res.status(500).json({ erro: "Erro ao buscar produção" })
+    }
+
+    res.json(rows)
+  })
 })
 
 app.get("/cortes-em-andamento", (req, res) => {
@@ -237,4 +271,121 @@ app.get("/cortes-em-andamento", (req, res) => {
       res.json(rows)
     }
   )
+})
+
+app.post("/itens-corte", (req, res) => {
+  const {
+    numero_corte,
+    modelo,
+    cor,
+    tecido,
+    metragem_usada,
+    sobra_metros,
+    perda_metros,
+    quantidade_pecas
+  } = req.body
+
+  db.get(
+    "SELECT itens_finalizados FROM cortes WHERE numero = ?",
+    [numero_corte],
+    (err, corte: any) => {
+      if (err) {
+        console.error(err)
+        return res.status(500).json({ erro: "Erro ao validar corte" })
+      }
+
+      if (!corte) {
+        return res.status(404).json({ erro: "Corte não encontrado" })
+      }
+
+      if (corte.itens_finalizados === 1) {
+        return res.status(400).json({
+          erro: "Os itens deste corte já foram finalizados e não podem ser alterados"
+        })
+      }
+
+      db.run(
+        `INSERT INTO itens_corte
+        (numero_corte, modelo, cor, tecido, metragem_usada, sobra_metros, perda_metros, quantidade_pecas)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          numero_corte,
+          modelo,
+          cor,
+          tecido,
+          metragem_usada,
+          sobra_metros,
+          perda_metros,
+          quantidade_pecas
+        ],
+        function (err) {
+          if (err) {
+            console.error(err)
+            return res.status(500).json({ erro: "Erro ao cadastrar item do corte" })
+          }
+
+          res.json({
+            mensagem: "Item do corte cadastrado com sucesso",
+            item: {
+              id: this.lastID,
+              numero_corte,
+              modelo,
+              cor,
+              tecido,
+              metragem_usada,
+              sobra_metros,
+              perda_metros,
+              quantidade_pecas
+            }
+          })
+        }
+      )
+    }
+  )
+})
+
+app.get("/itens-corte/:numero", (req, res) => {
+  const { numero } = req.params
+
+  db.all(
+    `SELECT * FROM itens_corte
+     WHERE numero_corte = ?
+     ORDER BY id ASC`,
+    [numero],
+    (err, rows) => {
+      if (err) {
+        console.error(err)
+        return res.status(500).json({ erro: "Erro ao buscar itens do corte" })
+      }
+
+      res.json(rows)
+    }
+  )
+})
+
+app.post("/cortes/:numero/finalizar-itens", (req, res) => {
+  const { numero } = req.params
+
+  db.run(
+    "UPDATE cortes SET itens_finalizados = 1 WHERE numero = ?",
+    [numero],
+    function (err) {
+      if (err) {
+        console.error(err)
+        return res.status(500).json({ erro: "Erro ao finalizar itens do corte" })
+      }
+
+      if (this.changes === 0) {
+        return res.status(404).json({ erro: "Corte não encontrado" })
+      }
+
+      res.json({ mensagem: "Itens do corte finalizados com sucesso" })
+    }
+  )
+})
+
+const PORT = process.env.PORT || 3000
+
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`)
 })

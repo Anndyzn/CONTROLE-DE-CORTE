@@ -1,8 +1,93 @@
 const botaoBuscar = document.getElementById("buscarCorte")
 const botaoSalvar = document.getElementById("salvarProducao")
 const botaoCadastrarCorte = document.getElementById("cadastrarCorte")
+const botaoSalvarItemCorte = document.getElementById("salvarItemCorte")
+const botaoFinalizarItensCorte = document.getElementById("finalizarItensCorte")
+
+const selectCor = document.getElementById("corItem")
+const inputCorOutra = document.getElementById("corOutra")
+
+const selectTecido = document.getElementById("tecidoItem")
+const inputTecidoOutro = document.getElementById("tecidoOutro")
+
+const selectOperador = document.getElementById("operador")
+const inputOperadorOutro = document.getElementById("operadorOutro")
+
+const selectStatusProducao = document.getElementById("statusProducao")
+const blocoItensCorte = document.getElementById("blocoItensCorte")
+
+function limparTabelaHistorico() {
+  document.getElementById("historicoCorte").innerHTML = ""
+}
+
+function limparTabelaItens() {
+  document.getElementById("listaItensCorte").innerHTML = ""
+}
+
+function limparCamposItens() {
+  document.getElementById("modeloItem").value = ""
+  document.getElementById("corItem").value = ""
+  document.getElementById("corOutra").value = ""
+  document.getElementById("corOutra").style.display = "none"
+  document.getElementById("tecidoItem").value = ""
+  document.getElementById("tecidoOutro").value = ""
+  document.getElementById("tecidoOutro").style.display = "none"
+  document.getElementById("metragemItem").value = ""
+  document.getElementById("sobraItem").value = ""
+  document.getElementById("perdaItem").value = ""
+  document.getElementById("quantidadeItem").value = ""
+}
+
+function habilitarProducao() {
+  botaoSalvar.disabled = false
+  document.getElementById("data").disabled = false
+  document.getElementById("turno").disabled = false
+  document.getElementById("operador").disabled = false
+  document.getElementById("operadorOutro").disabled = false
+  document.getElementById("folhaParouInput").disabled = false
+  document.getElementById("statusProducao").disabled = false
+}
+
+function desabilitarProducao() {
+  botaoSalvar.disabled = true
+  document.getElementById("data").disabled = true
+  document.getElementById("turno").disabled = true
+  document.getElementById("operador").disabled = true
+  document.getElementById("operadorOutro").disabled = true
+  document.getElementById("folhaParouInput").disabled = true
+  document.getElementById("statusProducao").disabled = true
+}
+
+function habilitarItens() {
+  botaoSalvarItemCorte.disabled = false
+  botaoFinalizarItensCorte.disabled = false
+}
+
+function desabilitarItens() {
+  botaoSalvarItemCorte.disabled = true
+  botaoFinalizarItensCorte.disabled = true
+}
+
+async function carregarFinalizacaoItens(numeroCorte) {
+  try {
+    const resposta = await fetch(`/cortes/${numeroCorte}/finalizacao-itens`)
+    const dados = await resposta.json()
+
+    if (!resposta.ok) {
+      return false
+    }
+
+    return dados.itens_finalizados === 1
+  } catch (error) {
+    console.error("Erro ao buscar finalização dos itens:", error)
+    return false
+  }
+}
 
 async function buscarCorte(numeroCorte) {
+  blocoItensCorte.style.display = "none"
+  document.getElementById("statusProducao").value = ""
+
   if (!numeroCorte) {
     alert("Digite o número do corte")
     return
@@ -18,8 +103,16 @@ async function buscarCorte(numeroCorte) {
       document.getElementById("folhaParou").textContent = "0"
       document.getElementById("status").textContent = "NOVO CORTE"
       document.getElementById("folhaInicio").value = 0
-      document.getElementById("historicoCorte").innerHTML = ""
+
+      limparTabelaHistorico()
+      limparTabelaItens()
+      limparCamposItens()
+
       document.getElementById("novoCorte").style.display = "block"
+
+      habilitarProducao()
+      habilitarItens()
+
       return
     }
 
@@ -36,6 +129,28 @@ async function buscarCorte(numeroCorte) {
       dados.ultima_producao?.folha_parou ?? 0
 
     await carregarHistorico(numeroCorte)
+    const quantidadeItens = await carregarItensCorte(numeroCorte)
+    const itensJaFinalizados = await carregarFinalizacaoItens(numeroCorte)
+
+    const producaoFinalizada = dados.ultima_producao?.status === "FINALIZADO"
+
+    if (producaoFinalizada) {
+      desabilitarProducao()
+    } else {
+      habilitarProducao()
+    }
+
+    if (itensJaFinalizados) {
+      desabilitarItens()
+    } else {
+      habilitarItens()
+    }
+
+    if (producaoFinalizada || quantidadeItens > 0) {
+      blocoItensCorte.style.display = "block"
+    } else {
+      blocoItensCorte.style.display = "none"
+    }
   } catch (error) {
     alert("Erro ao conectar com o servidor")
     console.error(error)
@@ -66,6 +181,37 @@ async function carregarHistorico(numeroCorte) {
     })
   } catch (error) {
     console.error("Erro ao carregar histórico:", error)
+  }
+}
+
+async function carregarItensCorte(numeroCorte) {
+  try {
+    const resposta = await fetch(`/itens-corte/${numeroCorte}`)
+    const itens = await resposta.json()
+
+    const tabela = document.getElementById("listaItensCorte")
+    tabela.innerHTML = ""
+
+    itens.forEach((item) => {
+      const linha = document.createElement("tr")
+
+      linha.innerHTML = `
+        <td>${item.modelo}</td>
+        <td>${item.cor}</td>
+        <td>${item.tecido}</td>
+        <td>${item.metragem_usada}</td>
+        <td>${item.sobra_metros}</td>
+        <td>${item.perda_metros}</td>
+        <td>${item.quantidade_pecas}</td>
+      `
+
+      tabela.appendChild(linha)
+    })
+
+    return itens.length
+  } catch (error) {
+    console.error("Erro ao carregar itens do corte:", error)
+    return 0
   }
 }
 
@@ -115,6 +261,8 @@ botaoCadastrarCorte.addEventListener("click", async () => {
     document.getElementById("produtoNovo").value = ""
     document.getElementById("mesaNova").value = ""
 
+    habilitarProducao()
+    habilitarItens()
     await carregarCortesEmAndamento()
   } catch (error) {
     alert("Erro ao conectar com o servidor")
@@ -126,7 +274,12 @@ botaoSalvar.addEventListener("click", async () => {
   const numeroCorte = document.getElementById("numeroCorte").value
   const data = document.getElementById("data").value
   const turno = document.getElementById("turno").value
-  const operador = document.getElementById("operador").value
+  let operador = document.getElementById("operador").value
+
+  if (operador === "OUTRO") {
+    operador = document.getElementById("operadorOutro").value.trim()
+  }
+
   const folhaInicio = document.getElementById("folhaInicio").value
   const folhaParou = document.getElementById("folhaParouInput").value
   const status = document.getElementById("statusProducao").value
@@ -167,9 +320,109 @@ botaoSalvar.addEventListener("click", async () => {
     document.getElementById("status").textContent = status
     document.getElementById("folhaParouInput").value = ""
     document.getElementById("operador").value = ""
+    document.getElementById("operadorOutro").value = ""
+    document.getElementById("operadorOutro").style.display = "none"
 
     await carregarHistorico(numeroCorte)
     await carregarCortesEmAndamento()
+
+    if (status === "FINALIZADO") {
+      blocoItensCorte.style.display = "block"
+      desabilitarProducao()
+    }
+  } catch (error) {
+    alert("Erro ao conectar com o servidor")
+    console.error(error)
+  }
+})
+
+botaoSalvarItemCorte.addEventListener("click", async () => {
+  const numeroCorte = document.getElementById("numeroCorte").value
+  const modelo = document.getElementById("modeloItem").value.trim()
+
+  let cor = document.getElementById("corItem").value
+  if (cor === "OUTRA") {
+    cor = document.getElementById("corOutra").value.trim()
+  }
+
+  let tecido = document.getElementById("tecidoItem").value
+  if (tecido === "OUTRA") {
+    tecido = document.getElementById("tecidoOutro").value.trim()
+  }
+
+  const metragem = document.getElementById("metragemItem").value
+  const sobra = document.getElementById("sobraItem").value
+  const perda = document.getElementById("perdaItem").value
+  const quantidade = document.getElementById("quantidadeItem").value
+
+  if (!numeroCorte || !modelo || !cor || !tecido || !quantidade) {
+    alert("Preencha modelo, cor, tecido e quantidade de peças")
+    return
+  }
+
+  if (metragem === "") {
+    alert("Informe a metragem usada. Se for aproveitamento, digite 0")
+    return
+  }
+
+  try {
+    const resposta = await fetch("/itens-corte", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        numero_corte: Number(numeroCorte),
+        modelo,
+        cor,
+        tecido,
+        metragem_usada: Number(metragem),
+        sobra_metros: Number(sobra || 0),
+        perda_metros: Number(perda || 0),
+        quantidade_pecas: Number(quantidade)
+      })
+    })
+
+    const dados = await resposta.json()
+
+    if (!resposta.ok) {
+      alert(dados.erro || "Erro ao salvar item do corte")
+      return
+    }
+
+    alert("Item do corte cadastrado com sucesso")
+
+    limparCamposItens()
+    await carregarItensCorte(numeroCorte)
+  } catch (error) {
+    alert("Erro ao conectar com o servidor")
+    console.error(error)
+  }
+})
+
+botaoFinalizarItensCorte.addEventListener("click", async () => {
+  const numeroCorte = document.getElementById("numeroCorte").value
+
+  if (!numeroCorte) {
+    alert("Busque um corte antes")
+    return
+  }
+
+  try {
+    const resposta = await fetch(`/cortes/${numeroCorte}/finalizar-itens`, {
+      method: "POST"
+    })
+
+    const dados = await resposta.json()
+
+    if (!resposta.ok) {
+      alert(dados.erro || "Erro ao finalizar itens do corte")
+      return
+    }
+
+    alert("Itens do corte registrados e finalizados com sucesso")
+
+    desabilitarItens()
   } catch (error) {
     alert("Erro ao conectar com o servidor")
     console.error(error)
@@ -208,5 +461,29 @@ async function carregarCortesEmAndamento() {
     console.error("Erro ao carregar cortes em andamento:", error)
   }
 }
+
+// COR
+selectCor.addEventListener("change", () => {
+  inputCorOutra.style.display = selectCor.value === "OUTRA" ? "block" : "none"
+})
+
+// TECIDO
+selectTecido.addEventListener("change", () => {
+  inputTecidoOutro.style.display = selectTecido.value === "OUTRA" ? "block" : "none"
+})
+
+// OPERADOR
+selectOperador.addEventListener("change", () => {
+  inputOperadorOutro.style.display = selectOperador.value === "OUTRO" ? "block" : "none"
+})
+
+// STATUS
+selectStatusProducao.addEventListener("change", () => {
+  if (selectStatusProducao.value === "FINALIZADO") {
+    blocoItensCorte.style.display = "block"
+  } else {
+    blocoItensCorte.style.display = "none"
+  }
+})
 
 carregarCortesEmAndamento()

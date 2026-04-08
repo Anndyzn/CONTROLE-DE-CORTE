@@ -10,7 +10,8 @@ db.serialize(() => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       numero INTEGER,
       produto TEXT,
-      mesa TEXT
+      mesa TEXT,
+      itens_finalizados INTEGER DEFAULT 0
     )
   `)
 
@@ -27,5 +28,21 @@ db.serialize(() => {
     )
   `)
 })
+
+
+db.run(`
+  CREATE TABLE IF NOT EXISTS itens_corte (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    numero_corte INTEGER,
+    modelo TEXT,
+    cor TEXT,
+    tecido TEXT,
+    metragem_usada REAL,
+    sobra_metros REAL,
+    perda_metros REAL,
+    quantidade_pecas INTEGER
+  )
+`)
+
 
 export default db
