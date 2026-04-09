@@ -10,111 +10,141 @@
   <div class="container">
     <h1>Sistema de Controle de Corte</h1>
 
-    <h2>Buscar corte</h2>
-
-    <div class="form-grid">
-      <div class="form-group">
-        <label for="numeroCorte">Número do corte</label>
-        <input type="number" id="numeroCorte" placeholder="Digite o número do corte">
+    <div class="info-grid-top">
+      <div class="info-summary-card">
+        <span class="info-summary-label">Corte buscado</span>
+        <span class="info-summary-value" id="resumoNumeroCorte">--</span>
       </div>
 
-      <div class="form-group" style="justify-content: end;">
-        <label>&nbsp;</label>
-        <button id="buscarCorte">Buscar</button>
+      <div class="info-summary-card">
+        <span class="info-summary-label">Última folha</span>
+        <span class="info-summary-value" id="resumoUltimaFolha">0</span>
+      </div>
+
+      <div class="info-summary-card">
+        <span class="info-summary-label">Status atual</span>
+        <span class="info-summary-value" id="resumoStatus">--</span>
+      </div>
+
+      <div class="info-summary-card">
+        <span class="info-summary-label">Mesa</span>
+        <span class="info-summary-value" id="resumoMesa">--</span>
       </div>
     </div>
 
-    <div id="novoCorte" style="display: none; margin-top: 20px;">
-      <h3>Novo corte</h3>
+    <section class="section-card">
+      <h2>Buscar corte</h2>
 
       <div class="form-grid">
         <div class="form-group">
-          <label for="produtoNovo">Produto</label>
-          <input type="text" id="produtoNovo" placeholder="Digite o produto">
+          <label for="numeroCorte">Número do corte</label>
+          <input type="number" id="numeroCorte" placeholder="Digite o número do corte">
+          <span class="small-help">Digite o número do corte para localizar ou iniciar um novo.</span>
+        </div>
+
+        <div class="form-group" style="justify-content: end;">
+          <label>&nbsp;</label>
+          <button id="buscarCorte">Buscar</button>
+        </div>
+      </div>
+
+      <div id="novoCorte" style="display: none;">
+        <h3>Novo corte</h3>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="produtoNovo">Produto</label>
+            <input type="text" id="produtoNovo" placeholder="Digite o produto">
+          </div>
+
+          <div class="form-group">
+            <label for="mesaNova">Mesa</label>
+            <select id="mesaNova">
+              <option value="">Selecione</option>
+              <option value="MESA 1">MESA 1</option>
+              <option value="MESA 2">MESA 2</option>
+              <option value="MESA 3">MESA 3</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button id="cadastrarCorte">Cadastrar corte</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <h2>Dados do corte</h2>
+
+      <div class="dados-corte">
+        <div class="card-info"><strong>Produto:</strong>&nbsp;<span id="produto"></span></div>
+        <div class="card-info"><strong>Mesa:</strong>&nbsp;<span id="mesa"></span></div>
+        <div class="card-info"><strong>Última folha parou:</strong>&nbsp;<span id="folhaParou"></span></div>
+        <div class="card-info"><strong>Status atual:</strong>&nbsp;<span id="status"></span></div>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <h2>Registrar produção</h2>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="data">Data</label>
+          <input type="date" id="data">
         </div>
 
         <div class="form-group">
-          <label for="mesaNova">Mesa</label>
-          <select id="mesaNova">
+          <label for="turno">Turno</label>
+          <select id="turno">
             <option value="">Selecione</option>
-            <option value="MESA 1">MESA 1</option>
-            <option value="MESA 2">MESA 2</option>
-            <option value="MESA 3">MESA 3</option>
+            <option value="1º TURNO">1º TURNO</option>
+            <option value="2º TURNO">2º TURNO</option>
           </select>
+        </div>
+
+        <div class="form-group">
+          <label for="operador">Operador</label>
+          <select id="operador">
+            <option value="">Selecione</option>
+            <option value="MATHEUS">MATHEUS</option>
+            <option value="CICERA">CICERA</option>
+            <option value="SOFIA">SOFIA</option>
+            <option value="ANA">ANA</option>
+            <option value="GUSTAVO">GUSTAVO</option>
+            <option value="ADILDE">ADILDE</option>
+            <option value="OUTRO">OUTRO</option>
+          </select>
+          <input type="text" id="operadorOutro" placeholder="Digite o operador" style="display:none; margin-top: 8px;">
+        </div>
+
+        <div class="form-group">
+          <label for="folhaInicio">Folha início</label>
+          <input type="number" id="folhaInicio" readonly>
+        </div>
+
+        <div class="form-group">
+          <label for="folhaParouInput">Folha parou</label>
+          <input type="number" id="folhaParouInput" placeholder="Digite onde parou">
+        </div>
+
+        <div class="form-group">
+          <label for="statusProducao">Status</label>
+          <select id="statusProducao">
+            <option value="">Selecione</option>
+            <option value="EM PRODUÇÃO">EM PRODUÇÃO</option>
+            <option value="FINALIZADO">FINALIZADO</option>
+          </select>
+          <span class="small-help">Ao marcar como finalizado, os itens do corte serão liberados.</span>
         </div>
       </div>
 
-      <button id="cadastrarCorte">Cadastrar corte</button>
-    </div>
-
-    <h3>Dados do corte</h3>
-
-    <div class="dados-corte">
-      <div class="card-info"><strong>Produto:</strong> <span id="produto"></span></div>
-      <div class="card-info"><strong>Mesa:</strong> <span id="mesa"></span></div>
-      <div class="card-info"><strong>Última folha parou:</strong> <span id="folhaParou"></span></div>
-      <div class="card-info"><strong>Status atual:</strong> <span id="status"></span></div>
-    </div>
-
-    <hr>
-
-    <h2>Registrar produção</h2>
-
-    <div class="form-grid">
-      <div class="form-group">
-        <label for="data">Data</label>
-        <input type="date" id="data">
+      <div class="button-row">
+        <button id="salvarProducao">Salvar produção</button>
       </div>
+    </section>
 
-      <div class="form-group">
-        <label for="turno">Turno</label>
-        <select id="turno">
-          <option value="">Selecione</option>
-          <option value="1º TURNO">1º TURNO</option>
-          <option value="2º TURNO">2º TURNO</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="operador">Operador</label>
-        <select id="operador">
-          <option value="">Selecione</option>
-          <option value="MATHEUS">MATHEUS</option>
-          <option value="CICERA">CICERA</option>
-          <option value="SOFIA">SOFIA</option>
-          <option value="ANA">ANA</option>
-          <option value="GUSTAVO">GUSTAVO</option>
-          <option value="ADILDE">ADILDE</option>
-          <option value="OUTRO">OUTRO</option>
-        </select>
-        <input type="text" id="operadorOutro" placeholder="Digite o operador" style="display:none; margin-top: 8px;">
-      </div>
-
-      <div class="form-group">
-        <label for="folhaInicio">Folha início</label>
-        <input type="number" id="folhaInicio" readonly>
-      </div>
-
-      <div class="form-group">
-        <label for="folhaParouInput">Folha parou</label>
-        <input type="number" id="folhaParouInput" placeholder="Digite onde parou">
-      </div>
-
-      <div class="form-group">
-        <label for="statusProducao">Status</label>
-        <select id="statusProducao">
-          <option value="">Selecione</option>
-          <option value="EM PRODUÇÃO">EM PRODUÇÃO</option>
-          <option value="FINALIZADO">FINALIZADO</option>
-        </select>
-      </div>
-    </div>
-
-    <button id="salvarProducao">Salvar produção</button>
-
-    <div id="blocoItensCorte" style="display: none;">
-      <hr>
-
+    <section class="section-card" id="blocoItensCorte" style="display: none;">
       <h2>Itens do corte</h2>
 
       <div class="form-grid">
@@ -157,6 +187,7 @@
         <div class="form-group">
           <label for="metragemItem">Metragem usada</label>
           <input type="number" step="0.01" id="metragemItem" placeholder="Ex: 25">
+          <span class="small-help">Se for aproveitamento, informe 0.</span>
         </div>
 
         <div class="form-group">
@@ -175,59 +206,67 @@
         </div>
       </div>
 
-      <button id="salvarItemCorte">Salvar item do corte</button>
-      <button id="finalizarItensCorte">Registrar itens do corte</button>
+      <div class="button-row">
+        <button id="salvarItemCorte">Salvar item do corte</button>
+        <button id="finalizarItensCorte">Registrar itens do corte</button>
+      </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Modelo</th>
-            <th>Cor</th>
-            <th>Tecido</th>
-            <th>Metragem</th>
-            <th>Sobra</th>
-            <th>Perda</th>
-            <th>Quantidade</th>
-          </tr>
-        </thead>
-        <tbody id="listaItensCorte"></tbody>
-      </table>
-    </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Modelo</th>
+              <th>Cor</th>
+              <th>Tecido</th>
+              <th>Metragem</th>
+              <th>Sobra</th>
+              <th>Perda</th>
+              <th>Quantidade</th>
+            </tr>
+          </thead>
+          <tbody id="listaItensCorte"></tbody>
+        </table>
+      </div>
+    </section>
 
-    <hr>
+    <section class="section-card">
+      <h2>Histórico do corte</h2>
 
-    <h2>Histórico do corte</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Turno</th>
+              <th>Operador</th>
+              <th>Folha início</th>
+              <th>Folha parou</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="historicoCorte"></tbody>
+        </table>
+      </div>
+    </section>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Data</th>
-          <th>Turno</th>
-          <th>Operador</th>
-          <th>Folha início</th>
-          <th>Folha parou</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="historicoCorte"></tbody>
-    </table>
+    <section class="section-card">
+      <h2>Cortes em andamento</h2>
 
-    <hr>
-
-    <h2>Cortes em andamento</h2>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Número</th>
-          <th>Produto</th>
-          <th>Mesa</th>
-          <th>Última folha</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="cortesEmAndamento"></tbody>
-    </table>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Número</th>
+              <th>Produto</th>
+              <th>Mesa</th>
+              <th>Última folha</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="cortesEmAndamento"></tbody>
+        </table>
+      </div>
+    </section>
   </div>
 
   <script src="script.js"></script>

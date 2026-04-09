@@ -16,6 +16,25 @@ const inputOperadorOutro = document.getElementById("operadorOutro")
 const selectStatusProducao = document.getElementById("statusProducao")
 const blocoItensCorte = document.getElementById("blocoItensCorte")
 
+function atualizarResumoTopo({ numero = "--", ultimaFolha = "0", status = "--", mesa = "--" }) {
+  document.getElementById("resumoNumeroCorte").textContent = numero
+  document.getElementById("resumoUltimaFolha").textContent = ultimaFolha
+  document.getElementById("resumoMesa").textContent = mesa
+  document.getElementById("resumoStatus").textContent = status
+}
+
+function renderizarStatus(status) {
+  const statusEl = document.getElementById("status")
+
+  if (status === "FINALIZADO") {
+    statusEl.innerHTML = `<span class="status-badge status-finalizado">${status}</span>`
+  } else if (status === "EM PRODUÇÃO") {
+    statusEl.innerHTML = `<span class="status-badge status-em-producao">${status}</span>`
+  } else {
+    statusEl.innerHTML = `<span class="status-badge status-default">${status}</span>`
+  }
+}
+
 function limparTabelaHistorico() {
   document.getElementById("historicoCorte").innerHTML = ""
 }
@@ -101,8 +120,15 @@ async function buscarCorte(numeroCorte) {
       document.getElementById("produto").textContent = ""
       document.getElementById("mesa").textContent = ""
       document.getElementById("folhaParou").textContent = "0"
-      document.getElementById("status").textContent = "NOVO CORTE"
+      renderizarStatus("NOVO CORTE")
       document.getElementById("folhaInicio").value = 0
+
+      atualizarResumoTopo({
+        numero: numeroCorte,
+        ultimaFolha: "0",
+        status: "NOVO CORTE",
+        mesa: "--"
+      })
 
       limparTabelaHistorico()
       limparTabelaItens()
@@ -118,21 +144,28 @@ async function buscarCorte(numeroCorte) {
 
     document.getElementById("novoCorte").style.display = "none"
 
+    const statusAtual = dados.ultima_producao?.status ?? "SEM PRODUÇÃO"
+    const ultimaFolha = dados.ultima_producao?.folha_parou ?? 0
+
     document.getElementById("produto").textContent = dados.corte.produto
     document.getElementById("mesa").textContent = dados.corte.mesa
-    document.getElementById("folhaParou").textContent =
-      dados.ultima_producao?.folha_parou ?? 0
-    document.getElementById("status").textContent =
-      dados.ultima_producao?.status ?? "SEM PRODUÇÃO"
+    document.getElementById("folhaParou").textContent = ultimaFolha
+    renderizarStatus(statusAtual)
 
-    document.getElementById("folhaInicio").value =
-      dados.ultima_producao?.folha_parou ?? 0
+    document.getElementById("folhaInicio").value = ultimaFolha
+
+    atualizarResumoTopo({
+      numero: numeroCorte,
+      ultimaFolha: String(ultimaFolha),
+      status: statusAtual,
+      mesa: dados.corte.mesa
+    })
 
     await carregarHistorico(numeroCorte)
     const quantidadeItens = await carregarItensCorte(numeroCorte)
     const itensJaFinalizados = await carregarFinalizacaoItens(numeroCorte)
 
-    const producaoFinalizada = dados.ultima_producao?.status === "FINALIZADO"
+    const producaoFinalizada = statusAtual === "FINALIZADO"
 
     if (producaoFinalizada) {
       desabilitarProducao()
@@ -255,11 +288,18 @@ botaoCadastrarCorte.addEventListener("click", async () => {
     document.getElementById("produto").textContent = produto
     document.getElementById("mesa").textContent = mesa
     document.getElementById("folhaParou").textContent = "0"
-    document.getElementById("status").textContent = "SEM PRODUÇÃO"
+    renderizarStatus("SEM PRODUÇÃO")
     document.getElementById("folhaInicio").value = 0
     document.getElementById("novoCorte").style.display = "none"
     document.getElementById("produtoNovo").value = ""
     document.getElementById("mesaNova").value = ""
+
+    atualizarResumoTopo({
+      numero: numeroCorte,
+      ultimaFolha: "0",
+      status: "SEM PRODUÇÃO",
+      mesa
+    })
 
     habilitarProducao()
     habilitarItens()
@@ -317,11 +357,18 @@ botaoSalvar.addEventListener("click", async () => {
 
     document.getElementById("folhaInicio").value = folhaParou
     document.getElementById("folhaParou").textContent = folhaParou
-    document.getElementById("status").textContent = status
+    renderizarStatus(status)
     document.getElementById("folhaParouInput").value = ""
     document.getElementById("operador").value = ""
     document.getElementById("operadorOutro").value = ""
     document.getElementById("operadorOutro").style.display = "none"
+
+    atualizarResumoTopo({
+      numero: numeroCorte,
+      ultimaFolha: folhaParou,
+      status,
+      mesa: document.getElementById("mesa").textContent || "--"
+    })
 
     await carregarHistorico(numeroCorte)
     await carregarCortesEmAndamento()
@@ -438,6 +485,13 @@ async function carregarCortesEmAndamento() {
     tabela.innerHTML = ""
 
     cortes.forEach((corte) => {
+      const statusClasse =
+        corte.status === "FINALIZADO"
+          ? "status-badge status-finalizado"
+          : corte.status === "EM PRODUÇÃO"
+          ? "status-badge status-em-producao"
+          : "status-badge status-default"
+
       const linha = document.createElement("tr")
 
       linha.innerHTML = `
@@ -445,7 +499,7 @@ async function carregarCortesEmAndamento() {
         <td>${corte.produto}</td>
         <td>${corte.mesa}</td>
         <td>${corte.folha_parou}</td>
-        <td>${corte.status}</td>
+        <td><span class="${statusClasse}">${corte.status}</span></td>
       `
 
       linha.style.cursor = "pointer"
@@ -486,4 +540,5 @@ selectStatusProducao.addEventListener("change", () => {
   }
 })
 
+atualizarResumoTopo({})
 carregarCortesEmAndamento()
