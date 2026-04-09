@@ -190,6 +190,27 @@ async function buscarCorte(numeroCorte) {
   }
 }
 
+function calcularDuracao(horaInicio, horaFim) {
+  if (!horaInicio || !horaFim) return "-"
+
+  const [horaIni, minIni] = horaInicio.split(":").map(Number)
+  const [horaFimNum, minFim] = horaFim.split(":").map(Number)
+
+  const inicioEmMinutos = horaIni * 60 + minIni
+  const fimEmMinutos = horaFimNum * 60 + minFim
+
+  let diferenca = fimEmMinutos - inicioEmMinutos
+
+  if (diferenca < 0) {
+    return "-"
+  }
+
+  const horas = Math.floor(diferenca / 60)
+  const minutos = diferenca % 60
+
+  return `${horas}h ${minutos}min`
+}
+
 async function carregarHistorico(numeroCorte) {
   try {
     const respostaHistorico = await fetch(`/producao/${numeroCorte}`)
@@ -200,11 +221,15 @@ async function carregarHistorico(numeroCorte) {
 
     historico.forEach((item) => {
       const linha = document.createElement("tr")
+      const duracao = calcularDuracao(item.hora_inicio, item.hora_fim)
 
       linha.innerHTML = `
         <td>${item.data}</td>
         <td>${item.turno}</td>
         <td>${item.operador}</td>
+        <td>${item.hora_inicio ?? "-"}</td>
+        <td>${item.hora_fim ?? "-"}</td>
+        <td>${duracao}</td>
         <td>${item.folha_inicio}</td>
         <td>${item.folha_parou}</td>
         <td>${item.status}</td>
@@ -320,11 +345,22 @@ botaoSalvar.addEventListener("click", async () => {
     operador = document.getElementById("operadorOutro").value.trim()
   }
 
+  const horaInicio = document.getElementById("horaInicio").value
+  const horaFim = document.getElementById("horaFim").value
   const folhaInicio = document.getElementById("folhaInicio").value
   const folhaParou = document.getElementById("folhaParouInput").value
   const status = document.getElementById("statusProducao").value
 
-  if (!numeroCorte || !data || !turno || !operador || !folhaParou || !status) {
+  if (
+    !numeroCorte ||
+    !data ||
+    !turno ||
+    !operador ||
+    !horaInicio ||
+    !horaFim ||
+    !folhaParou ||
+    !status
+  ) {
     alert("Preencha todos os campos")
     return
   }
@@ -340,6 +376,8 @@ botaoSalvar.addEventListener("click", async () => {
         numero_corte: Number(numeroCorte),
         turno,
         operador,
+        hora_inicio: horaInicio,
+        hora_fim: horaFim,
         folha_inicio: Number(folhaInicio),
         folha_parou: Number(folhaParou),
         status
@@ -358,7 +396,10 @@ botaoSalvar.addEventListener("click", async () => {
     document.getElementById("folhaInicio").value = folhaParou
     document.getElementById("folhaParou").textContent = folhaParou
     renderizarStatus(status)
+
     document.getElementById("folhaParouInput").value = ""
+    document.getElementById("horaInicio").value = ""
+    document.getElementById("horaFim").value = ""
     document.getElementById("operador").value = ""
     document.getElementById("operadorOutro").value = ""
     document.getElementById("operadorOutro").style.display = "none"

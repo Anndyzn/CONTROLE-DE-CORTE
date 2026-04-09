@@ -133,6 +133,8 @@ app.post("/producao", (req, res) => {
     numero_corte,
     turno,
     operador,
+    hora_inicio,
+    hora_fim,
     folha_inicio,
     folha_parou,
     status
@@ -158,9 +160,19 @@ app.post("/producao", (req, res) => {
 
       db.run(
         `INSERT INTO producao 
-        (data, numero_corte, turno, operador, folha_inicio, folha_parou, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [data, numero_corte, turno, operador, folha_inicio, folha_parou, status],
+        (data, numero_corte, turno, operador, hora_inicio, hora_fim, folha_inicio, folha_parou, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          data,
+          numero_corte,
+          turno,
+          operador,
+          hora_inicio,
+          hora_fim,
+          folha_inicio,
+          folha_parou,
+          status
+        ],
         function (err) {
           if (err) {
             console.error(err)
@@ -175,6 +187,8 @@ app.post("/producao", (req, res) => {
               numero_corte,
               turno,
               operador,
+              hora_inicio,
+              hora_fim,
               folha_inicio,
               folha_parou,
               status
