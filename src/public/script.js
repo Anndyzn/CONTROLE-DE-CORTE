@@ -478,7 +478,7 @@ botaoSalvarItemCorte.addEventListener("click", async () => {
       return
     }
 
-    alert("Item do corte cadastrado com sucesso")
+    alert("Item salvo. Adicione outro item, se necessário")
 
     limparCamposItens()
     await carregarItensCorte(numeroCorte)
@@ -490,6 +490,14 @@ botaoSalvarItemCorte.addEventListener("click", async () => {
 
 botaoFinalizarItensCorte.addEventListener("click", async () => {
   const numeroCorte = document.getElementById("numeroCorte").value
+  
+  const confirmar = confirm(
+  "Confirmar itens do corte?\n\nDepois de registrar, não será possível adicionar ou alterar itens."
+)
+
+if (!confirmar) {
+  return
+}
 
   if (!numeroCorte) {
     alert("Busque um corte antes")
@@ -580,6 +588,71 @@ selectStatusProducao.addEventListener("change", () => {
     blocoItensCorte.style.display = "none"
   }
 })
+const botaoBuscarFiltros = document.getElementById("buscarFiltros")
+
+botaoBuscarFiltros.addEventListener("click", async () => {
+  const numero = document.getElementById("filtroNumero").value
+  const dataInicial = document.getElementById("filtroDataInicial").value
+  const dataFinal = document.getElementById("filtroDataFinal").value
+  const status = document.getElementById("filtroStatus").value
+
+  const params = new URLSearchParams()
+
+  if (numero) params.append("numero", numero)
+  if (dataInicial) params.append("data_inicial", dataInicial)
+  if (dataFinal) params.append("data_final", dataFinal)
+  if (status) params.append("status", status)
+
+  try {
+    const resposta = await fetch(`/consultar-cortes?${params.toString()}`)
+    const resultados = await resposta.json()
+
+    const tabela = document.getElementById("resultadoFiltros")
+    tabela.innerHTML = ""
+
+    if (resultados.length === 0) {
+      tabela.innerHTML = `
+        <tr>
+          <td colspan="6">Nenhum corte encontrado</td>
+        </tr>
+      `
+      return
+    }
+
+    resultados.forEach((item) => {
+      const linha = document.createElement("tr")
+
+      linha.innerHTML = `
+        <td>${item.numero}</td>
+        <td>${item.produto ?? "-"}</td>
+        <td>${item.mesa ?? "-"}</td>
+        <td>${
+          item.data
+            ? new Date(item.data).toLocaleDateString("pt-BR")
+            : "-"
+        }</td>
+        <td>${item.folha_parou ?? "-"}</td>
+        <td>${item.status ?? "-"}</td>
+      `
+
+      linha.style.cursor = "pointer"
+
+      linha.addEventListener("click", async () => {
+        document.getElementById("numeroCorte").value = item.numero
+        await buscarCorte(item.numero)
+        window.scrollTo({ top: 0, behavior: "smooth" })
+      })
+
+      tabela.appendChild(linha)
+    })
+  } catch (error) {
+    alert("Erro ao consultar cortes")
+    console.error(error)
+  }
+})
+
+const status = document.getElementById("filtroStatus").value
+if (status) params.append("status", status)
 
 atualizarResumoTopo({})
 carregarCortesEmAndamento()

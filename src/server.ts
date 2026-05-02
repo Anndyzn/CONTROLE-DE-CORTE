@@ -403,3 +403,57 @@ const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`)
 })
+
+app.get("/consultar-cortes", (req, res) => {
+  const { numero, data_inicial, data_final, status } = req.query
+
+  let query = `
+    SELECT
+      c.numero,
+      c.produto,
+      c.mesa,
+      p.data,
+      p.status,
+      p.folha_parou
+    FROM cortes c
+    JOIN producao p ON c.numero = p.numero_corte
+    WHERE p.id IN (
+      SELECT MAX(id)
+      FROM producao
+      GROUP BY numero_corte
+    )
+  `
+
+  const params: any[] = []
+
+  if (numero) {
+    query += " AND c.numero = ?"
+    params.push(numero)
+  }
+
+  if (data_inicial) {
+    query += " AND p.data >= ?"
+    params.push(data_inicial)
+  }
+
+  if (data_final) {
+    query += " AND p.data <= ?"
+    params.push(data_final)
+  }
+
+  if (status) {
+    query += " AND p.status = ?"
+    params.push(status)
+  }
+
+  query += " ORDER BY p.data DESC, c.numero DESC"
+
+  db.all(query, params, (err, rows) => {
+    if (err) {
+      console.error(err)
+      return res.status(500).json({ erro: "Erro ao consultar cortes" })
+    }
+
+    res.json(rows)
+  })
+})
