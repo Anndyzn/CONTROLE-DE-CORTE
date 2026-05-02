@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consultar Cortes</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Consultar Cortes</h1>
+
+    <div class="button-row">
+      <a href="index.html" class="link-button">Voltar para início</a>
+    </div>
+
+    <section class="section-card">
+      <h2>Filtros</h2>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="filtroNumero">Número do corte</label>
+          <input type="number" id="filtroNumero" placeholder="Ex: 101">
+        </div>
+
+        <div class="form-group">
+          <label for="filtroDataInicial">Data inicial</label>
+          <input type="date" id="filtroDataInicial">
+        </div>
+
+        <div class="form-group">
+          <label for="filtroDataFinal">Data final</label>
+          <input type="date" id="filtroDataFinal">
+        </div>
+
+        <div class="form-group">
+          <label for="filtroStatus">Status</label>
+          <select id="filtroStatus">
+            <option value="">Todos</option>
+            <option value="EM PRODUÇÃO">EM PRODUÇÃO</option>
+            <option value="FINALIZADO">FINALIZADO</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="button-row">
+        <button id="buscarFiltros" class="btn-filtrar">Filtrar cortes</button>
+      </div>
+
+      <div class="table-wrap tabela-consulta">
+        <table>
+          <thead>
+            <tr>
+              <th>Número</th>
+              <th>Produto</th>
+              <th>Mesa</th>
+              <th>Data</th>
+              <th>Última folha</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="resultadoFiltros"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script src="consultar.js"></script>
+</body>
+</html>
