@@ -244,11 +244,24 @@ async function carregarHistorico(numeroCorte) {
 
 async function carregarItensCorte(numeroCorte) {
   try {
+    const respostaFinalizacao = await fetch(`/cortes/${numeroCorte}/finalizacao-itens`)
+    const finalizacao = await respostaFinalizacao.json()
+    const itensFinalizados = finalizacao.itens_finalizados === 1
+
     const resposta = await fetch(`/itens-corte/${numeroCorte}`)
     const itens = await resposta.json()
 
     const tabela = document.getElementById("listaItensCorte")
     tabela.innerHTML = ""
+
+    if (itens.length === 0) {
+      tabela.innerHTML = `
+        <tr>
+          <td colspan="8">Nenhum item encontrado</td>
+        </tr>
+      `
+      return 0
+    }
 
     itens.forEach((item) => {
       const linha = document.createElement("tr")
@@ -261,7 +274,58 @@ async function carregarItensCorte(numeroCorte) {
         <td>${item.sobra_metros}</td>
         <td>${item.perda_metros}</td>
         <td>${item.quantidade_pecas}</td>
+        <td>
+          ${
+            itensFinalizados
+              ? `<span class="status-badge status-default">Bloqueado</span>`
+              : `
+                <div class="acoes-item">
+                  <button class="btn-editar-item">Editar</button>
+                  <button class="btn-excluir-item">Excluir</button>
+                </div>
+              `
+          }
+        </td>
       `
+
+      if (!itensFinalizados) {
+        const botaoEditar = linha.querySelector(".btn-editar-item")
+
+        botaoEditar.addEventListener("click", () => {
+          document.getElementById("itemEditandoId").value = item.id
+          document.getElementById("modeloItem").value = item.modelo
+          document.getElementById("corItem").value = item.cor
+          document.getElementById("tecidoItem").value = item.tecido
+          document.getElementById("metragemItem").value = item.metragem_usada
+          document.getElementById("sobraItem").value = item.sobra_metros
+          document.getElementById("perdaItem").value = item.perda_metros
+          document.getElementById("quantidadeItem").value = item.quantidade_pecas
+
+          document.getElementById("salvarItemCorte").textContent = "Atualizar item do corte"
+        })
+
+        const botaoExcluir = linha.querySelector(".btn-excluir-item")
+
+        botaoExcluir.addEventListener("click", async () => {
+          const confirmar = confirm("Deseja excluir este item do corte?")
+
+          if (!confirmar) return
+
+          const resposta = await fetch(`/itens-corte/${item.id}`, {
+            method: "DELETE"
+          })
+
+          const dados = await resposta.json()
+
+          if (!resposta.ok) {
+            alert(dados.erro || "Erro ao excluir item")
+            return
+          }
+
+          alert("Item excluído com sucesso")
+          await carregarItensCorte(numeroCorte)
+        })
+      }
 
       tabela.appendChild(linha)
     })
@@ -453,9 +517,17 @@ botaoSalvarItemCorte.addEventListener("click", async () => {
     return
   }
 
+  const itemEditandoId = document.getElementById("itemEditandoId").value
+
+  const metodo = itemEditandoId ? "PUT" : "POST"
+
+  const url = itemEditandoId
+    ? `/itens-corte/${itemEditandoId}`
+    : "/itens-corte"
+
   try {
-    const resposta = await fetch("/itens-corte", {
-      method: "POST",
+    const resposta = await fetch(url, {
+      method: metodo,
       headers: {
         "Content-Type": "application/json"
       },
@@ -478,7 +550,14 @@ botaoSalvarItemCorte.addEventListener("click", async () => {
       return
     }
 
-    alert("Item salvo. Adicione outro item, se necessário")
+    alert(
+      itemEditandoId
+        ? "Item atualizado com sucesso"
+        : "Item salvo. Adicione outro item, se necessário."
+    )
+
+    document.getElementById("itemEditandoId").value = ""
+    document.getElementById("salvarItemCorte").textContent = "Salvar item do corte"
 
     limparCamposItens()
     await carregarItensCorte(numeroCorte)
@@ -519,6 +598,7 @@ if (!confirmar) {
     alert("Itens do corte registrados e finalizados com sucesso")
 
     desabilitarItens()
+    await carregarItensCorte(numeroCorte)
   } catch (error) {
     alert("Erro ao conectar com o servidor")
     console.error(error)

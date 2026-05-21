@@ -371,3 +371,32 @@ tr:hover td {
 .link-button:hover {
   background: linear-gradient(135deg, var(--primary-hover), #1e3a8a);
 }
+
+.btn-excluir-item {
+  background: #dc2626;
+  min-width: 90px;
+  height: 34px;
+  font-size: 12px;
+  padding: 0 12px;
+}
+
+.btn-excluir-item:hover {
+  background: #b91c1c;
+}
+
+.acoes-item {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-editar-item {
+  background: #f59e0b;
+  min-width: 80px;
+  height: 34px;
+  font-size: 12px;
+  padding: 0 12px;
+}
+
+.btn-editar-item:hover {
+  background: #d97706;
+}

@@ -452,6 +452,96 @@ app.get("/consultar-cortes", (req, res) => {
   })
 })
 
+app.post("/cortes/:numero/reabrir-itens", (req, res) => {
+  const { numero } = req.params
+
+  db.run(
+    "UPDATE cortes SET itens_finalizados = 0 WHERE numero = ?",
+    [numero],
+    function (err) {
+      if (err) {
+        console.error(err)
+        return res.status(500).json({ erro: "Erro ao reabrir itens do corte" })
+      }
+
+      if (this.changes === 0) {
+        return res.status(404).json({ erro: "Corte não encontrado" })
+      }
+
+      res.json({ mensagem: "Itens do corte reabertos com sucesso" })
+    }
+  )
+})
+
+app.delete("/itens-corte/:id", (req, res) => {
+  const { id } = req.params
+
+  db.run(
+    "DELETE FROM itens_corte WHERE id = ?",
+    [id],
+    function (err) {
+      if (err) {
+        console.error(err)
+        return res.status(500).json({ erro: "Erro ao excluir item" })
+      }
+
+      if (this.changes === 0) {
+        return res.status(404).json({ erro: "Item não encontrado" })
+      }
+
+      res.json({ mensagem: "Item excluído com sucesso" })
+    }
+  )
+})
+
+app.put("/itens-corte/:id", (req, res) => {
+  const { id } = req.params
+
+  const {
+    modelo,
+    cor,
+    tecido,
+    metragem_usada,
+    sobra_metros,
+    perda_metros,
+    quantidade_pecas
+  } = req.body
+
+  db.run(
+    `UPDATE itens_corte
+     SET modelo = ?,
+         cor = ?,
+         tecido = ?,
+         metragem_usada = ?,
+         sobra_metros = ?,
+         perda_metros = ?,
+         quantidade_pecas = ?
+     WHERE id = ?`,
+    [
+      modelo,
+      cor,
+      tecido,
+      metragem_usada,
+      sobra_metros,
+      perda_metros,
+      quantidade_pecas,
+      id
+    ],
+    function (err) {
+      if (err) {
+        console.error(err)
+        return res.status(500).json({ erro: "Erro ao editar item" })
+      }
+
+      if (this.changes === 0) {
+        return res.status(404).json({ erro: "Item não encontrado" })
+      }
+
+      res.json({ mensagem: "Item editado com sucesso" })
+    }
+  )
+})
+
 const PORT = Number(process.env.PORT) || 3000
 
 app.listen(PORT, "0.0.0.0", () => {

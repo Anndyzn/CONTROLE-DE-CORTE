@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Correções</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Admin - Correções</h1>
+
+    <section class="section-card">
+      <h2>Buscar corte</h2>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="numeroCorteAdmin">Número do corte</label>
+          <input type="number" id="numeroCorteAdmin" placeholder="Digite o número do corte">
+        </div>
+      </div>
+
+      <div class="button-row">
+        <button id="buscarCorteAdmin">Buscar corte</button>
+        <button id="reabrirItensCorte">Reabrir itens do corte</button>
+        <a href="index.html" class="link-button">Voltar para início</a>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <h2>Histórico do corte</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Turno</th>
+              <th>Operador</th>
+              <th>Hora início</th>
+              <th>Hora fim</th>
+              <th>Folha início</th>
+              <th>Folha parou</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="historicoAdmin"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <h2>Itens do corte</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Modelo</th>
+              <th>Cor</th>
+              <th>Tecido</th>
+              <th>Metragem</th>
+              <th>Sobra</th>
+              <th>Perda</th>
+              <th>Quantidade</th>
+            </tr>
+          </thead>
+          <tbody id="itensAdmin"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
