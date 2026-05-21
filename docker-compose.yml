@@ -1,0 +1,10 @@
+services:
+  corte-app:
+    build: .
+    container_name: controle-corte
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src:/app/src
+      - ./database.db:/app/database.db
+    restart: always

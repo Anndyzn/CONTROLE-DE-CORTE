@@ -398,12 +398,6 @@ app.post("/cortes/:numero/finalizar-itens", (req, res) => {
   )
 })
 
-const PORT = process.env.PORT || 3000
-
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`)
-})
-
 app.get("/consultar-cortes", (req, res) => {
   const { numero, data_inicial, data_final, status } = req.query
 
@@ -456,4 +450,10 @@ app.get("/consultar-cortes", (req, res) => {
 
     res.json(rows)
   })
+})
+
+const PORT = Number(process.env.PORT) || 3000
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Servidor rodando na porta ${PORT}`)
 })
