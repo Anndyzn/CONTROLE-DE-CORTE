@@ -8,7 +8,6 @@ RUN npm install
 
 COPY tsconfig.json ./
 COPY src ./src
-COPY database.db ./database.db
 
 EXPOSE 3000
 
