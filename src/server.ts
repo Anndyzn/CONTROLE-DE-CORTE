@@ -410,12 +410,12 @@ app.get("/consultar-cortes", (req, res) => {
       p.status,
       p.folha_parou
     FROM cortes c
-    JOIN producao p ON c.numero = p.numero_corte
-    WHERE p.id IN (
-      SELECT MAX(id)
-      FROM producao
-      GROUP BY numero_corte
+    LEFT JOIN producao p ON p.id = (
+      SELECT MAX(p2.id)
+      FROM producao p2
+      WHERE p2.numero_corte = c.numero
     )
+    WHERE 1 = 1
   `
 
   const params: any[] = []

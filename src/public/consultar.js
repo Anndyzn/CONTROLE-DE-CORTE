@@ -18,15 +18,6 @@ function converterNumero(valor) {
   return Number.isNaN(numero) ? 0 : numero
 }
 
-  const texto = String(valor)
-    .replace(/\./g, "")
-    .replace(",", ".")
-    .replace(/[^\d.-]/g, "")
-
-  const numero = Number(texto)
-
-  return Number.isNaN(numero) ? 0 : numero
-
 function calcularDuracao(horaInicio, horaFim) {
   if (!horaInicio || !horaFim) return "-"
 
