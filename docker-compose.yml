@@ -1,10 +1,17 @@
 services:
-  corte-app:
+  app:
     build: .
-    container_name: controle-corte
     ports:
       - "3000:3000"
     volumes:
-      - ./src:/app/src
       - ./database.db:/app/database.db
-    restart: always
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    command: tunnel --no-autoupdate run --token eyJhIjoiYzkwODdmN2EyZDI2NzNiMzMzZDY5ODlmMzhiM2NkZDciLCJ0IjoiNzEyNjk0ZGMtZGYxZS00Yjc3LTk3NTYtN2Y4MjYwMGJjMzA0IiwicyI6Ik1tVXpNRFUzWm1NdFlqTXlOeTAwTURBNExXSXlOV1F0TlRjeU16TTJZbUppT0RsbCJ9
+    restart: unless-stopped
+    depends_on:
+      - app
+
+command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TOKEN}
