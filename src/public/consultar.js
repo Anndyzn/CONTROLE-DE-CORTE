@@ -26,7 +26,6 @@ function converterNumero(valor) {
   const numero = Number(texto)
 
   return Number.isNaN(numero) ? 0 : numero
-}
 
 function calcularDuracao(horaInicio, horaFim) {
   if (!horaInicio || !horaFim) return "-"
