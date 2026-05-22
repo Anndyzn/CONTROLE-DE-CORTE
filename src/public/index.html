@@ -5,11 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Controle de Corte</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="container">
-    <h1>Sistema de Controle de Corte</h1>
+    <header class="app-header">
+      <div class="logo-box">
+        <img src="img/logo.png" alt="Logo Dimepor" class="app-logo">
+      </div>
 
+      <div class="header-text">
+        <span class="system-tag">Sistema interno</span>
+        <h1>Sistema de Controle de Corte</h1>
+        <p>Gestão de cortes, turnos e produção</p>
+      </div>
+    </header>
 
     <section class="section-card topo-andamento">
       <h2>Cortes em andamento</h2>
@@ -55,7 +67,10 @@
     </div>
 
     <section class="section-card">
-      <h2>Buscar corte</h2>
+      <h2><span class="step-number">1</span> Buscar ou cadastrar corte</h2>
+      <p class="section-help">
+        Digite o número do corte. Se ele não existir, cadastre o produto e a mesa.
+      </p>
 
       <div class="form-grid">
         <div class="form-group">
@@ -97,7 +112,10 @@
     </section>
 
     <section class="section-card">
-      <h2>Dados do corte</h2>
+      <h2><span class="step-number">2</span> Corte selecionado</h2>
+      <p class="section-help">
+        Confira o produto, mesa, última folha e status antes de registrar a produção.
+      </p>
 
       <div class="dados-corte">
         <div class="card-info"><strong>Produto:</strong>&nbsp;<span id="produto"></span></div>
@@ -106,9 +124,12 @@
         <div class="card-info"><strong>Status atual:</strong>&nbsp;<span id="status"></span></div>
       </div>
     </section>
-
+    
     <section class="section-card">
-      <h2>Registrar produção</h2>
+      <h2><span class="step-number">3</span> Registrar produção do turno</h2>
+      <p class="section-help">
+        Informe horário, turno e onde o corte parou. A folha início vem automática.
+      </p>
 
       <div class="form-grid">
         <div class="form-group">
@@ -167,7 +188,7 @@
             <option value="EM PRODUÇÃO">EM PRODUÇÃO</option>
             <option value="FINALIZADO">FINALIZADO</option>
           </select>
-          <span class="small-help">Ao marcar como finalizado, os itens do corte serão liberados.</span>
+          <span class="small-help">Ao marcar como "finalizado" liberará os campos para colocar os produtos que foram cortados .</span>
         </div>
       </div>
 
@@ -177,12 +198,15 @@
     </section>
 
     <section class="section-card" id="blocoItensCorte" style="display: none;">
-      <h2>Itens do corte</h2>
+      <h2><span class="step-number">4</span> Informar PIs cortados</h2>
+      <p class="section-help">
+        Preencha os materiais, cores, metragem e quantidade de peças produzidas.
+      </p>
 
       <div class="form-grid">
         <div class="form-group">
-          <label for="modeloItem">Modelo</label>
-          <input type="text" id="modeloItem" placeholder="Digite o modelo">
+          <label for="modeloItem">Produto Cortado</label>
+          <input type="text" id="modeloItem" placeholder="Digite o Produto Cortado">
         </div>
 
         <div class="form-group">
@@ -266,7 +290,10 @@
     </section>
 
     <section class="section-card">
-      <h2>Histórico do corte</h2>
+      <h2><span class="step-number">5</span>Histórico de Produção</h2>
+      <p class="section-help">
+        Veja o histórico dos turnos.
+      </p>
 
       <div class="table-wrap">
         <table>
