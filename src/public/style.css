@@ -567,3 +567,48 @@ tr:hover td {
     grid-template-columns: 1fr;
   }
 }
+
+.consulta-layout {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 22px;
+  align-items: start;
+  max-width: 1180px;
+  margin: 0 auto 22px;
+}
+
+.consulta-filtros,
+.consulta-resultados {
+  margin-bottom: 0;
+}
+
+.consulta-filtros .form-grid {
+  grid-template-columns: 1fr;
+}
+
+.consulta-resultados .table-wrap {
+  max-height: 360px;
+}
+
+.detalhe-corte {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+#dashboardCorte {
+  margin-top: 0;
+}
+
+.dashboard-grid {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 1000px) {
+  .consulta-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
