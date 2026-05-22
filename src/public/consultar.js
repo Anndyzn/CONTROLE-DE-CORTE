@@ -10,6 +10,15 @@ function converterNumero(valor) {
   if (valor === null || valor === undefined || valor === "") return 0
 
   const texto = String(valor)
+    .trim()
+    .replace(",", ".")
+
+  const numero = Number(texto)
+
+  return Number.isNaN(numero) ? 0 : numero
+}
+
+  const texto = String(valor)
     .replace(/\./g, "")
     .replace(",", ".")
     .replace(/[^\d.-]/g, "")
