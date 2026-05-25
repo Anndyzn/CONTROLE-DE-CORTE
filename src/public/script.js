@@ -147,8 +147,8 @@ async function buscarCorte(numeroCorte) {
     const statusAtual = dados.ultima_producao?.status ?? "SEM PRODUÇÃO"
     const ultimaFolha = dados.ultima_producao?.folha_parou ?? 0
 
-    document.getElementById("produto").textContent = dados.corte.produto
-    document.getElementById("mesa").textContent = dados.corte.mesa
+    document.getElementById("produto").textContent = maiusculo(dados.corte.produto)
+    document.getElementById("mesa").textContent = maiusculo(dados.corte.mesa)
     document.getElementById("folhaParou").textContent = ultimaFolha
     renderizarStatus(statusAtual)
 
@@ -267,9 +267,9 @@ async function carregarItensCorte(numeroCorte) {
       const linha = document.createElement("tr")
 
       linha.innerHTML = `
-        <td>${item.modelo}</td>
-        <td>${item.cor}</td>
-        <td>${item.tecido}</td>
+        <td>${maiusculo(item.modelo)}</td>
+        <td>${maiusculo(item.cor)}</td>
+        <td>${maiusculo(item.tecido)}</td>
         <td>${item.metragem_usada}</td>
         <td>${item.sobra_metros}</td>
         <td>${item.perda_metros}</td>
@@ -374,8 +374,8 @@ botaoCadastrarCorte.addEventListener("click", async () => {
 
     alert("Corte cadastrado com sucesso")
 
-    document.getElementById("produto").textContent = produto
-    document.getElementById("mesa").textContent = mesa
+    document.getElementById("produto").textContent = maiusculo(produto)
+    document.getElementById("mesa").textContent = maiusculo(mesa)
     document.getElementById("folhaParou").textContent = "0"
     renderizarStatus("SEM PRODUÇÃO")
     document.getElementById("folhaInicio").value = 0
@@ -625,8 +625,8 @@ async function carregarCortesEmAndamento() {
 
       linha.innerHTML = `
         <td>${corte.numero}</td>
-        <td>${corte.produto}</td>
-        <td>${corte.mesa}</td>
+        <td>${maiusculo(corte.produto)}</td>
+        <td>${maiusculo(corte.mesa)}</td>
         <td>${corte.folha_parou}</td>
         <td><span class="${statusClasse}">${corte.status}</span></td>
       `
@@ -668,6 +668,11 @@ selectStatusProducao.addEventListener("change", () => {
     blocoItensCorte.style.display = "none"
   }
 })
+
+function maiusculo(valor) {
+  return valor ? String(valor).toUpperCase() : "-"
+}
+
 
 atualizarResumoTopo({})
 carregarCortesEmAndamento()

@@ -6,6 +6,10 @@ function formatarData(data) {
   return `${dia}/${mes}/${ano}`
 }
 
+function maiusculo(valor) {
+  return valor ? String(valor).toUpperCase() : "-"
+}
+
 function converterNumero(valor) {
   if (valor === null || valor === undefined || valor === "") return 0
 
@@ -79,8 +83,8 @@ async function carregarHistoricoConsulta(numeroCorte) {
 
       linha.innerHTML = `
         <td>${formatarData(item.data)}</td>
-        <td>${item.turno}</td>
-        <td>${item.operador}</td>
+        <td>${maiusculo(item.turno)}</td>
+        <td>${maiusculo(item.operador)}</td>
         <td>${item.hora_inicio ?? "-"}</td>
         <td>${item.hora_fim ?? "-"}</td>
         <td>${duracao}</td>
@@ -121,9 +125,9 @@ async function carregarItensConsulta(numeroCorte) {
       const linha = document.createElement("tr")
 
       linha.innerHTML = `
-        <td>${item.modelo}</td>
-        <td>${item.cor}</td>
-        <td>${item.tecido}</td>
+        <td>${maiusculo(item.modelo)}</td>
+        <td>${maiusculo(item.cor)}</td>
+        <td>${maiusculo(item.tecido)}</td>
         <td>${item.metragem_usada}</td>
         <td>${item.sobra_metros}</td>
         <td>${item.perda_metros}</td>
@@ -239,8 +243,8 @@ botaoBuscarFiltros.addEventListener("click", async () => {
 
       linha.innerHTML = `
         <td>${item.numero}</td>
-        <td>${item.produto ?? "-"}</td>
-        <td>${item.mesa ?? "-"}</td>
+        <td>${maiusculo(item.produto)}</td>
+        <td>${maiusculo(item.mesa)}</td>
         <td>${formatarData(item.data)}</td>
         <td>${item.folha_parou ?? "-"}</td>
         <td><span class="${statusClasse}">${item.status ?? "-"}</span></td>
