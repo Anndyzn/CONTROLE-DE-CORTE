@@ -259,20 +259,19 @@ app.get("/producao", (req, res) => {
 app.get("/cortes-em-andamento", (req, res) => {
   db.all(
     `
-    SELECT 
+    SELECT
       c.numero,
       c.produto,
       c.mesa,
-      p.folha_parou,
-      p.status
+      COALESCE(p.folha_parou, 0) AS folha_parou,
+      COALESCE(p.status, 'EM PRODUÇÃO') AS status
     FROM cortes c
-    JOIN producao p ON c.numero = p.numero_corte
-    WHERE p.id IN (
-      SELECT MAX(id)
-      FROM producao
-      GROUP BY numero_corte
+    LEFT JOIN producao p ON p.id = (
+      SELECT MAX(p2.id)
+      FROM producao p2
+      WHERE p2.numero_corte = c.numero
     )
-    AND p.status != 'FINALIZADO'
+    WHERE p.status != 'FINALIZADO' OR p.status IS NULL
     ORDER BY c.numero ASC
     `,
     [],
@@ -296,64 +295,42 @@ app.post("/itens-corte", (req, res) => {
     metragem_usada,
     sobra_metros,
     perda_metros,
+    metros_faltantes,
     quantidade_pecas
   } = req.body
 
-  db.get(
-    "SELECT itens_finalizados FROM cortes WHERE numero = ?",
-    [numero_corte],
-    (err, corte: any) => {
+  db.run(
+    `INSERT INTO itens_corte
+    (
+      numero_corte,
+      modelo,
+      cor,
+      tecido,
+      metragem_usada,
+      sobra_metros,
+      perda_metros,
+      metros_faltantes,
+      quantidade_pecas
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      numero_corte,
+      modelo,
+      cor,
+      tecido,
+      metragem_usada,
+      sobra_metros,
+      perda_metros,
+      metros_faltantes || 0,
+      quantidade_pecas
+    ],
+    function (err) {
       if (err) {
         console.error(err)
-        return res.status(500).json({ erro: "Erro ao validar corte" })
+        return res.status(500).json({ erro: "Erro ao salvar item do corte" })
       }
 
-      if (!corte) {
-        return res.status(404).json({ erro: "Corte não encontrado" })
-      }
-
-      if (corte.itens_finalizados === 1) {
-        return res.status(400).json({
-          erro: "Os itens deste corte já foram finalizados e não podem ser alterados"
-        })
-      }
-
-      db.run(
-        `INSERT INTO itens_corte
-        (numero_corte, modelo, cor, tecido, metragem_usada, sobra_metros, perda_metros, quantidade_pecas)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          numero_corte,
-          modelo,
-          cor,
-          tecido,
-          metragem_usada,
-          sobra_metros,
-          perda_metros,
-          quantidade_pecas
-        ],
-        function (err) {
-          if (err) {
-            console.error(err)
-            return res.status(500).json({ erro: "Erro ao cadastrar item do corte" })
-          }
-
-          res.json({
-            mensagem: "Item do corte cadastrado com sucesso",
-            item: {
-              id: this.lastID,
-              numero_corte,
-              modelo,
-              cor,
-              tecido,
-              metragem_usada,
-              sobra_metros,
-              perda_metros,
-              quantidade_pecas
-            }
-          })
-        }
-      )
+      res.json({ mensagem: "Item do corte salvo com sucesso" })
     }
   )
 })
@@ -504,29 +481,32 @@ app.put("/itens-corte/:id", (req, res) => {
     metragem_usada,
     sobra_metros,
     perda_metros,
+    metros_faltantes,
     quantidade_pecas
   } = req.body
 
   db.run(
-    `UPDATE itens_corte
-     SET modelo = ?,
-         cor = ?,
-         tecido = ?,
-         metragem_usada = ?,
-         sobra_metros = ?,
-         perda_metros = ?,
-         quantidade_pecas = ?
-     WHERE id = ?`,
-    [
-      modelo,
-      cor,
-      tecido,
-      metragem_usada,
-      sobra_metros,
-      perda_metros,
-      quantidade_pecas,
-      id
-    ],
+  `UPDATE itens_corte
+  SET modelo = ?,
+      cor = ?,
+      tecido = ?,
+      metragem_usada = ?,
+      sobra_metros = ?,
+      perda_metros = ?,
+      metros_faltantes = ?,
+      quantidade_pecas = ?
+  WHERE id = ?`,
+  [
+    modelo,
+    cor,
+    tecido,
+    metragem_usada,
+    sobra_metros,
+    perda_metros,
+    metros_faltantes || 0,
+    quantidade_pecas,
+    id
+  ],
     function (err) {
       if (err) {
         console.error(err)

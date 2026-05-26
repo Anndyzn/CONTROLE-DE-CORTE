@@ -131,6 +131,7 @@ async function carregarItensConsulta(numeroCorte) {
         <td>${item.metragem_usada}</td>
         <td>${item.sobra_metros}</td>
         <td>${item.perda_metros}</td>
+        <td>${item.metros_faltantes ?? 0}</td>
         <td>${item.quantidade_pecas}</td>
       `
 
@@ -184,6 +185,10 @@ async function carregarDashboardCorte(numeroCorte) {
       return total + converterNumero(item.perda_metros)
     }, 0)
 
+    const totalMetrosFaltantes = itens.reduce((total, item) => {
+      return total + converterNumero(item.metros_faltantes)
+    }, 0)
+
     document.getElementById("totalFolhas").textContent = totalFolhas
     document.getElementById("tempoTotal").textContent = formatarMinutos(tempoTotalMinutos)
     document.getElementById("totalLancamentos").textContent = historico.length
@@ -191,6 +196,8 @@ async function carregarDashboardCorte(numeroCorte) {
     document.getElementById("totalMetragem").textContent = totalMetragem.toFixed(2)
     document.getElementById("totalSobra").textContent = totalSobra.toFixed(2)
     document.getElementById("totalPerda").textContent = totalPerda.toFixed(2)
+    document.getElementById("totalmetrosFaltantesTotal").textContent =
+      totalMetrosFaltantes.toFixed(2)
 
     document.getElementById("dashboardCorte").style.display = "block"
   } catch (error) {

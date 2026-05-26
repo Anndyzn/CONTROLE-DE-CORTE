@@ -64,6 +64,7 @@ function limparCamposItens() {
   document.getElementById("metragemItem").value = ""
   document.getElementById("sobraItem").value = ""
   document.getElementById("perdaItem").value = ""
+  document.getElementById("metrosFaltantesItem").value = ""
   document.getElementById("quantidadeItem").value = ""
 }
 
@@ -154,7 +155,7 @@ async function buscarCorte(numeroCorte) {
 
     document.getElementById("novoCorte").style.display = "none"
 
-    const statusAtual = dados.ultima_producao?.status ?? "SEM PRODUÇÃO"
+    const statusAtual = dados.ultima_producao?.status ?? "EM PRODUÇÃO"
     const ultimaFolha = dados.ultima_producao?.folha_parou ?? 0
 
     document.getElementById("produto").textContent = maiusculo(dados.corte.produto)
@@ -284,6 +285,7 @@ async function carregarItensCorte(numeroCorte) {
         <td>${item.metragem_usada}</td>
         <td>${item.sobra_metros}</td>
         <td>${item.perda_metros}</td>
+        <td>${item.metros_faltantes ?? 0}</td>
         <td>${item.quantidade_pecas}</td>
         <td>
           ${
@@ -310,6 +312,7 @@ async function carregarItensCorte(numeroCorte) {
           document.getElementById("metragemItem").value = item.metragem_usada
           document.getElementById("sobraItem").value = item.sobra_metros
           document.getElementById("perdaItem").value = item.perda_metros
+          document.getElementById("metrosFaltantesItem").value = item.metros_faltantes ?? 0
           document.getElementById("quantidadeItem").value = item.quantidade_pecas
 
           document.getElementById("salvarItemCorte").textContent = "Atualizar item do corte"
@@ -388,7 +391,7 @@ botaoCadastrarCorte.addEventListener("click", async () => {
     document.getElementById("produto").textContent = maiusculo(produto)
     document.getElementById("mesa").textContent = maiusculo(mesa)
     document.getElementById("folhaParou").textContent = "0"
-    renderizarStatus("SEM PRODUÇÃO")
+    renderizarStatus("EM PRODUÇÃO")
     document.getElementById("folhaInicio").value = 0
     document.getElementById("novoCorte").style.display = "none"
     document.getElementById("produtoNovo").value = ""
@@ -441,30 +444,36 @@ botaoSalvar.addEventListener("click", async () => {
   }
 
   try {
-    const resposta = await fetch("/producao", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        data,
-        numero_corte: Number(numeroCorte),
-        turno,
-        operador,
-        hora_inicio: horaInicio,
-        hora_fim: horaFim,
-        folha_inicio: Number(folhaInicio),
-        folha_parou: Number(folhaParou),
-        status
-      })
+  const resposta = await fetch("/producao", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      data,
+      numero_corte: Number(numeroCorte),
+      turno,
+      operador,
+      hora_inicio: horaInicio,
+      hora_fim: horaFim,
+      folha_inicio: Number(folhaInicio),
+      folha_parou: Number(folhaParou),
+      status
     })
+  })
 
-    const dados = await resposta.json()
+  let dados = {}
 
-    if (!resposta.ok) {
-      alert(dados.erro || "Erro ao salvar produção")
-      return
-    }
+  try {
+    dados = await resposta.json()
+  } catch {
+    dados = {}
+  }
+
+  if (!resposta.ok) {
+    alert(dados.erro || "Erro ao salvar produção")
+    return
+  }
 
     alert("Produção cadastrada com sucesso")
 
@@ -516,6 +525,7 @@ botaoSalvarItemCorte.addEventListener("click", async () => {
   const metragem = document.getElementById("metragemItem").value
   const sobra = document.getElementById("sobraItem").value
   const perda = document.getElementById("perdaItem").value
+  const metrosFaltantes = document.getElementById("metrosFaltantesItem").value
   const quantidade = document.getElementById("quantidadeItem").value
 
   if (!numeroCorte || !modelo || !cor || !tecido || !quantidade) {
@@ -550,6 +560,7 @@ botaoSalvarItemCorte.addEventListener("click", async () => {
         metragem_usada: Number(metragem),
         sobra_metros: Number(sobra || 0),
         perda_metros: Number(perda || 0),
+        metros_faltantes: Number(metrosFaltantes || 0),
         quantidade_pecas: Number(quantidade)
       })
     })

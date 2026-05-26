@@ -55,4 +55,10 @@ db.serialize(() => {
   `)
 })
 
+db.run(`ALTER TABLE itens_corte ADD COLUMN metros_faltantes REAL DEFAULT 0`, (err) => {
+  if (err && !err.message.includes("duplicate column name")) {
+    console.error("Erro ao adicionar coluna metros_faltantes:", err.message)
+  }
+})
+
 export default db
