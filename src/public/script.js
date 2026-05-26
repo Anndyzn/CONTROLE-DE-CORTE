@@ -1,5 +1,15 @@
 const botaoBuscar = document.getElementById("buscarCorte")
 const botaoSalvar = document.getElementById("salvarProducao")
+function maiusculo(valor) {
+  return valor ? String(valor).toUpperCase() : "-"
+}
+
+function formatarDataBR(data) {
+  if (!data) return "-"
+
+  const partes = data.split("-")
+  return `${partes[2]}/${partes[1]}/${partes[0]}`
+}
 const botaoCadastrarCorte = document.getElementById("cadastrarCorte")
 const botaoSalvarItemCorte = document.getElementById("salvarItemCorte")
 const botaoFinalizarItensCorte = document.getElementById("finalizarItensCorte")
@@ -222,9 +232,10 @@ async function carregarHistorico(numeroCorte) {
     historico.forEach((item) => {
       const linha = document.createElement("tr")
       const duracao = calcularDuracao(item.hora_inicio, item.hora_fim)
+      const dataBR = item.data ? item.data.split("-").reverse().join("/") : "-"
 
       linha.innerHTML = `
-        <td>${item.data}</td>
+        <td>${formatarDataBR(item.data)}</td>
         <td>${item.turno}</td>
         <td>${item.operador}</td>
         <td>${item.hora_inicio ?? "-"}</td>
@@ -668,10 +679,6 @@ selectStatusProducao.addEventListener("change", () => {
     blocoItensCorte.style.display = "none"
   }
 })
-
-function maiusculo(valor) {
-  return valor ? String(valor).toUpperCase() : "-"
-}
 
 
 atualizarResumoTopo({})
