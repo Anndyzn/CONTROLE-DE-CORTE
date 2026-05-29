@@ -10,8 +10,33 @@ SET numero = 695,
     produto = 'CAPTONE COM FITA'
 WHERE numero = 696;
 
+
+-----APAGAR DADOS DE CORTE
 DELETE FROM producao
-WHERE numero_corte = 696;
+WHERE numero_corte IN (1, 2);
+
+DELETE FROM itens_corte
+WHERE numero_corte IN (1, 2);
+
+DELETE FROM cortes
+WHERE numero IN (1, 2);
+--------------------------------------
+
+
+------------ALTERAÇÃO DE TURNOS E DATAS --------------
+UPDATE producao
+SET turno = '2º TURNO'
+WHERE id = 46;
+
+UPDATE producao
+SET turno = '1º TURNO'
+WHERE id IN (48, 49);
+
+UPDATE producao
+SET data = '2026-05-28'
+WHERE id = 49;
+
+
 
 
 --ALTERAR DATA--
