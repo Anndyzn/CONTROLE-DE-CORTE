@@ -232,7 +232,7 @@ app.get("/producao/:numero", (req, res) => {
   db.all(
     `SELECT * FROM producao
      WHERE numero_corte = ?
-     ORDER BY id ASC`,
+     ORDER BY data ASC, hora_inicio ASC`,
     [numero],
     (err, rows) => {
       if (err) {
