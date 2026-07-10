@@ -839,3 +839,166 @@ tbody tr:last-child td { border-bottom: none; }
     scroll-behavior: auto;
   }
 }
+
+/* =========================================================
+   MELHORIAS VISUAIS EXTRAS
+   ========================================================= */
+
+/* Destaque suave quando o usuário passa pelo card */
+.section-card {
+  position: relative;
+}
+
+.section-card:hover {
+  border-color: hsl(221 83% 53% / 0.22);
+}
+
+/* Títulos das seções com melhor separação */
+.section-card h2 {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Destaque da área do corte selecionado */
+.dados-corte {
+  border-left: 5px solid var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Melhora a visualização dos dados selecionados */
+.card-info {
+  line-height: 1.4;
+}
+
+.card-info strong {
+  color: var(--primary-deep);
+}
+
+/* Botões principais maiores */
+#buscarCorte,
+#salvarProducao,
+#salvarItemCorte,
+#finalizarItensCorte,
+.btn-filtrar {
+  min-height: 48px;
+  font-size: 15px;
+}
+
+/* Destaque maior para salvar produção */
+#salvarProducao {
+  min-width: 230px;
+}
+
+/* Resultado total da consulta mais visível */
+.total-consulta {
+  width: fit-content;
+  padding: 8px 12px;
+  margin: -8px 0 16px;
+  background: var(--primary-soft);
+  border: 1px solid hsl(221 83% 53% / 0.18);
+  border-radius: var(--radius-sm);
+}
+
+.total-consulta strong {
+  font-size: 20px;
+}
+
+/* Primeira coluna fixa na tabela de consulta */
+.tabela-consulta th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  background: var(--primary-deep);
+}
+
+.tabela-consulta td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface);
+  font-weight: 700;
+}
+
+.tabela-consulta tbody tr:nth-child(even) td:first-child {
+  background: var(--surface-2);
+}
+
+.tabela-consulta tbody tr:hover td:first-child {
+  background: var(--primary-soft);
+}
+
+/* Linhas da consulta mais fáceis de identificar */
+#resultadoFiltros tr:hover td,
+#cortesEmAndamento tr:hover td {
+  cursor: pointer;
+  background: hsl(214 100% 96%);
+}
+
+/* Colunas numéricas alinhadas */
+td {
+  vertical-align: middle;
+}
+
+/* Melhor aparência para tabela vazia */
+.table-wrap td[colspan] {
+  padding: 26px;
+  color: var(--text-muted);
+  text-align: center;
+  font-style: italic;
+}
+
+/* Status com melhor contraste */
+.status-badge {
+  min-width: 112px;
+  justify-content: center;
+}
+
+/* Scroll da tabela mais visível */
+.table-wrap::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+
+.table-wrap::-webkit-scrollbar-thumb {
+  background: hsl(215 18% 68%);
+}
+
+.table-wrap::-webkit-scrollbar-track {
+  background: var(--surface-3);
+}
+
+/* Formulários com separação visual */
+.form-group {
+  padding: 2px;
+}
+
+/* Campo selecionado */
+input:focus,
+select:focus {
+  background: var(--primary-soft);
+}
+
+/* Responsividade das melhorias */
+@media (max-width: 700px) {
+  .section-card h2 {
+    padding-bottom: 10px;
+  }
+
+  .dados-corte {
+    border-left-width: 4px;
+  }
+
+  #salvarProducao {
+    min-width: 0;
+  }
+
+  .total-consulta {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .status-badge {
+    min-width: 100px;
+    font-size: 10px;
+  }
+}
