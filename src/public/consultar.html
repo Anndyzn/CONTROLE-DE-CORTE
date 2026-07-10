@@ -38,6 +38,15 @@
           </div>
 
           <div class="form-group">
+            <label for="filtroProduto">Nome do corte</label>
+            <input
+              type="text"
+              id="filtroProduto"
+              placeholder="Ex: EDREDON, MANTA, CORTINA"
+            >
+          </div>
+
+          <div class="form-group">
             <label for="filtroDataInicial">Data inicial</label>
             <input type="date" id="filtroDataInicial">
           </div>
@@ -67,6 +76,11 @@
         <p class="section-help">
           Clique em um corte para visualizar o resumo, histórico e itens lançados.
         </p>
+
+        <div class="total-consulta">
+          Total encontrado:
+          <strong id="totalConsulta">0</strong>
+        </div>
 
         <div class="table-wrap tabela-consulta">
           <table>

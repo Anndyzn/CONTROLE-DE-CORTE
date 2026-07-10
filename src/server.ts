@@ -376,7 +376,7 @@ app.post("/cortes/:numero/finalizar-itens", (req, res) => {
 })
 
 app.get("/consultar-cortes", (req, res) => {
-  const { numero, data_inicial, data_final, status } = req.query
+  const { numero, produto, data_inicial, data_final, status } = req.query
 
   let query = `
     SELECT
@@ -402,6 +402,11 @@ app.get("/consultar-cortes", (req, res) => {
     params.push(numero)
   }
 
+  if (produto) {
+    query += " AND UPPER(c.produto) LIKE UPPER(?)"
+    params.push(`%${produto}%`)
+  }
+
   if (data_inicial) {
     query += " AND p.data >= ?"
     params.push(data_inicial)
@@ -417,12 +422,14 @@ app.get("/consultar-cortes", (req, res) => {
     params.push(status)
   }
 
-  query += " ORDER BY p.data DESC, c.numero DESC"
+  query += " ORDER BY c.numero DESC"
 
   db.all(query, params, (err, rows) => {
     if (err) {
       console.error(err)
-      return res.status(500).json({ erro: "Erro ao consultar cortes" })
+      return res.status(500).json({
+        erro: "Erro ao consultar cortes"
+      })
     }
 
     res.json(rows)

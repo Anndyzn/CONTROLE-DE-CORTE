@@ -207,6 +207,7 @@ async function carregarDashboardCorte(numeroCorte) {
 
 botaoBuscarFiltros.addEventListener("click", async () => {
   const numero = document.getElementById("filtroNumero").value
+  const produto = document.getElementById("filtroProduto").value.trim()
   const dataInicial = document.getElementById("filtroDataInicial").value
   const dataFinal = document.getElementById("filtroDataFinal").value
   const status = document.getElementById("filtroStatus").value
@@ -214,6 +215,7 @@ botaoBuscarFiltros.addEventListener("click", async () => {
   const params = new URLSearchParams()
 
   if (numero) params.append("numero", numero)
+  if (produto) params.append("produto", produto)
   if (dataInicial) params.append("data_inicial", dataInicial)
   if (dataFinal) params.append("data_final", dataFinal)
   if (status) params.append("status", status)
@@ -221,6 +223,7 @@ botaoBuscarFiltros.addEventListener("click", async () => {
   try {
     const resposta = await fetch(`/consultar-cortes?${params.toString()}`)
     const resultados = await resposta.json()
+    document.getElementById("totalConsulta").textContent = resultados.length
 
     const tabela = document.getElementById("resultadoFiltros")
     tabela.innerHTML = ""

@@ -90,7 +90,12 @@
 *::before,
 *::after { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
 
 body {
   margin: 0;
@@ -102,7 +107,10 @@ body {
     radial-gradient(1200px 600px at 50% -10%, var(--bg-grad-1) 0%, transparent 60%),
     linear-gradient(180deg, var(--bg-grad-2) 0%, var(--bg) 100%);
   background-attachment: fixed;
+  width: 100%;
+  max-width: 100%;
   min-height: 100vh;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -137,6 +145,7 @@ h3 {
 
 /* ---------- Layout ---------- */
 .container {
+  width: 100%;
   max-width: var(--container);
   margin: 0 auto;
 }
@@ -147,7 +156,10 @@ h3 {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   padding: 26px;
-  margin: 0 auto 22px;
+  width: 100%;
+  min-width: 0;
+  margin: 0 0 22px;
+  overflow: hidden;
   scroll-margin-top: 20px;
   transition: box-shadow var(--t-base), transform var(--t-base);
 }
@@ -523,6 +535,7 @@ tbody tr:last-child td { border-bottom: none; }
   text-transform: uppercase;
   border: 1px solid transparent;
 }
+
 .status-badge::before {
   content: "";
   width: 6px; height: 6px;
@@ -562,74 +575,123 @@ tbody tr:last-child td { border-bottom: none; }
 }
 
 /* ---------- Variantes de tabela ---------- */
-.tabela-topo { max-height: 200px; }
-.tabela-topo table { min-width: 650px; }
-.tabela-consulta { max-height: 360px; }
-.tabela-consulta table { min-width: 760px; }
+.tabela-topo {
+  max-height: 200px;
+}
 
-.btn-filtrar { min-width: 150px; }
+.tabela-topo table {
+  min-width: 650px;
+}
 
-/* ---------- Layout Consulta ---------- */
+.tabela-consulta {
+  width: 100%;
+  max-width: 100%;
+  max-height: 360px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabela-consulta table {
+  min-width: 760px;
+}
+
+.btn-filtrar {
+  min-width: 150px;
+}
+
+/* ---------- Layout da consulta ---------- */
 .consulta-layout {
   display: grid;
-  grid-template-columns: 420px 1fr;
+  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
   gap: 22px;
   align-items: start;
+  width: 100%;
   max-width: var(--container);
   margin: 0 auto 22px;
 }
+
 .consulta-filtros,
-.consulta-resultados { margin-bottom: 0; }
-.consulta-filtros .form-grid { grid-template-columns: 1fr; }
+.consulta-resultados {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
 
-.detalhe-corte { max-width: var(--container); margin: 0 auto; }
-#dashboardCorte { margin-top: 0; }
+.consulta-filtros .form-grid {
+  grid-template-columns: 1fr;
+}
 
-/* ---------- Responsivo ---------- */
+.consulta-resultados {
+  overflow: hidden;
+}
 
-/* Tablet */
+.consulta-resultados .table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow: auto;
+}
+
+.detalhe-corte {
+  width: 100%;
+  max-width: var(--container);
+  margin: 0 auto;
+}
+
+#dashboardCorte {
+  margin-top: 0;
+}
+
+/* ---------- Total da consulta ---------- */
+.total-consulta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -8px 0 16px;
+  color: var(--text-soft);
+  font-size: 14px;
+}
+
+.total-consulta strong {
+  color: var(--primary);
+  font-size: 18px;
+}
+
+/* ---------- Tablet ---------- */
 @media (max-width: 1000px) {
+  body {
+    padding: 18px;
+  }
 
   .consulta-layout {
     grid-template-columns: 1fr;
-    max-width: 100%;
     gap: 18px;
   }
 
   .dashboard-grid,
   .info-grid-top {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ---------- Celular ---------- */
+@media (max-width: 700px) {
+  body {
+    padding: 8px;
   }
 
-  .consulta-filtros,
-  .consulta-resultados,
-  .detalhe-corte {
+  .container {
     width: 100%;
     max-width: 100%;
   }
 
-}
-
-
-/* Celular */
-@media (max-width: 700px) {
-
-  body {
-      padding: 0;
-      overflow-x: hidden;
-  }
-
-  .container {
-      width: 100%;
-      max-width: 100%;
-  }
-
-  /* Cabeçalho */
   .app-header {
-    margin: 0 8px 14px;
-    border-radius: 0 0 18px 18px;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0 0 14px;
+    padding: 18px;
+    text-align: center;
+    border-radius: var(--radius-lg);
   }
-
 
   .header-text {
     align-items: center;
@@ -654,20 +716,16 @@ tbody tr:last-child td { border-bottom: none; }
     height: 55px;
   }
 
-
-  /* Cards */
   .section-card {
-      padding: 14px;
-      border-radius: var(--radius-md);
-      margin: 0 8px 16px;
+    margin: 0 0 14px;
+    padding: 14px;
+    border-radius: var(--radius-md);
   }
 
   h2 {
-    font-size: 22px;
+    font-size: 21px;
   }
 
-
-  /* Formulários */
   .form-grid,
   .dados-corte,
   .dashboard-grid,
@@ -675,15 +733,16 @@ tbody tr:last-child td { border-bottom: none; }
     grid-template-columns: 1fr;
   }
 
-
   input,
   select {
     height: 46px;
     font-size: 14px;
   }
 
+  .button-row {
+    flex-direction: column;
+  }
 
-  /* Botões */
   button,
   .link-button,
   #buscarCorte,
@@ -694,110 +753,81 @@ tbody tr:last-child td { border-bottom: none; }
     min-width: 0;
   }
 
-
-  .button-row {
-    flex-direction: column;
-  }
-
-
-  /* Consulta */
   .consulta-layout {
-      display: block;
-      width: 100%;
-      max-width: 100%;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    width: 100%;
   }
-
 
   .consulta-filtros,
   .consulta-resultados,
   .detalhe-corte {
-      width: auto;
-      max-width: 100%;
-  }
-
-
-  .consulta-resultados {
-      margin-top: 18px;
-  }
-
-
-  /* Tabelas */
-  .table-wrap {
     width: 100%;
-    overflow-x: auto;
-    max-height: 300px;
+    max-width: 100%;
   }
 
+  .table-wrap {
+    max-height: 280px;
+  }
 
   table {
-    min-width: 750px;
+    min-width: 720px;
   }
-
 
   .tabela-topo table {
     min-width: 650px;
   }
 
-
-  .tabela-consulta {
-      overflow-x: auto;
-  }
-
   .tabela-consulta table {
-      min-width: 850px;
+    min-width: 760px;
   }
 
-
-  td,
-  th {
+  th,
+  td {
     padding: 10px 12px;
     font-size: 12px;
   }
 
-
-  /* Cards superiores */
   .info-summary-card,
   .dashboard-card {
     padding: 14px;
   }
-
 
   .info-summary-value,
   .dashboard-card strong {
     font-size: 22px;
   }
 
+  .acoes-item {
+    flex-wrap: wrap;
+  }
 }
 
-
-/* Celulares pequenos */
+/* ---------- Celulares pequenos ---------- */
 @media (max-width: 420px) {
-
   body {
     padding: 6px;
   }
 
+  .app-header {
+    padding: 14px;
+  }
 
   .section-card {
     padding: 12px;
   }
 
-
   h2 {
     font-size: 20px;
   }
 
-
   .system-tag {
     font-size: 10px;
   }
-
 }
-
 
 /* ---------- Acessibilidade ---------- */
 @media (prefers-reduced-motion: reduce) {
-
   *,
   *::before,
   *::after {
@@ -805,9 +835,7 @@ tbody tr:last-child td { border-bottom: none; }
     transition-duration: 0.001ms !important;
   }
 
-
   html {
     scroll-behavior: auto;
   }
-
 }
