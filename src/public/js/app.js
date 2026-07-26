@@ -1,15 +1,6 @@
 const botaoBuscar = document.getElementById("buscarCorte")
 const botaoSalvar = document.getElementById("salvarProducao")
-function maiusculo(valor) {
-  return valor ? String(valor).toUpperCase() : "-"
-}
 
-function formatarDataBR(data) {
-  if (!data) return "-"
-
-  const partes = data.split("-")
-  return `${partes[2]}/${partes[1]}/${partes[0]}`
-}
 const botaoCadastrarCorte = document.getElementById("cadastrarCorte")
 const botaoSalvarItemCorte = document.getElementById("salvarItemCorte")
 const botaoFinalizarItensCorte = document.getElementById("finalizarItensCorte")
@@ -25,6 +16,7 @@ const inputOperadorOutro = document.getElementById("operadorOutro")
 
 const selectStatusProducao = document.getElementById("statusProducao")
 const blocoItensCorte = document.getElementById("blocoItensCorte")
+
 
 function atualizarResumoTopo({ numero = "--", ultimaFolha = "0", status = "--", mesa = "--" }) {
   document.getElementById("resumoNumeroCorte").textContent = numero
@@ -417,6 +409,7 @@ botaoSalvar.addEventListener("click", async () => {
   const numeroCorte = document.getElementById("numeroCorte").value
   const data = document.getElementById("data").value
   const turno = document.getElementById("turno").value
+
   let operador = document.getElementById("operador").value
 
   if (operador === "OUTRO") {
@@ -439,46 +432,72 @@ botaoSalvar.addEventListener("click", async () => {
     !folhaParou ||
     !status
   ) {
-    alert("Preencha todos os campos")
+    mostrarToast(
+      "Preencha todos os campos obrigatórios antes de salvar.",
+      "atencao",
+      "Campos obrigatórios"
+    )
+
     return
   }
 
   try {
-  const resposta = await fetch("/producao", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      data,
-      numero_corte: Number(numeroCorte),
-      turno,
-      operador,
-      hora_inicio: horaInicio,
-      hora_fim: horaFim,
-      folha_inicio: Number(folhaInicio),
-      folha_parou: Number(folhaParou),
-      status
+    definirCarregamento(
+      botaoSalvar,
+      true,
+      "Salvar produção"
+    )
+
+    const resposta = await fetch("/producao", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        data,
+        numero_corte: Number(numeroCorte),
+        turno,
+        operador,
+        hora_inicio: horaInicio,
+        hora_fim: horaFim,
+        folha_inicio: Number(folhaInicio),
+        folha_parou: Number(folhaParou),
+        status
+      })
     })
-  })
 
-  let dados = {}
+    const dados = await resposta.json()
 
-  try {
-    dados = await resposta.json()
-  } catch {
-    dados = {}
-  }
+    if (!resposta.ok) {
+      definirCarregamento(
+        botaoSalvar,
+        false,
+        "Salvar produção"
+      )
 
-  if (!resposta.ok) {
-    alert(dados.erro || "Erro ao salvar produção")
-    return
-  }
+      mostrarToast(
+        dados.erro || "Não foi possível salvar a produção.",
+        "erro",
+        "Erro no lançamento"
+      )
 
-    alert("Produção cadastrada com sucesso")
+      return
+    }
+
+    mostrarToast(
+      status === "FINALIZADO"
+        ? "Última produção registrada. Agora informe os PIs cortados."
+        : "Produção do turno registrada com sucesso.",
+      "sucesso",
+      status === "FINALIZADO"
+        ? "Produção finalizada"
+        : "Lançamento concluído",
+      6000
+    )
 
     document.getElementById("folhaInicio").value = folhaParou
     document.getElementById("folhaParou").textContent = folhaParou
+
     renderizarStatus(status)
 
     document.getElementById("folhaParouInput").value = ""
@@ -487,6 +506,7 @@ botaoSalvar.addEventListener("click", async () => {
     document.getElementById("operador").value = ""
     document.getElementById("operadorOutro").value = ""
     document.getElementById("operadorOutro").style.display = "none"
+    document.getElementById("statusProducao").value = ""
 
     atualizarResumoTopo({
       numero: numeroCorte,
@@ -495,16 +515,39 @@ botaoSalvar.addEventListener("click", async () => {
       mesa: document.getElementById("mesa").textContent || "--"
     })
 
+    definirCarregamento(
+      botaoSalvar,
+      false,
+      "Salvar produção"
+    )
+
     await carregarHistorico(numeroCorte)
     await carregarCortesEmAndamento()
 
     if (status === "FINALIZADO") {
       blocoItensCorte.style.display = "block"
       desabilitarProducao()
+
+      blocoItensCorte.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      })
     }
   } catch (error) {
-    alert("Erro ao conectar com o servidor")
     console.error(error)
+
+    definirCarregamento(
+      botaoSalvar,
+      false,
+      "Salvar produção"
+    )
+
+    mostrarToast(
+      "Não foi possível conectar ao servidor. Verifique se o sistema está ligado.",
+      "erro",
+      "Servidor indisponível",
+      7000
+    )
   }
 })
 
@@ -529,12 +572,20 @@ botaoSalvarItemCorte.addEventListener("click", async () => {
   const quantidade = document.getElementById("quantidadeItem").value
 
   if (!numeroCorte || !modelo || !cor || !tecido || !quantidade) {
-    alert("Preencha modelo, cor, tecido e quantidade de peças")
+    mostrarToast(
+      "Preencha modelo, cor, tecido e quantidade de peças.",
+      "atencao",
+      "Campos obrigatórios"
+    )
     return
   }
 
   if (metragem === "") {
-    alert("Informe a metragem usada. Se for aproveitamento, digite 0")
+    mostrarToast(
+      "Informe a metragem usada. Se for aproveitamento, digite 0.",
+      "atencao",
+      "Metragem obrigatória"
+    )
     return
   }
 
@@ -572,10 +623,15 @@ botaoSalvarItemCorte.addEventListener("click", async () => {
       return
     }
 
-    alert(
+    mostrarToast(
       itemEditandoId
-        ? "Item atualizado com sucesso"
-        : "Item salvo. Adicione outro item, se necessário."
+        ? "O item do corte foi atualizado."
+        : "Item salvo. Adicione outro PI ou registre os itens do corte.",
+      "sucesso",
+      itemEditandoId
+        ? "Item atualizado"
+        : "PI adicionado",
+      5000
     )
 
     document.getElementById("itemEditandoId").value = ""
@@ -617,7 +673,12 @@ if (!confirmar) {
       return
     }
 
-    alert("Itens do corte registrados e finalizados com sucesso")
+    mostrarToast(
+      "Os PIs foram registrados e agora estão bloqueados para alteração.",
+      "sucesso",
+      "Corte concluído",
+      6000
+    )
 
     desabilitarItens()
     await carregarItensCorte(numeroCorte)
@@ -684,13 +745,8 @@ selectOperador.addEventListener("change", () => {
 
 // STATUS
 selectStatusProducao.addEventListener("change", () => {
-  if (selectStatusProducao.value === "FINALIZADO") {
-    blocoItensCorte.style.display = "block"
-  } else {
-    blocoItensCorte.style.display = "none"
-  }
+  blocoItensCorte.style.display = "none"
 })
-
 
 atualizarResumoTopo({})
 carregarCortesEmAndamento()

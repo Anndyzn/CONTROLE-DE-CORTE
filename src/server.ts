@@ -133,71 +133,59 @@ app.post("/producao", (req, res) => {
     numero_corte,
     turno,
     operador,
-    hora_inicio,
-    hora_fim,
     folha_inicio,
     folha_parou,
-    status
+    status,
+    hora_inicio,
+    hora_fim
   } = req.body
 
-  db.get(
-    `SELECT * FROM producao
-     WHERE numero_corte = ?
-     ORDER BY id DESC
-     LIMIT 1`,
-    [numero_corte],
-    (err, ultimaProducao: any) => {
-      if (err) {
-        console.error(err)
-        return res.status(500).json({ erro: "Erro ao validar produção" })
-      }
+  function salvarProducao() {
+    db.run(
+      `
+      INSERT INTO producao (
+        data,
+        numero_corte,
+        turno,
+        operador,
+        folha_inicio,
+        folha_parou,
+        status,
+        hora_inicio,
+        hora_fim
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+      [
+        data,
+        numero_corte,
+        turno,
+        operador,
+        folha_inicio,
+        folha_parou,
+        status,
+        hora_inicio,
+        hora_fim
+      ],
+      function (err) {
+        if (err) {
+          console.error(err)
 
-      if (ultimaProducao && ultimaProducao.status === "FINALIZADO") {
-        return res.status(400).json({
-          erro: "Este corte já foi finalizado e não pode receber nova produção"
-        })
-      }
-
-      db.run(
-        `INSERT INTO producao 
-        (data, numero_corte, turno, operador, hora_inicio, hora_fim, folha_inicio, folha_parou, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          data,
-          numero_corte,
-          turno,
-          operador,
-          hora_inicio,
-          hora_fim,
-          folha_inicio,
-          folha_parou,
-          status
-        ],
-        function (err) {
-          if (err) {
-            console.error(err)
-            return res.status(500).json({ erro: "Erro ao cadastrar produção" })
-          }
-
-          res.json({
-            mensagem: "Produção cadastrada com sucesso",
-            producao: {
-              id: this.lastID,
-              data,
-              numero_corte,
-              turno,
-              operador,
-              hora_inicio,
-              hora_fim,
-              folha_inicio,
-              folha_parou,
-              status
-            }
+          return res.status(500).json({
+            erro: "Erro ao salvar produção"
           })
         }
-      )
-    }
-  )
+
+        res.status(201).json({
+          mensagem: "Produção salva com sucesso",
+          id: this.lastID
+        })
+      }
+    )
+  }
+  
+  salvarProducao()
+
 })
 
 app.get("/producao/:numero/ultima", (req, res) => {
@@ -357,20 +345,51 @@ app.get("/itens-corte/:numero", (req, res) => {
 app.post("/cortes/:numero/finalizar-itens", (req, res) => {
   const { numero } = req.params
 
-  db.run(
-    "UPDATE cortes SET itens_finalizados = 1 WHERE numero = ?",
+  db.get(
+    `
+    SELECT COUNT(*) AS total
+    FROM itens_corte
+    WHERE numero_corte = ?
+    `,
     [numero],
-    function (err) {
-      if (err) {
-        console.error(err)
-        return res.status(500).json({ erro: "Erro ao finalizar itens do corte" })
+    (erroContagem, resultado: any) => {
+      if (erroContagem) {
+        console.error(erroContagem)
+
+        return res.status(500).json({
+          erro: "Erro ao verificar os itens do corte"
+        })
       }
 
-      if (this.changes === 0) {
-        return res.status(404).json({ erro: "Corte não encontrado" })
+      if (!resultado || resultado.total === 0) {
+        return res.status(400).json({
+          erro: "Adicione pelo menos um PI antes de registrar os itens do corte."
+        })
       }
 
-      res.json({ mensagem: "Itens do corte finalizados com sucesso" })
+      db.run(
+        "UPDATE cortes SET itens_finalizados = 1 WHERE numero = ?",
+        [numero],
+        function (err) {
+          if (err) {
+            console.error(err)
+
+            return res.status(500).json({
+              erro: "Erro ao finalizar itens do corte"
+            })
+          }
+
+          if (this.changes === 0) {
+            return res.status(404).json({
+              erro: "Corte não encontrado"
+            })
+          }
+
+          res.json({
+            mensagem: "Itens do corte registrados com sucesso"
+          })
+        }
+      )
     }
   )
 })
