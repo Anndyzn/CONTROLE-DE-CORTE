@@ -193,6 +193,39 @@ async function buscarCorte(numeroCorte) {
   }
 }
 
+function formatarData(data) {
+  if (!data) return "-"
+
+  const somenteData = String(data).substring(0, 10)
+  const [ano, mes, dia] = somenteData.split("-")
+
+  if (!ano || !mes || !dia) return data
+
+  return `${dia}/${mes}/${ano}`
+}
+
+function formatarNumero(valor) {
+  if (valor === null || valor === undefined || valor === "") {
+    return "0"
+  }
+
+  return Number(valor).toLocaleString("pt-BR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  })
+}
+
+function formatarQuantidade(valor) {
+  if (valor === null || valor === undefined || valor === "") {
+    return "0"
+  }
+
+  return Number(valor).toLocaleString("pt-BR", {
+    maximumFractionDigits: 0
+  })
+}
+
+
 function calcularDuracao(horaInicio, horaFim) {
   if (!horaInicio || !horaFim) return "-"
 
@@ -225,10 +258,9 @@ async function carregarHistorico(numeroCorte) {
     historico.forEach((item) => {
       const linha = document.createElement("tr")
       const duracao = calcularDuracao(item.hora_inicio, item.hora_fim)
-      const dataBR = item.data ? item.data.split("-").reverse().join("/") : "-"
 
       linha.innerHTML = `
-        <td>${formatarDataBR(item.data)}</td>
+        <td>${formatarData(item.data)}</td>
         <td>${item.turno}</td>
         <td>${item.operador}</td>
         <td>${item.hora_inicio ?? "-"}</td>
@@ -274,11 +306,11 @@ async function carregarItensCorte(numeroCorte) {
         <td>${maiusculo(item.modelo)}</td>
         <td>${maiusculo(item.cor)}</td>
         <td>${maiusculo(item.tecido)}</td>
-        <td>${item.metragem_usada}</td>
-        <td>${item.sobra_metros}</td>
-        <td>${item.perda_metros}</td>
-        <td>${item.metros_faltantes ?? 0}</td>
-        <td>${item.quantidade_pecas}</td>
+        <td>${formatarNumero(item.metragem_usada)}</td>
+        <td>${formatarNumero(item.sobra_metros)}</td>
+        <td>${formatarNumero(item.perda_metros)}</td>
+        <td>${formatarNumero(item.metros_faltantes)}</td>
+        <td>${formatarQuantidade(item.quantidade_pecas)}</td>
         <td>
           ${
             itensFinalizados

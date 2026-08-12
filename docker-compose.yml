@@ -1,10 +1,13 @@
 services:
   app:
     build: .
+    container_name: controle-corte
     ports:
       - "3000:3000"
-    volumes:
-      - ./database.db:/app/database.db
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - PORT=3000
+    restart: unless-stopped
 
   cloudflared:
     image: cloudflare/cloudflared:latest

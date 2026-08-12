@@ -2,12 +2,38 @@ const botaoBuscarFiltros = document.getElementById("buscarFiltros")
 
 function formatarData(data) {
   if (!data) return "-"
-  const [ano, mes, dia] = data.split("-")
+
+  const somenteData = String(data).substring(0, 10)
+  const [ano, mes, dia] = somenteData.split("-")
+
+  if (!ano || !mes || !dia) return data
+
   return `${dia}/${mes}/${ano}`
 }
 
 function maiusculo(valor) {
   return valor ? String(valor).toUpperCase() : "-"
+}
+
+function formatarNumero(valor) {
+  if (valor === null || valor === undefined || valor === "") {
+    return "0"
+  }
+
+  return Number(valor).toLocaleString("pt-BR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  })
+}
+
+function formatarQuantidade(valor) {
+  if (valor === null || valor === undefined || valor === "") {
+    return "0"
+  }
+
+  return Number(valor).toLocaleString("pt-BR", {
+    maximumFractionDigits: 0
+  })
 }
 
 function converterNumero(valor) {
@@ -29,16 +55,22 @@ function calcularDuracao(horaInicio, horaFim) {
   const [h2, m2] = horaFim.split(":").map(Number)
 
   const inicio = h1 * 60 + m1
-  const fim = h2 * 60 + m2
+  let fim = h2 * 60 + m2
+
+  if (fim < inicio) {
+    fim += 24 * 60
+  }
+
   const diferenca = fim - inicio
 
-  if (Number.isNaN(diferenca) || diferenca < 0) return "-"
+  if (Number.isNaN(diferenca)) return "-"
 
   const horas = Math.floor(diferenca / 60)
   const minutos = diferenca % 60
 
   return `${horas}h ${minutos}min`
 }
+
 
 function calcularMinutos(horaInicio, horaFim) {
   if (!horaInicio || !horaFim) return 0
@@ -47,7 +79,12 @@ function calcularMinutos(horaInicio, horaFim) {
   const [h2, m2] = horaFim.split(":").map(Number)
 
   const inicio = h1 * 60 + m1
-  const fim = h2 * 60 + m2
+  let fim = h2 * 60 + m2
+
+  if (fim < inicio) {
+    fim += 24 * 60
+  }
+
   const diff = fim - inicio
 
   return diff > 0 ? diff : 0
@@ -63,7 +100,20 @@ function formatarMinutos(totalMinutos) {
 async function carregarHistoricoConsulta(numeroCorte) {
   try {
     const resposta = await fetch(`/producao/${numeroCorte}`)
+
+    if (!resposta.ok) {
+      const erroServidor = await resposta.json()
+
+      throw new Error(
+        erroServidor.erro || "Não foi possível buscar o histórico."
+      )
+    }
+
     const historico = await resposta.json()
+
+    if (!Array.isArray(historico)) {
+      throw new Error("O histórico recebido do servidor não é uma lista.")
+    }
 
     const tabela = document.getElementById("historicoConsulta")
     tabela.innerHTML = ""
@@ -79,27 +129,36 @@ async function carregarHistoricoConsulta(numeroCorte) {
 
     historico.forEach((item) => {
       const linha = document.createElement("tr")
-      const duracao = calcularDuracao(item.hora_inicio, item.hora_fim)
+
+      const duracao = calcularDuracao(
+        item.hora_inicio,
+        item.hora_fim
+      )
 
       linha.innerHTML = `
         <td>${formatarData(item.data)}</td>
         <td>${maiusculo(item.turno)}</td>
         <td>${maiusculo(item.operador)}</td>
-        <td>${item.hora_inicio ?? "-"}</td>
-        <td>${item.hora_fim ?? "-"}</td>
+        <td>${item.hora_inicio ? String(item.hora_inicio).substring(0, 5) : "-"}</td>
+        <td>${item.hora_fim ? String(item.hora_fim).substring(0, 5) : "-"}</td>
         <td>${duracao}</td>
-        <td>${item.folha_inicio}</td>
-        <td>${item.folha_parou}</td>
-        <td>${item.status}</td>
+        <td>${formatarQuantidade(item.folha_inicio)}</td>
+        <td>${formatarQuantidade(item.folha_parou)}</td>
+        <td>${maiusculo(item.status)}</td>
       `
 
       tabela.appendChild(linha)
     })
 
     return historico
+
   } catch (error) {
-    alert("Erro ao carregar histórico")
-    console.error(error)
+    console.error("ERRO REAL AO CARREGAR HISTÓRICO:", error)
+
+    alert(
+      `Erro ao carregar histórico:\n\n${error.message}`
+    )
+
     return []
   }
 }
@@ -128,11 +187,11 @@ async function carregarItensConsulta(numeroCorte) {
         <td>${maiusculo(item.modelo)}</td>
         <td>${maiusculo(item.cor)}</td>
         <td>${maiusculo(item.tecido)}</td>
-        <td>${item.metragem_usada}</td>
-        <td>${item.sobra_metros}</td>
-        <td>${item.perda_metros}</td>
-        <td>${item.metros_faltantes ?? 0}</td>
-        <td>${item.quantidade_pecas}</td>
+        <td>${formatarNumero(item.metragem_usada)}</td>
+        <td>${formatarNumero(item.sobra_metros)}</td>
+        <td>${formatarNumero(item.perda_metros)}</td>
+        <td>${formatarNumero(item.metros_faltantes)}</td>
+        <td>${formatarQuantidade(item.quantidade_pecas)}</td>
       `
 
       tabela.appendChild(linha)
@@ -189,15 +248,29 @@ async function carregarDashboardCorte(numeroCorte) {
       return total + converterNumero(item.metros_faltantes)
     }, 0)
 
-    document.getElementById("totalFolhas").textContent = totalFolhas
-    document.getElementById("tempoTotal").textContent = formatarMinutos(tempoTotalMinutos)
-    document.getElementById("totalLancamentos").textContent = historico.length
-    document.getElementById("totalPecas").textContent = totalPecas
-    document.getElementById("totalMetragem").textContent = totalMetragem.toFixed(2)
-    document.getElementById("totalSobra").textContent = totalSobra.toFixed(2)
-    document.getElementById("totalPerda").textContent = totalPerda.toFixed(2)
-    document.getElementById("totalmetrosFaltantesTotal").textContent =
-      totalMetrosFaltantes.toFixed(2)
+document.getElementById("totalFolhas").textContent =
+  formatarQuantidade(totalFolhas)
+
+document.getElementById("tempoTotal").textContent =
+  formatarMinutos(tempoTotalMinutos)
+
+document.getElementById("totalLancamentos").textContent =
+  historico.length
+
+document.getElementById("totalPecas").textContent =
+  formatarQuantidade(totalPecas)
+
+document.getElementById("totalMetragem").textContent =
+  formatarNumero(totalMetragem)
+
+document.getElementById("totalSobra").textContent =
+  formatarNumero(totalSobra)
+
+document.getElementById("totalPerda").textContent =
+  formatarNumero(totalPerda)
+
+document.getElementById("totalmetrosFaltantesTotal").textContent =
+  formatarNumero(totalMetrosFaltantes)
 
     document.getElementById("dashboardCorte").style.display = "block"
   } catch (error) {

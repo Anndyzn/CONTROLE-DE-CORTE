@@ -4,3 +4,5 @@ database.db
 dist/
 .sql
 *.log
+backup/
+*.db
