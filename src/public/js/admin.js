@@ -1,6 +1,9 @@
 const botaoBuscarCorteAdmin = document.getElementById("buscarCorteAdmin")
 const botaoReabrirItensCorte = document.getElementById("reabrirItensCorte")
 
+const SUPABASE_URL = "https://znpmlfrwkftzfufywskr.supabase.co"
+const SUPABASE_PUBLIC_KEY = "sb_publishable_WUTuenRk7EC1KIORYpOb7A_4Vyurr6U"
+
 function formatarData(data) {
   if (!data) return "-"
   const [ano, mes, dia] = data.split("-")

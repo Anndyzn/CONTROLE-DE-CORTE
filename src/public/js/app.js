@@ -17,6 +17,18 @@ const inputOperadorOutro = document.getElementById("operadorOutro")
 const selectStatusProducao = document.getElementById("statusProducao")
 const blocoItensCorte = document.getElementById("blocoItensCorte")
 
+const botaoGerarProximoCorte =
+  document.getElementById("gerarProximoCorte")
+
+const SUPABASE_URL = "https://znpmlfrwkftzfufywskr.supabase.co"
+const SUPABASE_PUBLIC_KEY = "sb_publishable_WUTuenRk7EC1KIORYpOb7A_4Vyurr6U"
+
+const supabaseRealtime = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLIC_KEY
+)
+
+
 
 function atualizarResumoTopo({ numero = "--", ultimaFolha = "0", status = "--", mesa = "--" }) {
   document.getElementById("resumoNumeroCorte").textContent = numero
@@ -374,6 +386,84 @@ async function carregarItensCorte(numeroCorte) {
     return 0
   }
 }
+
+botaoGerarProximoCorte.addEventListener("click", async () => {
+  try {
+    definirCarregamento(
+      botaoGerarProximoCorte,
+      true,
+      "Novo corte"
+    )
+
+    const resposta = await fetch("/cortes/proximo-numero")
+    const dados = await resposta.json()
+
+    if (!resposta.ok) {
+      mostrarToast(
+        dados.erro || "Não foi possível gerar o próximo número.",
+        "erro",
+        "Erro"
+      )
+      return
+    }
+
+    const proximoNumero = dados.proximo_numero
+
+    document.getElementById("numeroCorte").value = proximoNumero
+
+    document.getElementById("produtoNovo").value = ""
+    document.getElementById("mesaNova").value = ""
+
+    document.getElementById("novoCorte").style.display = "block"
+
+    document.getElementById("produto").textContent = ""
+    document.getElementById("mesa").textContent = ""
+    document.getElementById("folhaParou").textContent = "0"
+
+    renderizarStatus("NOVO CORTE")
+
+    document.getElementById("folhaInicio").value = 0
+
+    atualizarResumoTopo({
+      numero: proximoNumero,
+      ultimaFolha: "0",
+      status: "NOVO CORTE",
+      mesa: "--"
+    })
+
+    limparTabelaHistorico()
+    limparTabelaItens()
+    limparCamposItens()
+
+    habilitarProducao()
+    habilitarItens()
+
+    mostrarToast(
+      `Novo corte ${proximoNumero} preparado para cadastro.`,
+      "info",
+      "Novo corte"
+    )
+
+    document.getElementById("produtoNovo").focus()
+
+  } catch (erro) {
+    console.error(erro)
+
+    mostrarToast(
+      "Não foi possível consultar o próximo número.",
+      "erro",
+      "Erro de conexão"
+    )
+
+  } finally {
+    definirCarregamento(
+      botaoGerarProximoCorte,
+      false,
+      "Novo corte"
+    )
+  }
+})
+
 
 botaoBuscar.addEventListener("click", async () => {
   const numeroCorte = document.getElementById("numeroCorte").value
@@ -779,6 +869,67 @@ selectOperador.addEventListener("change", () => {
 selectStatusProducao.addEventListener("change", () => {
   blocoItensCorte.style.display = "none"
 })
+
+const canalRealtime = supabaseRealtime
+  .channel("controle-corte-realtime")
+
+  .on(
+    "postgres_changes",
+    {
+      event: "*",
+      schema: "public",
+      table: "cortes"
+    },
+    async () => {
+      console.log("Realtime: cortes alterados")
+
+      await carregarCortesEmAndamento()
+    }
+  )
+
+  .on(
+    "postgres_changes",
+    {
+      event: "*",
+      schema: "public",
+      table: "producao"
+    },
+    async (payload) => {
+      console.log("Realtime: produção alterada", payload)
+
+      await carregarCortesEmAndamento()
+
+      const numeroCorteAtual =
+        document.getElementById("numeroCorte").value
+
+      if (numeroCorteAtual) {
+        await buscarCorte(numeroCorteAtual)
+      }
+    }
+  )
+
+  .on(
+    "postgres_changes",
+    {
+      event: "*",
+      schema: "public",
+      table: "itens_corte"
+    },
+    async (payload) => {
+      console.log("Realtime: itens alterados", payload)
+
+      const numeroCorteAtual =
+        document.getElementById("numeroCorte").value
+
+      if (numeroCorteAtual) {
+        await carregarItensCorte(numeroCorteAtual)
+      }
+    }
+  )
+
+  .subscribe((status) => {
+    console.log("Status Realtime:", status)
+  })
 
 atualizarResumoTopo({})
 carregarCortesEmAndamento()

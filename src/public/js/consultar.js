@@ -1,5 +1,13 @@
 const botaoBuscarFiltros = document.getElementById("buscarFiltros")
 
+const SUPABASE_URL = "https://znpmlfrwkftzfufywskr.supabase.co"
+const SUPABASE_PUBLIC_KEY = "sb_publishable_WUTuenRk7EC1KIORYpOb7A_4Vyurr6U"
+
+const supabaseRealtime = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLIC_KEY
+)
+
 function formatarData(data) {
   if (!data) return "-"
 
@@ -336,6 +344,8 @@ botaoBuscarFiltros.addEventListener("click", async () => {
       linha.style.cursor = "pointer"
 
       linha.addEventListener("click", async () => {
+        corteConsultaAtual = item.numero
+
         await carregarHistoricoConsulta(item.numero)
         await carregarItensConsulta(item.numero)
         await carregarDashboardCorte(item.numero)
@@ -348,3 +358,60 @@ botaoBuscarFiltros.addEventListener("click", async () => {
     console.error(error)
   }
 })
+
+const canalConsultaRealtime = supabaseConsulta
+  .channel("consulta-cortes-realtime")
+
+  .on(
+    "postgres_changes",
+    {
+      event: "*",
+      schema: "public",
+      table: "cortes"
+    },
+    async () => {
+      console.log("Consulta Realtime: corte alterado")
+
+      botaoBuscarFiltros.click()
+    }
+  )
+
+  .on(
+    "postgres_changes",
+    {
+      event: "*",
+      schema: "public",
+      table: "producao"
+    },
+    async (payload) => {
+      console.log("Consulta Realtime: produção alterada", payload)
+
+      botaoBuscarFiltros.click()
+
+      if (corteConsultaAtual) {
+        await carregarHistoricoConsulta(corteConsultaAtual)
+        await carregarDashboardCorte(corteConsultaAtual)
+      }
+    }
+  )
+
+  .on(
+    "postgres_changes",
+    {
+      event: "*",
+      schema: "public",
+      table: "itens_corte"
+    },
+    async (payload) => {
+      console.log("Consulta Realtime: item alterado", payload)
+
+      if (corteConsultaAtual) {
+        await carregarItensConsulta(corteConsultaAtual)
+        await carregarDashboardCorte(corteConsultaAtual)
+      }
+    }
+  )
+
+  .subscribe((status) => {
+    console.log("Status Realtime Consulta:", status)
+  })

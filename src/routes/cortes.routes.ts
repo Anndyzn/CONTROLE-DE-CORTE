@@ -111,6 +111,29 @@ router.get("/cortes/:numero/finalizacao-itens", async (req, res) => {
   }
 })
 
+router.get("/cortes/proximo-numero", async (req, res) => {
+  try {
+    const resultado = await dbPg.query(`
+      SELECT COALESCE(MAX(numero), 0) + 1 AS proximo_numero
+      FROM cortes
+    `)
+
+    res.json({
+      proximo_numero: resultado.rows[0].proximo_numero
+    })
+  } catch (erro) {
+    console.error("Erro ao buscar próximo número:", erro)
+
+    res.status(500).json({
+      erro: "Erro ao buscar próximo número de corte"
+    })
+  }
+})
+
+router.get("/cortes/:numero", async (req, res) => {
+  // sua rota atual continua aqui
+})
+
 router.get("/cortes/:numero", async (req, res) => {
   const { numero } = req.params
 

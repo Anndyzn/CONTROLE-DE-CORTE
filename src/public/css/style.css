@@ -1179,3 +1179,24 @@ select:focus {
   }
 }
 
+.campo-numero-corte {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.btn-proximo-corte {
+  min-width: 170px;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .campo-numero-corte {
+    grid-template-columns: 1fr;
+  }
+
+  .btn-proximo-corte {
+    width: 100%;
+  }
+}
