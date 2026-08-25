@@ -9,10 +9,21 @@ import consultasRoutes from "./routes/consultas.routes"
 const app = express()
 
 app.use(express.json())
-app.use(express.static(path.join(__dirname, "public")))
+
+app.use(
+  express.static(
+    path.join(__dirname, "public")
+  )
+)
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"))
+  res.sendFile(
+    path.join(
+      __dirname,
+      "public",
+      "index.html"
+    )
+  )
 })
 
 app.use(cortesRoutes)
@@ -20,8 +31,11 @@ app.use(producaoRoutes)
 app.use(itensRoutes)
 app.use(consultasRoutes)
 
-const PORT = process.env.PORT || 3000
+const PORT =
+  process.env.PORT || 3000
 
 app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`)
+  console.log(
+    `Servidor rodando na porta ${PORT}`
+  )
 })
