@@ -1,0 +1,100 @@
+.button-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 10px 0 16px;
+}
+
+button, .link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 150px;
+  height: 44px;
+  padding: 0 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-deep) 100%);
+  box-shadow: var(--shadow-primary);
+  transition: transform var(--t-fast), box-shadow var(--t-fast), filter var(--t-fast);
+  position: relative;
+  overflow: hidden;
+}
+button::after, .link-button::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, hsl(0 0% 100% / 0.18), transparent 40%);
+  pointer-events: none;
+}
+button:hover, .link-button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow: 0 14px 28px hsl(221 83% 53% / 0.35);
+}
+button:active, .link-button:active { transform: translateY(0); filter: brightness(0.97); }
+button:focus-visible, .link-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--primary-ring), var(--shadow-primary);
+}
+button:disabled {
+  background: var(--surface-3);
+  color: var(--text-muted);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+}
+
+.primary-action,
+#buscarCorte,
+#salvarProducao,
+#salvarItemCorte,
+#finalizarItensCorte { min-width: 200px; }
+
+/* Variantes de ação */
+.btn-excluir-item {
+  background: linear-gradient(135deg, var(--danger), var(--danger-hover));
+  box-shadow: 0 8px 18px hsl(0 72% 51% / 0.28);
+  min-width: 90px; height: 34px; font-size: 12px; padding: 0 12px;
+}
+.btn-excluir-item:hover { box-shadow: 0 12px 22px hsl(0 72% 51% / 0.35); }
+
+.btn-editar-item {
+  background: linear-gradient(135deg, hsl(38 92% 55%), hsl(28 90% 45%));
+  box-shadow: 0 8px 18px hsl(38 92% 50% / 0.28);
+  min-width: 80px; height: 34px; font-size: 12px; padding: 0 12px;
+}
+.btn-editar-item:hover { box-shadow: 0 12px 22px hsl(38 92% 50% / 0.35); }
+
+.acoes-item { display: flex; gap: 8px; }
+
+.btn-filtrar {
+  min-width: 150px;
+}
+
+#buscarCorte,
+#salvarProducao,
+#salvarItemCorte,
+#finalizarItensCorte,
+.btn-filtrar {
+  min-height: 48px;
+  font-size: 15px;
+}
+
+#salvarProducao {
+  min-width: 230px;
+}
+
+.btn-proximo-corte {
+  min-width: 170px;
+  white-space: nowrap;
+}
+

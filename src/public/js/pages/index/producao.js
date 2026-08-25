@@ -6,7 +6,6 @@ import {
 } from "../../core/ui.js"
 
 import {
-  atualizarResumoTopo,
   renderizarStatus,
   desabilitarProducao
 } from "./ui-corte.js"
@@ -145,17 +144,6 @@ export async function salvarProducao() {
       folhaParou
 
     renderizarStatus(status)
-
-
-    atualizarResumoTopo({
-      numero: numeroCorte,
-      ultimaFolha: folhaParou,
-      status,
-      mesa:
-        document.getElementById("mesa").textContent ||
-        "--"
-    })
-
 
     limparFormularioProducao()
 

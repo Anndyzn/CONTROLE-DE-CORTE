@@ -12,10 +12,6 @@ import {
 } from "./itens.js"
 
 import {
-  atualizarResumoTopo
-} from "./ui-corte.js"
-
-import {
   inicializarRealtime
 } from "../../core/realtime.js"
 
@@ -34,6 +30,29 @@ async function iniciarPagina() {
 
 
   // ========================================
+  // BOTÃO NOVO CORTE DO TOPO
+  // ========================================
+
+  const botaoNovoCorteTopo =
+    document.getElementById("novoCorteTopo")
+
+  const botaoNovoCorteOriginal =
+    document.getElementById("gerarProximoCorte")
+
+  if (
+    botaoNovoCorteTopo &&
+    botaoNovoCorteOriginal
+  ) {
+    botaoNovoCorteTopo.addEventListener(
+      "click",
+      () => {
+        botaoNovoCorteOriginal.click()
+      }
+    )
+  }
+
+
+  // ========================================
   // PRODUÇÃO
   // ========================================
 
@@ -45,13 +64,6 @@ async function iniciarPagina() {
   // ========================================
 
   inicializarItens()
-
-
-  // ========================================
-  // RESUMO SUPERIOR
-  // ========================================
-
-  atualizarResumoTopo({})
 
 
   // ========================================

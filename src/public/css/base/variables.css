@@ -1,0 +1,100 @@
+:root {
+  --hue: 222;
+
+  --bg: hsl(214 32% 94%);
+  --bg-grad-1: hsl(0 0% 100%);
+  --bg-grad-2: hsl(214 40% 96%);
+
+  --surface: hsl(0 0% 100%);
+  --surface-2: hsl(214 32% 97%);
+  --surface-3: hsl(214 28% 93%);
+
+  --border: hsl(215 20% 88%);
+  --border-strong: hsl(215 18% 78%);
+
+  --text: hsl(222 47% 11%);
+  --text-soft: hsl(215 14% 42%);
+  --text-muted: hsl(215 12% 55%);
+
+  --primary: hsl(221 83% 53%);
+  --primary-hover: hsl(224 76% 45%);
+  --primary-deep: hsl(226 71% 36%);
+  --primary-soft: hsl(214 100% 97%);
+  --primary-ring: hsl(221 83% 53% / 0.28);
+
+  --success: hsl(142 71% 36%);
+  --success-bg: hsl(142 76% 92%);
+  --success-text: hsl(142 72% 22%);
+
+  --warning: hsl(38 92% 50%);
+  --warning-bg: hsl(48 96% 89%);
+  --warning-text: hsl(28 80% 28%);
+
+  --danger: hsl(0 72% 51%);
+  --danger-hover: hsl(0 74% 42%);
+
+  --font-sans:
+    "Inter",
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+
+  --font-feature: "cv11", "ss01", "ss03";
+
+  --radius-xs: 8px;
+  --radius-sm: 11px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 22px;
+  --radius-pill: 999px;
+
+  --shadow-xs:
+    0 1px 2px hsl(222 47% 11% / 0.05);
+
+  --shadow-sm:
+    0 2px 6px hsl(222 47% 11% / 0.06);
+
+  --shadow-md:
+    0 8px 20px hsl(222 47% 11% / 0.08);
+
+  --shadow-lg:
+    0 16px 40px hsl(222 47% 11% / 0.10);
+
+  --shadow-primary:
+    0 10px 22px hsl(221 83% 53% / 0.28);
+
+  --t-fast:
+    140ms cubic-bezier(.4, 0, .2, 1);
+
+  --t-base:
+    220ms cubic-bezier(.4, 0, .2, 1);
+
+  --container: 1180px;
+}
+
+[data-theme="dark"] {
+  --bg: hsl(222 30% 8%);
+  --bg-grad-1: hsl(222 30% 11%);
+  --bg-grad-2: hsl(222 30% 7%);
+
+  --surface: hsl(222 25% 12%);
+  --surface-2: hsl(222 22% 15%);
+  --surface-3: hsl(222 20% 18%);
+
+  --border: hsl(222 15% 22%);
+  --border-strong: hsl(222 14% 30%);
+
+  --text: hsl(210 40% 96%);
+  --text-soft: hsl(215 16% 70%);
+  --text-muted: hsl(215 14% 58%);
+
+  --primary-soft: hsl(221 60% 16%);
+
+  --success-bg: hsl(142 40% 18%);
+  --success-text: hsl(142 70% 75%);
+
+  --warning-bg: hsl(38 50% 18%);
+  --warning-text: hsl(38 95% 75%);
+}

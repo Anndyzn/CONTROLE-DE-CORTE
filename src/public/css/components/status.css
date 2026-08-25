@@ -1,0 +1,41 @@
+
+/* Status com melhor contraste */
+.status-badge {
+  min-width: 112px;
+  justify-content: center;
+}
+
+.status-badge::before {
+  content: "";
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.status-em-producao {
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  border-color: hsl(38 92% 50% / 0.25);
+}
+.status-finalizado {
+  background: var(--success-bg);
+  color: var(--success-text);
+  border-color: hsl(142 71% 36% / 0.25);
+}
+.status-default {
+  background: var(--surface-3);
+  color: var(--text-soft);
+  border-color: var(--border);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}

@@ -1,15 +1,3 @@
-export function atualizarResumoTopo({
-  numero = "--",
-  ultimaFolha = "0",
-  status = "--",
-  mesa = "--"
-}) {
-  document.getElementById("resumoNumeroCorte").textContent = numero
-  document.getElementById("resumoUltimaFolha").textContent = ultimaFolha
-  document.getElementById("resumoMesa").textContent = mesa
-  document.getElementById("resumoStatus").textContent = status
-}
-
 export function renderizarStatus(status) {
   const statusEl = document.getElementById("status")
 

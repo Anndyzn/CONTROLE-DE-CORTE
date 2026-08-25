@@ -1,0 +1,68 @@
+.consulta-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+  width: 100%;
+  max-width: var(--container);
+  margin: 0 auto 22px;
+}
+
+.consulta-filtros,
+.consulta-resultados {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+.consulta-filtros .form-grid {
+  grid-template-columns: 1fr;
+}
+
+.consulta-resultados {
+  overflow: hidden;
+}
+
+.consulta-resultados .table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow: auto;
+}
+
+.detalhe-corte {
+  width: 100%;
+  max-width: var(--container);
+  margin: 0 auto;
+}
+
+#dashboardCorte {
+  margin-top: 0;
+}
+
+/* ---------- Total da consulta ---------- */
+.total-consulta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -8px 0 16px;
+  color: var(--text-soft);
+  font-size: 14px;
+}
+
+.total-consulta strong {
+  color: var(--primary);
+  font-size: 18px;
+}
+
+.total-consulta {
+  width: fit-content;
+  padding: 8px 12px;
+  margin: -8px 0 16px;
+  background: var(--primary-soft);
+  border: 1px solid hsl(221 83% 53% / 0.18);
+  border-radius: var(--radius-sm);
+}
+
+.total-consulta strong {
+  font-size: 20px;
+}

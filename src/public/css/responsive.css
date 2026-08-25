@@ -1,0 +1,281 @@
+@media (max-width: 1000px) {
+  body {
+    padding: 18px;
+  }
+
+  .consulta-layout {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .dashboard-grid,
+  .info-grid-top {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.producao-grid {
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+}
+
+.corte-resumo-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+
+/* ---------- Celular ---------- */
+@media (max-width: 700px) {
+body {
+    padding: 8px;
+  }
+
+.app-header-modern {
+  align-items: stretch;
+}
+
+.corte-resumo-grid {
+  grid-template-columns: 1fr;
+}
+
+.corte-resumo-item {
+  min-height: 70px;
+  padding: 14px;
+}
+
+.producao-grid {
+  grid-template-columns: 1fr;
+}
+
+.producao-actions {
+  justify-content: stretch;
+}
+
+.producao-actions #salvarProducao {
+  width: 100%;
+}
+
+.header-main {
+  flex-direction: column;
+  text-align: center;
+}
+
+.header-actions {
+  width: 100%;
+  justify-content: center;
+}
+
+.header-btn,
+.sync-status {
+  flex: 1;
+  min-width: 110px;
+}
+
+.dashboard-top {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+  /* Header */
+  .app-header {
+    flex-direction: column;
+    gap: 12px;
+    margin: 0 0 14px;
+    padding: 18px;
+    text-align: center;
+    border-radius: var(--radius-lg);
+  }
+
+  .header-text {
+    align-items: center;
+  }
+
+  .app-header h1 {
+    text-align: center;
+    font-size: 24px;
+  }
+
+  .app-header p {
+    font-size: 13px;
+  }
+
+  .logo-box {
+    width: 70px;
+    height: 70px;
+  }
+
+  .app-logo {
+    width: 55px;
+    height: 55px;
+  }
+
+  /* Cards */
+  .section-card {
+    margin: 0 0 14px;
+    padding: 14px;
+    border-radius: var(--radius-md);
+  }
+
+  .section-card h2 {
+    padding-bottom: 10px;
+  }
+
+  .dados-corte {
+    border-left-width: 4px;
+  }
+
+  .info-summary-card,
+  .dashboard-card {
+    padding: 14px;
+  }
+
+  .info-summary-value,
+  .dashboard-card strong {
+    font-size: 22px;
+  }
+
+  /* Grids */
+  .form-grid,
+  .dados-corte,
+  .dashboard-grid,
+  .info-grid-top {
+    grid-template-columns: 1fr;
+  }
+
+  /* Formulários */
+  input,
+  select {
+    height: 46px;
+    font-size: 14px;
+  }
+
+  .campo-numero-corte {
+    grid-template-columns: 1fr;
+  }
+
+  /* Botões */
+  .button-row {
+    flex-direction: column;
+  }
+
+  button,
+  .link-button,
+  #buscarCorte,
+  #salvarProducao,
+  #salvarItemCorte,
+  #finalizarItensCorte {
+    width: 100%;
+    min-width: 0;
+  }
+
+  #salvarProducao {
+    min-width: 0;
+  }
+
+  .acoes-item {
+    flex-wrap: wrap;
+  }
+
+  /* Consulta */
+  .consulta-layout {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    width: 100%;
+  }
+
+  .consulta-filtros,
+  .consulta-resultados,
+  .detalhe-corte {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .total-consulta {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  /* Tabelas */
+  .table-wrap {
+    max-height: 280px;
+  }
+
+  table {
+    min-width: 720px;
+  }
+
+  .tabela-topo table {
+    min-width: 650px;
+  }
+
+  .tabela-consulta table {
+    min-width: 760px;
+  }
+
+  th,
+  td {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  /* Status */
+  .status-badge {
+    min-width: 100px;
+    font-size: 10px;
+  }
+
+  /* Toast */
+  .toast-container {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    width: auto;
+  }
+
+  .toast {
+    grid-template-columns: 34px minmax(0, 1fr) 28px;
+    padding: 12px;
+  }
+
+  .toast-icone {
+    width: 32px;
+    height: 32px;
+    font-size: 15px;
+  }
+}
+
+
+/* ---------- Celulares pequenos ---------- */
+@media (max-width: 420px) {
+  body {
+    padding: 6px;
+  }
+
+  .app-header {
+    padding: 14px;
+  }
+
+  .section-card {
+    padding: 12px;
+  }
+
+  .system-tag {
+    font-size: 10px;
+  }
+  .dashboard-top {
+    grid-template-columns: 1fr;
+    }
+}
+
+
+/* ---------- Acessibilidade ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}

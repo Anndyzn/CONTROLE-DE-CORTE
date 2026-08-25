@@ -1,0 +1,134 @@
+.table-wrap {
+  margin-top: 16px;
+  max-height: 300px;
+  overflow: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+}
+
+/* Scrollbar refinada */
+.table-wrap::-webkit-scrollbar { width: 10px; height: 10px; }
+.table-wrap::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--surface);
+}
+.table-wrap::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+table {
+  width: 100%;
+  min-width: 850px;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--surface);
+}
+
+thead th {
+  background: linear-gradient(180deg, var(--primary), var(--primary-deep));
+  color: #fff;
+  text-align: left;
+  padding: 14px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  position: sticky; top: 0; z-index: 2;
+}
+th:first-child { border-top-left-radius: var(--radius-md); }
+th:last-child  { border-top-right-radius: var(--radius-md); }
+
+td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  color: var(--text);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+tbody tr { transition: background var(--t-fast); }
+tbody tr:nth-child(even) td { background: var(--surface-2); }
+tbody tr:hover td { background: var(--primary-soft); }
+tbody tr:last-child td { border-bottom: none; }
+
+#cortesEmAndamento tr,
+#resultadoFiltros tr { cursor: pointer; }
+
+.tabela-topo {
+  max-height: 200px;
+}
+
+.tabela-topo table {
+  min-width: 650px;
+}
+
+.tabela-consulta {
+  width: 100%;
+  max-width: 100%;
+  max-height: 360px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabela-consulta table {
+  min-width: 760px;
+}
+
+.tabela-consulta th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  background: var(--primary-deep);
+}
+
+.tabela-consulta td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface);
+  font-weight: 700;
+}
+
+.tabela-consulta tbody tr:nth-child(even) td:first-child {
+  background: var(--surface-2);
+}
+
+.tabela-consulta tbody tr:hover td:first-child {
+  background: var(--primary-soft);
+}
+
+#resultadoFiltros tr:hover td,
+#cortesEmAndamento tr:hover td {
+  cursor: pointer;
+  background: hsl(214 100% 96%);
+}
+
+/* Colunas numéricas alinhadas */
+td {
+  vertical-align: middle;
+}
+
+/* Melhor aparência para tabela vazia */
+.table-wrap td[colspan] {
+  padding: 26px;
+  color: var(--text-muted);
+  text-align: center;
+  font-style: italic;
+}
+
+/* Scroll da tabela mais visível */
+.table-wrap::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+
+.table-wrap::-webkit-scrollbar-thumb {
+  background: hsl(215 18% 68%);
+}
+
+.table-wrap::-webkit-scrollbar-track {
+  background: var(--surface-3);
+}

@@ -11,17 +11,67 @@
 </head>
 <body>
   <div class="container">
-    <header class="app-header">
-      <div class="logo-box">
-        <img src="img/logo.png" alt="Logo Dimepor" class="app-logo">
+    <header class="app-header app-header-modern">
+      <div class="header-main">
+        <div class="logo-box">
+          <img src="img/logo.png" alt="Logo Dimepor" class="app-logo">
+        </div>
+
+        <div class="header-text">
+          <span class="system-tag">Sistema interno</span>
+          <h1>Controle de Cortes</h1>
+          <p>Gestão de cortes, turnos e produção</p>
+        </div>
       </div>
 
-      <div class="header-text">
-        <span class="system-tag">Sistema interno</span>
-        <h1>Controle de Cortes</h1>
-        <p>Gestão de cortes, turnos e produção</p>
+      <div class="header-actions">
+        <a href="consultar.html" class="header-btn header-btn-secondary">
+          Consultar
+        </a>
+
+        <a href="admin.html" class="header-btn header-btn-secondary">
+          Admin
+        </a>
+
+        <span class="sync-status" id="syncStatus">
+          <span class="sync-dot"></span>
+          Sincronizado
+        </span>
       </div>
     </header>
+
+    <section class="dashboard-top">
+      <div class="dashboard-top-card">
+        <span class="dashboard-top-label">Em andamento</span>
+        <strong id="resumoEmAndamento">0</strong>
+      </div>
+
+      <div class="dashboard-top-card">
+        <span class="dashboard-top-label">Último finalizado</span>
+        <strong id="resumoUltimoFinalizado">--</strong>
+      </div>
+
+      <div class="dashboard-top-card">
+        <span class="dashboard-top-label">
+          Último corte
+        </span>
+        <strong id="resumoUltimoCorte">--</strong>
+      </div>
+
+      <div class="dashboard-top-card dashboard-top-card-action">
+        <span class="dashboard-top-label">
+          Ação rápida
+        </span>
+
+        <button
+          type="button"
+          id="novoCorteTopo"
+          class="btn-novo-corte-topo"
+        >
+          + Novo corte
+        </button>
+      </div>
+    </section>
 
     <section class="section-card topo-andamento">
       <h2>Cortes em andamento</h2>
@@ -41,30 +91,6 @@
         </table>
       </div>
     </section>
-    <div class="info-grid-top"></div>
-  </div>
-
-    <div class="info-grid-top">
-      <div class="info-summary-card">
-        <span class="info-summary-label">Corte buscado</span>
-        <span class="info-summary-value" id="resumoNumeroCorte">--</span>
-      </div>
-
-      <div class="info-summary-card">
-        <span class="info-summary-label">Última folha</span>
-        <span class="info-summary-value" id="resumoUltimaFolha">0</span>
-      </div>
-
-      <div class="info-summary-card">
-        <span class="info-summary-label">Status atual</span>
-        <span class="info-summary-value" id="resumoStatus">--</span>
-      </div>
-
-      <div class="info-summary-card">
-        <span class="info-summary-label">Mesa</span>
-        <span class="info-summary-value" id="resumoMesa">--</span>
-      </div>
-    </div>
 
     <section class="section-card">
       <h2><span class="step-number">1</span> Buscar ou cadastrar corte</h2>
@@ -129,27 +155,66 @@
       </div>
     </section>
 
-    <section class="section-card">
-      <h2><span class="step-number">2</span> Corte selecionado</h2>
+    <section
+      class="section-card corte-selecionado-card"
+      id="corteSelecionado"
+    >
+      <h2>
+        <span class="step-number">2</span>
+        Corte selecionado
+      </h2>
+
       <p class="section-help">
-        Confira o produto, mesa, última folha e status antes de registrar a produção.
+        Confira os principais dados do corte antes de registrar a produção.
       </p>
 
-      <div class="dados-corte">
-        <div class="card-info"><strong>Produto:</strong>&nbsp;<span id="produto"></span></div>
-        <div class="card-info"><strong>Mesa:</strong>&nbsp;<span id="mesa"></span></div>
-        <div class="card-info"><strong>Última folha parou:</strong>&nbsp;<span id="folhaParou"></span></div>
-        <div class="card-info"><strong>Status atual:</strong>&nbsp;<span id="status"></span></div>
+      <div class="corte-resumo-grid">
+        <div class="corte-resumo-item corte-resumo-produto">
+          <span class="corte-resumo-label">Produto</span>
+          <strong class="corte-resumo-valor" id="produto">--</strong>
+        </div>
+
+        <div class="corte-resumo-item">
+          <span class="corte-resumo-label">Mesa</span>
+          <strong class="corte-resumo-valor" id="mesa">--</strong>
+        </div>
+
+        <div class="corte-resumo-item">
+          <span class="corte-resumo-label">Última folha</span>
+          <strong class="corte-resumo-valor" id="folhaParou">0</strong>
+        </div>
+
+        <div class="corte-resumo-item corte-resumo-status">
+          <span class="corte-resumo-label">Status</span>
+          <span id="status">--</span>
+        </div>
+
+        <div class="corte-resumo-item">
+          <span class="corte-resumo-label">
+            Corte
+          </span>
+
+          <strong
+            class="corte-resumo-valor"
+            id="numeroCorteSelecionado"
+          >
+            --
+          </strong>
+        </div>
       </div>
     </section>
-    
-    <section class="section-card">
-      <h2><span class="step-number">3</span> Registrar produção do turno</h2>
-      <p class="section-help">
-        Informe horário, turno e onde o corte parou. A folha início vem automática.
-      </p>
 
-      <div class="form-grid">
+    <section class="section-card producao-card">
+      <div class="section-title-row">
+        <div>
+          <h2><span class="step-number">3</span> Registrar produção do turno</h2>
+          <p class="section-help">
+            Informe turno, operador, horários e a folha onde o corte parou.
+          </p>
+        </div>
+      </div>
+
+      <div class="producao-grid">
         <div class="form-group">
           <label for="data">Data</label>
           <input type="date" id="data">
@@ -176,7 +241,12 @@
             <option value="ADILDE">ADILDE</option>
             <option value="OUTRO">OUTRO</option>
           </select>
-          <input type="text" id="operadorOutro" placeholder="Digite o operador" style="display:none; margin-top: 8px;">
+          <input
+            type="text"
+            id="operadorOutro"
+            placeholder="Digite o operador"
+            style="display: none; margin-top: 8px;"
+          >
         </div>
 
         <div class="form-group">
@@ -192,6 +262,7 @@
         <div class="form-group">
           <label for="folhaInicio">Folha início</label>
           <input type="number" id="folhaInicio" readonly>
+          <span class="small-help">Preenchida automaticamente pela última folha registrada.</span>
         </div>
 
         <div class="form-group">
@@ -206,12 +277,16 @@
             <option value="EM PRODUÇÃO">EM PRODUÇÃO</option>
             <option value="FINALIZADO">FINALIZADO</option>
           </select>
-          <span class="small-help">Ao marcar como "finalizado" liberará os campos para colocar os produtos que foram cortados .</span>
+          <span class="small-help">
+            Ao finalizar o corte, os campos para informar os PIs cortados serão liberados.
+          </span>
         </div>
       </div>
 
-      <div class="button-row">
-        <button id="salvarProducao">Salvar produção</button>
+      <div class="producao-actions">
+        <button type="button" id="salvarProducao" class="primary-action">
+          Salvar produção
+        </button>
       </div>
     </section>
 
@@ -341,11 +416,8 @@
       </div>
     </section>
 
-  <div class="button-row">
-    <a href="consultar.html" class="link-button">Consultar cortes</a>
+    <div id="toastContainer" class="toast-container"></div>
   </div>
-
-  <div id="toastContainer" class="toast-container"></div>
 
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

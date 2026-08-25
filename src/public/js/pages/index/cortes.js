@@ -10,7 +10,6 @@ import {
 } from "../../utils/formatters.js"
 
 import {
-  atualizarResumoTopo,
   renderizarStatus,
   limparTabelaHistorico,
   limparTabelaItens,
@@ -76,6 +75,10 @@ export async function buscarCorte(numeroCorte) {
     const ultimaFolha =
       dados.ultima_producao?.folha_parou ?? 0
 
+    document.getElementById(
+      "numeroCorteSelecionado"
+    ).textContent = numeroCorte
+
     document.getElementById("produto").textContent =
       maiusculo(dados.corte.produto)
 
@@ -89,13 +92,6 @@ export async function buscarCorte(numeroCorte) {
       ultimaFolha
 
     renderizarStatus(statusAtual)
-
-    atualizarResumoTopo({
-      numero: numeroCorte,
-      ultimaFolha: String(ultimaFolha),
-      status: statusAtual,
-      mesa: dados.corte.mesa
-    })
 
     await carregarHistorico(numeroCorte)
 
@@ -155,13 +151,6 @@ export function prepararNovoCorte(numeroCorte) {
 
   renderizarStatus("NOVO CORTE")
 
-  atualizarResumoTopo({
-    numero: numeroCorte,
-    ultimaFolha: "0",
-    status: "NOVO CORTE",
-    mesa: "--"
-  })
-
   limparTabelaHistorico()
   limparTabelaItens()
   limparCamposItens()
@@ -172,10 +161,206 @@ export function prepararNovoCorte(numeroCorte) {
   habilitarItens()
 }
 
+async function atualizarUltimosCortes() {
+  try {
+    const todosCortes =
+      await apiGet("/consultar-cortes")
+
+    console.log(
+      "Cortes para dashboard:",
+      todosCortes
+    )
+
+    if (
+      !Array.isArray(todosCortes) ||
+      todosCortes.length === 0
+    ) {
+      return
+    }
+
+    // ==============================
+    // ÚLTIMO CORTE
+    // ==============================
+
+    const numerosValidos =
+      todosCortes
+        .map((corte) =>
+          Number(corte.numero)
+        )
+        .filter((numero) =>
+          !Number.isNaN(numero)
+        )
+
+    if (numerosValidos.length > 0) {
+      const ultimoCorte =
+        Math.max(...numerosValidos)
+
+      const elemento =
+        document.getElementById(
+          "resumoUltimoCorte"
+        )
+
+      if (elemento) {
+        elemento.textContent =
+          ultimoCorte
+      }
+    }
+
+    // ==============================
+    // ÚLTIMO FINALIZADO
+    // ==============================
+
+    const finalizados =
+      todosCortes.filter((corte) => {
+        return (
+          String(corte.status ?? "")
+            .trim()
+            .toUpperCase() ===
+          "FINALIZADO"
+        )
+      })
+
+    if (finalizados.length > 0) {
+      const numerosFinalizados =
+        finalizados
+          .map((corte) =>
+            Number(corte.numero)
+          )
+          .filter((numero) =>
+            !Number.isNaN(numero)
+          )
+
+      if (numerosFinalizados.length > 0) {
+        const ultimoFinalizado =
+          Math.max(
+            ...numerosFinalizados
+          )
+
+        const elemento =
+          document.getElementById(
+            "resumoUltimoFinalizado"
+          )
+
+        if (elemento) {
+          elemento.textContent =
+            ultimoFinalizado
+        }
+      }
+    }
+
+  } catch (erro) {
+    // Se o dashboard der erro,
+    // NÃO interfere na tabela principal.
+    console.error(
+      "Erro ao carregar últimos cortes:",
+      erro
+    )
+  }
+}
+
+async function atualizarDashboardTopo(cortesEmAndamento) {
+  try {
+    // ==============================
+    // EM ANDAMENTO
+    // ==============================
+
+    const resumoEmAndamento =
+      document.getElementById("resumoEmAndamento")
+
+    if (resumoEmAndamento) {
+      resumoEmAndamento.textContent =
+        cortesEmAndamento.length
+    }
+
+
+    // ==============================
+    // TODOS OS CORTES
+    // ==============================
+
+    const todosCortes =
+      await apiGet("/consultar-cortes")
+
+
+    if (!todosCortes.length) {
+      return
+    }
+
+
+    // ==============================
+    // ÚLTIMO CORTE
+    // ==============================
+
+    const ultimoNumeroCorte =
+      Math.max(
+        ...todosCortes.map(
+          (corte) => Number(corte.numero)
+        )
+      )
+
+
+    const resumoUltimoCorte =
+      document.getElementById(
+        "resumoUltimoCorte"
+      )
+
+
+    if (resumoUltimoCorte) {
+      resumoUltimoCorte.textContent =
+        ultimoNumeroCorte
+    }
+
+
+    // ==============================
+    // ÚLTIMO FINALIZADO
+    // ==============================
+
+    const finalizados =
+      todosCortes.filter(
+        (corte) =>
+          String(corte.status)
+            .trim()
+            .toUpperCase() === "FINALIZADO"
+      )
+
+
+    const resumoUltimoFinalizado =
+      document.getElementById(
+        "resumoUltimoFinalizado"
+      )
+
+
+    if (finalizados.length === 0) {
+      if (resumoUltimoFinalizado) {
+        resumoUltimoFinalizado.textContent = "--"
+      }
+
+      return
+    }
+
+
+    const ultimoFinalizado =
+      Math.max(
+        ...finalizados.map(
+          (corte) => Number(corte.numero)
+        )
+      )
+
+
+    if (resumoUltimoFinalizado) {
+      resumoUltimoFinalizado.textContent =
+        ultimoFinalizado
+    }
+
+  } catch (erro) {
+    console.error(
+      "Erro ao atualizar resumo do dashboard:",
+      erro
+    )
+  }
+}
 
 export async function carregarCortesEmAndamento() {
   try {
-
     const cortes =
       await apiGet("/cortes-em-andamento")
 
@@ -184,46 +369,95 @@ export async function carregarCortesEmAndamento() {
 
     tabela.innerHTML = ""
 
-    cortes.forEach((corte) => {
+    // Atualiza somente a quantidade
+    const resumoEmAndamento =
+      document.getElementById("resumoEmAndamento")
 
-      const statusClasse =
-        corte.status === "FINALIZADO"
-          ? "status-badge status-finalizado"
-          : corte.status === "EM PRODUÇÃO"
-          ? "status-badge status-em-producao"
-          : "status-badge status-default"
+    if (resumoEmAndamento) {
+      resumoEmAndamento.textContent =
+        cortes.length
+    }
 
-      const linha =
-        document.createElement("tr")
-
-      linha.innerHTML = `
-        <td>${corte.numero}</td>
-        <td>${maiusculo(corte.produto)}</td>
-        <td>${maiusculo(corte.mesa)}</td>
-        <td>${corte.folha_parou}</td>
-
-        <td>
-          <span class="${statusClasse}">
-            ${corte.status}
-          </span>
-        </td>
+    if (cortes.length === 0) {
+      tabela.innerHTML = `
+        <tr>
+          <td colspan="5">
+            Nenhum corte em andamento
+          </td>
+        </tr>
       `
+    } else {
+      cortes.forEach((corte) => {
+        const statusClasse =
+          corte.status === "FINALIZADO"
+            ? "status-badge status-finalizado"
+            : corte.status === "EM PRODUÇÃO"
+            ? "status-badge status-em-producao"
+            : "status-badge status-default"
 
-      linha.style.cursor = "pointer"
+        const linha =
+          document.createElement("tr")
 
-      linha.addEventListener("click", async () => {
+        linha.innerHTML = `
+          <td>${corte.numero}</td>
+          <td>${maiusculo(corte.produto)}</td>
+          <td>${maiusculo(corte.mesa)}</td>
+          <td>${corte.folha_parou ?? 0}</td>
 
-        document.getElementById("numeroCorte").value =
-          corte.numero
+          <td>
+            <span class="${statusClasse}">
+              ${corte.status ?? "-"}
+            </span>
+          </td>
+        `
 
-        await buscarCorte(corte.numero)
+        linha.style.cursor = "pointer"
+
+        linha.addEventListener(
+          "click",
+          async () => {
+
+            // Remove seleção anterior
+            document
+              .querySelectorAll("#cortesEmAndamento tr")
+              .forEach((linhaTabela) => {
+                linhaTabela.classList.remove(
+                  "corte-selecionado"
+                )
+              })
+
+            // Destaca a linha clicada
+            linha.classList.add(
+              "corte-selecionado"
+            )
+
+            // Coloca o número na busca
+            document.getElementById(
+              "numeroCorte"
+            ).value = corte.numero
+
+            // Carrega o corte
+            await buscarCorte(corte.numero)
+
+            // Desce até o corte selecionado
+            document
+              .getElementById("corteSelecionado")
+              ?.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+              })
+          }
+        )
+
+        tabela.appendChild(linha)
       })
+    }
 
-      tabela.appendChild(linha)
-    })
+    // IMPORTANTE:
+    // atualiza os outros cards separadamente
+    atualizarUltimosCortes()
 
   } catch (erro) {
-
     console.error(
       "Erro ao carregar cortes em andamento:",
       erro
