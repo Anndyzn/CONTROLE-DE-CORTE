@@ -66,11 +66,10 @@ async function iniciarPagina() {
   // PRODUÇÃO
   // ========================================
 
-  inicializarProducao()
+inicializarProducao()
 
-  // A tela começa bloqueada
-  // até o usuário selecionar um corte válido.
-  desabilitarProducao()
+// Começa bloqueado até selecionar um corte
+desabilitarProducao("SEM_CORTE")
 
 
   // ========================================

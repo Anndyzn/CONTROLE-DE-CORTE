@@ -98,3 +98,75 @@ button:disabled {
   white-space: nowrap;
 }
 
+/* =========================================================
+   AÇÃO PRINCIPAL
+   ========================================================= */
+
+.primary-action,
+#salvarProducao {
+  min-width: 210px;
+  height: 44px;
+
+  padding: 0 22px;
+
+  color: #ffffff;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--primary),
+      var(--primary-deep)
+    );
+
+  border: 0;
+  border-radius: 10px;
+
+  box-shadow:
+    0 7px 16px
+    rgb(31 95 211 / 0.20);
+
+  font-size: 13px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    transform var(--t-fast),
+    box-shadow var(--t-fast),
+    filter var(--t-fast);
+}
+
+
+.primary-action:hover:not(:disabled),
+#salvarProducao:hover:not(:disabled) {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 10px 22px
+    rgb(31 95 211 / 0.26);
+
+  filter: brightness(1.03);
+}
+
+
+.primary-action:active:not(:disabled),
+#salvarProducao:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+
+/* Botão bloqueado */
+
+.primary-action:disabled,
+#salvarProducao:disabled {
+  color: #8b99aa;
+
+  background: #e9eef4;
+
+  box-shadow: none;
+
+  cursor: not-allowed;
+
+  transform: none;
+}
+

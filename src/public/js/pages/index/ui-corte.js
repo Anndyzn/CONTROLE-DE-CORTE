@@ -41,6 +41,34 @@ export function limparCamposItens() {
 }
 
 export function habilitarProducao() {
+
+  const campoData =
+    document.getElementById("data")
+
+  if (campoData && !campoData.value) {
+    const hoje = new Date()
+
+    const ano =
+      hoje.getFullYear()
+
+    const mes =
+      String(
+        hoje.getMonth() + 1
+      ).padStart(2, "0")
+
+    const dia =
+      String(
+        hoje.getDate()
+      ).padStart(2, "0")
+
+    campoData.value =
+      `${ano}-${mes}-${dia}`
+  }
+
+    document.getElementById(
+      "salvarProducao"
+    ).disabled = false
+
   document.getElementById("salvarProducao").disabled = false
   document.getElementById("data").disabled = false
   document.getElementById("turno").disabled = false
@@ -63,27 +91,88 @@ export function habilitarProducao() {
     ?.classList.remove("producao-bloqueada")
 }
 
-export function desabilitarProducao() {
-  document.getElementById("salvarProducao").disabled = true
-  document.getElementById("data").disabled = true
-  document.getElementById("turno").disabled = true
-  document.getElementById("operador").disabled = true
-  document.getElementById("operadorOutro").disabled = true
-  document.getElementById("horaInicio").disabled = true
-  document.getElementById("horaFim").disabled = true
-  document.getElementById("folhaParouInput").disabled = true
-  document.getElementById("statusProducao").disabled = true
+export function desabilitarProducao(
+  motivo = "SEM_CORTE"
+) {
+  document.getElementById(
+    "salvarProducao"
+  ).disabled = true
+
+  document.getElementById(
+    "data"
+  ).disabled = true
+
+  document.getElementById(
+    "turno"
+  ).disabled = true
+
+  document.getElementById(
+    "operador"
+  ).disabled = true
+
+  document.getElementById(
+    "operadorOutro"
+  ).disabled = true
+
+  document.getElementById(
+    "horaInicio"
+  ).disabled = true
+
+  document.getElementById(
+    "horaFim"
+  ).disabled = true
+
+  document.getElementById(
+    "folhaParouInput"
+  ).disabled = true
+
+  document.getElementById(
+    "statusProducao"
+  ).disabled = true
+
 
   const aviso =
-    document.getElementById("producaoAviso")
+    document.getElementById(
+      "producaoAviso"
+    )
+
 
   if (aviso) {
+
+    if (motivo === "FINALIZADO") {
+      aviso.innerHTML = `
+        <strong>✓ Corte finalizado</strong>
+        <br>
+        Novos lançamentos de produção estão bloqueados.
+      `
+    }
+
+    else if (motivo === "NOVO_CORTE") {
+      aviso.innerHTML = `
+        <strong>Novo corte ainda não cadastrado</strong>
+        <br>
+        Informe o produto e a mesa e conclua o cadastro para liberar a produção.
+      `
+    }
+
+    else {
+      aviso.innerHTML = `
+        Selecione um corte em andamento
+        ou busque pelo número para registrar a produção.
+      `
+    }
+
     aviso.style.display = "block"
   }
 
+
   document
-    .querySelector(".producao-card")
-    ?.classList.add("producao-bloqueada")
+    .querySelector(
+      ".producao-card"
+    )
+    ?.classList.add(
+      "producao-bloqueada"
+    )
 }
 
 export function habilitarItens() {

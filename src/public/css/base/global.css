@@ -15,33 +15,23 @@ body {
   margin: 0;
   padding: 24px;
 
-  width: 100%;
-  max-width: 100%;
-  min-height: 100vh;
-
-  overflow-x: hidden;
-
   font-family: var(--font-sans);
-  font-feature-settings: var(--font-feature);
-
   color: var(--text);
 
   background:
     radial-gradient(
-      1200px 600px at 50% -10%,
-      var(--bg-grad-1) 0%,
-      transparent 60%
+      circle at top left,
+      rgb(31 95 211 / 0.04),
+      transparent 32%
     ),
     linear-gradient(
       180deg,
-      var(--bg-grad-2) 0%,
-      var(--bg) 100%
+      #f8fafd 0%,
+      var(--bg) 45%,
+      #eef3f8 100%
     );
 
-  background-attachment: fixed;
-
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+  min-height: 100vh;
 }
 
 ::selection {

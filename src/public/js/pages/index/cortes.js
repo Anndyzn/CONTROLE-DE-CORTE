@@ -105,7 +105,9 @@ export async function buscarCorte(numeroCorte) {
       statusAtual === "FINALIZADO"
 
     if (producaoFinalizada) {
-      desabilitarProducao()
+      desabilitarProducao(
+        "FINALIZADO"
+      )
     } else {
       habilitarProducao()
     }
@@ -121,6 +123,40 @@ export async function buscarCorte(numeroCorte) {
     } else {
       blocoItensCorte.style.display = "none"
     }
+
+    setTimeout(() => {
+
+      if (producaoFinalizada) {
+
+        // Corte finalizado:
+        // leva direto para PIs / histórico
+        const destino =
+          document.getElementById(
+            "blocoItensCorte"
+          )
+
+        destino?.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        })
+
+      } else {
+
+        // Corte em produção:
+        // leva para o resumo do corte
+        const destino =
+          document.getElementById(
+            "corteSelecionado"
+          )
+
+        destino?.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        })
+
+      }
+
+    }, 100)
 
   } catch (erro) {
 
@@ -159,6 +195,9 @@ export function prepararNovoCorte(numeroCorte) {
 
   habilitarProducao()
   habilitarItens()
+  desabilitarProducao(
+    "NOVO_CORTE"
+  )
 }
 
 async function atualizarUltimosCortes() {
@@ -381,7 +420,7 @@ export async function carregarCortesEmAndamento() {
     if (cortes.length === 0) {
       tabela.innerHTML = `
         <tr>
-          <td colspan="5">
+          <td colspan="6">
             Nenhum corte em andamento
           </td>
         </tr>
@@ -400,54 +439,96 @@ export async function carregarCortesEmAndamento() {
 
         linha.innerHTML = `
           <td>${corte.numero}</td>
-          <td>${maiusculo(corte.produto)}</td>
-          <td>${maiusculo(corte.mesa)}</td>
-          <td>${corte.folha_parou ?? 0}</td>
+
+          <td>
+            ${maiusculo(corte.produto)}
+          </td>
+
+          <td>
+            ${maiusculo(corte.mesa)}
+          </td>
+
+          <td>
+            ${corte.folha_parou ?? 0}
+          </td>
 
           <td>
             <span class="${statusClasse}">
               ${corte.status ?? "-"}
             </span>
           </td>
+
+          <td>
+            <button
+              type="button"
+              class="btn-abrir-corte"
+            >
+              Abrir
+            </button>
+          </td>
         `
 
-        linha.style.cursor = "pointer"
+      linha.style.cursor = "pointer"
 
-        linha.addEventListener(
-          "click",
-          async () => {
 
-            // Remove seleção anterior
-            document
-              .querySelectorAll("#cortesEmAndamento tr")
-              .forEach((linhaTabela) => {
-                linhaTabela.classList.remove(
-                  "corte-selecionado"
-                )
-              })
+      const abrirCorte = async () => {
 
-            // Destaca a linha clicada
-            linha.classList.add(
-              "corte-selecionado"
+        // Remove destaque anterior
+        document
+          .querySelectorAll(
+            "#cortesEmAndamento tr"
+          )
+          .forEach((linhaTabela) => {
+            linhaTabela.classList.remove(
+              "corte-linha-selecionada"
             )
+          })
 
-            // Coloca o número na busca
-            document.getElementById(
-              "numeroCorte"
-            ).value = corte.numero
 
-            // Carrega o corte
-            await buscarCorte(corte.numero)
-
-            // Desce até o corte selecionado
-            document
-              .getElementById("corteSelecionado")
-              ?.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
-              })
-          }
+        // Destaca o corte atual
+        linha.classList.add(
+          "corte-linha-selecionada"
         )
+
+
+        // Preenche a busca
+        document.getElementById(
+          "numeroCorte"
+        ).value = corte.numero
+
+
+        // Carrega o corte
+        await buscarCorte(
+          corte.numero
+        )
+
+      }
+
+      // Clique em qualquer lugar da linha
+      linha.addEventListener(
+        "click",
+        abrirCorte
+      )
+
+      // Clique especificamente no botão Abrir
+      const botaoAbrir =
+        linha.querySelector(
+          ".btn-abrir-corte"
+        )
+
+      botaoAbrir.addEventListener(
+        "click",
+        async (evento) => {
+
+          // Evita disparar também
+          // o clique da linha
+          evento.stopPropagation()
+
+          await buscarCorte(
+            corte.numero
+          )
+        }
+      )
 
         tabela.appendChild(linha)
       })
@@ -501,6 +582,11 @@ export function inicializarCortes() {
   const botaoNovoCorte =
     document.getElementById("gerarProximoCorte")
 
+  const campoNumeroCorte =
+  document.getElementById(
+    "numeroCorte"
+  )
+
 
   // ========================================
   // BUSCAR CORTE
@@ -516,6 +602,25 @@ export function inicializarCortes() {
     }
   )
 
+  // Buscar também com ENTER
+  campoNumeroCorte.addEventListener(
+    "keydown",
+    async (evento) => {
+
+      if (evento.key !== "Enter") {
+        return
+      }
+
+      evento.preventDefault()
+
+      const numeroCorte =
+        campoNumeroCorte.value
+
+      await buscarCorte(
+        numeroCorte
+      )
+    }
+  )
 
   // ========================================
   // NOVO CORTE / PRÓXIMO NÚMERO
