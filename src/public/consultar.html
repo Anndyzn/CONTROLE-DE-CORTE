@@ -8,25 +8,58 @@
 </head>
 <body>
   <div class="container">
-    <header class="app-header">
+    <header class="app-header app-header-modern">
+
+    <div class="header-main">
+
       <div class="logo-box">
-        <img src="img/logo.png" alt="Logo Dimepor" class="app-logo">
+        <img
+          src="img/logo.png"
+          alt="Logo Dimepor"
+          class="app-logo"
+        >
       </div>
 
       <div class="header-text">
-        <span class="system-tag">Sistema interno</span>
-        <h1>Relatório de Cortes</h1>
-        <p>Consulta de cortes, histórico, produção e apontamentos</p>
-      </div>
-    </header>
+        <span class="system-tag">
+          Sistema interno
+        </span>
 
-    <div class="button-row">
-      <a href="index.html" class="link-button">Voltar para início</a>
+        <h1>
+          Relatório de Cortes
+        </h1>
+
+        <p>
+          Consulta, histórico e análise da produção
+        </p>
+      </div>
+
     </div>
 
+
+    <div class="header-actions">
+
+      <a
+        href="index.html"
+        class="header-btn header-btn-secondary"
+      >
+        Início
+      </a>
+
+      <span class="sync-status">
+        <span class="sync-dot"></span>
+        Consulta
+      </span>
+
+    </div>
+
+  </header>
+
     <div class="consulta-layout">
-      <section class="section-card consulta-filtros">
-        <h2>Filtros</h2>
+      <h2>Filtros</h2>
+        <p class="section-help">
+          Encontre cortes por número, produto, período ou status.
+        </p>
         <p class="section-help">
           Use os filtros para localizar cortes por número, período ou status.
         </p>
@@ -67,19 +100,27 @@
         </div>
 
         <div class="button-row">
-          <button id="buscarFiltros" class="btn-filtrar">Filtrar cortes</button>
+          <button id="buscarFiltros" class="btn-filtrar">Buscar</button>
         </div>
       </section>
 
       <section class="section-card consulta-resultados">
-        <h2>Resultado da consulta</h2>
-        <p class="section-help">
-          Clique em um corte para visualizar o resumo, histórico e itens lançados.
-        </p>
 
-        <div class="total-consulta">
-          Total encontrado:
-          <strong id="totalConsulta">0</strong>
+        <div class="consulta-resultados-header">
+
+          <div>
+            <h2>Resultados</h2>
+
+            <p class="section-help">
+              Selecione um corte para visualizar os detalhes.
+            </p>
+          </div>
+
+          <div class="consulta-total-badge">
+            <strong id="totalConsulta">0</strong>
+            <span>cortes encontrados</span>
+          </div>
+
         </div>
 
         <div class="table-wrap tabela-consulta">
@@ -94,13 +135,19 @@
                 <th>Status</th>
               </tr>
             </thead>
+
             <tbody id="resultadoFiltros"></tbody>
           </table>
         </div>
+
       </section>
     </div>
 
-    <div class="detalhe-corte">
+    <div
+      class="detalhe-corte"
+      id="detalheCorte"
+      style="display: none;"
+    >
       <section class="section-card" id="dashboardCorte" style="display: none;">
         <h2>Resumo do corte selecionado</h2>
         <p class="section-help">
