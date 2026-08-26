@@ -12,8 +12,16 @@ import {
 } from "./itens.js"
 
 import {
+  desabilitarProducao
+} from "./ui-corte.js"
+
+import {
   inicializarRealtime
 } from "../../core/realtime.js"
+
+import {
+  inicializarHistoricoUI
+} from "./historico.js"
 
 
 async function iniciarPagina() {
@@ -25,6 +33,8 @@ async function iniciarPagina() {
   // ========================================
   // CORTES
   // ========================================
+
+  
 
   inicializarCortes()
 
@@ -58,12 +68,18 @@ async function iniciarPagina() {
 
   inicializarProducao()
 
+  // A tela começa bloqueada
+  // até o usuário selecionar um corte válido.
+  desabilitarProducao()
+
 
   // ========================================
   // PIs
   // ========================================
 
   inicializarItens()
+
+  inicializarHistoricoUI()
 
 
   // ========================================

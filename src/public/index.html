@@ -92,50 +92,59 @@
       </div>
     </section>
 
-    <section class="section-card">
-      <h2><span class="step-number">1</span> Buscar ou cadastrar corte</h2>
-      <p class="section-help">
-        Digite o número do corte. Se ele não existir, cadastre o produto e a mesa.
-      </p>
-
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="numeroCorte">Número do corte</label>
-
-          <div class="campo-numero-corte">
-            <input
-              type="number"
-              id="numeroCorte"
-              placeholder="Digite o número do corte"
-            >
-
-            <button
-              type="button"
-              id="gerarProximoCorte"
-              class="btn-proximo-corte"
-            >
-              Novo corte
-            </button>
-          </div>
-
-          <span class="small-help">
-            Digite um número para buscar ou clique em "Próximo número" para sugerir o próximo corte da sequência.
-          </span>
-        </div>
-
-        <div class="form-group" style="justify-content: end;">
-          <label>&nbsp;</label>
-          <button id="buscarCorte">Buscar</button>
+    <section class="section-card busca-corte-card">
+      <div class="section-title-row">
+        <div>
+          <h2>Buscar corte</h2>
+          <p class="section-help">
+            Localize um corte pelo número ou inicie um novo.
+          </p>
         </div>
       </div>
 
-      <div id="novoCorte" style="display: none;">
+      <div class="busca-corte-bar">
+        <div class="form-group busca-corte-campo">
+          <label for="numeroCorte">Número do corte</label>
+
+          <input
+            type="number"
+            id="numeroCorte"
+            placeholder="Ex: 843"
+          >
+        </div>
+
+        <button
+          type="button"
+          id="buscarCorte"
+          class="btn-buscar-corte"
+        >
+          Buscar
+        </button>
+
+        <button
+          type="button"
+          id="gerarProximoCorte"
+          class="btn-proximo-corte"
+        >
+          + Novo corte
+        </button>
+      </div>
+
+      <div
+        id="novoCorte"
+        class="novo-corte-form"
+        style="display: none;"
+      >
         <h3>Novo corte</h3>
 
         <div class="form-grid">
           <div class="form-group">
             <label for="produtoNovo">Produto</label>
-            <input type="text" id="produtoNovo" placeholder="Digite o produto">
+            <input
+              type="text"
+              id="produtoNovo"
+              placeholder="Digite o produto"
+            >
           </div>
 
           <div class="form-group">
@@ -150,7 +159,9 @@
         </div>
 
         <div class="button-row">
-          <button id="cadastrarCorte">Cadastrar corte</button>
+          <button id="cadastrarCorte">
+            Cadastrar corte
+          </button>
         </div>
       </div>
     </section>
@@ -159,47 +170,46 @@
       class="section-card corte-selecionado-card"
       id="corteSelecionado"
     >
-      <h2>
-        <span class="step-number">2</span>
-        Corte selecionado
-      </h2>
+      <div class="section-title-row">
+        <div>
+          <h2>Corte selecionado</h2>
 
-      <p class="section-help">
-        Confira os principais dados do corte antes de registrar a produção.
-      </p>
-
-      <div class="corte-resumo-grid">
-        <div class="corte-resumo-item corte-resumo-produto">
-          <span class="corte-resumo-label">Produto</span>
-          <strong class="corte-resumo-valor" id="produto">--</strong>
+          <p class="section-help">
+            Confira o corte antes de registrar a produção.
+          </p>
         </div>
+      </div>
 
-        <div class="corte-resumo-item">
-          <span class="corte-resumo-label">Mesa</span>
-          <strong class="corte-resumo-valor" id="mesa">--</strong>
-        </div>
-
-        <div class="corte-resumo-item">
-          <span class="corte-resumo-label">Última folha</span>
-          <strong class="corte-resumo-valor" id="folhaParou">0</strong>
-        </div>
-
-        <div class="corte-resumo-item corte-resumo-status">
-          <span class="corte-resumo-label">Status</span>
-          <span id="status">--</span>
-        </div>
-
-        <div class="corte-resumo-item">
-          <span class="corte-resumo-label">
-            Corte
-          </span>
+      <div class="corte-selecionado-bar">
+        <div class="corte-principal">
+          <span class="corte-label">Corte</span>
 
           <strong
-            class="corte-resumo-valor"
+            class="corte-numero"
             id="numeroCorteSelecionado"
           >
             --
           </strong>
+        </div>
+
+        <div class="corte-produto">
+          <span class="corte-label">Produto</span>
+          <strong id="produto">--</strong>
+        </div>
+
+        <div class="corte-dado">
+          <span class="corte-label">Mesa</span>
+          <strong id="mesa">--</strong>
+        </div>
+
+        <div class="corte-dado">
+          <span class="corte-label">Última folha</span>
+          <strong id="folhaParou">0</strong>
+        </div>
+
+        <div class="corte-status">
+          <span class="corte-label">Status</span>
+          <div id="status">--</div>
         </div>
       </div>
     </section>
@@ -211,6 +221,13 @@
           <p class="section-help">
             Informe turno, operador, horários e a folha onde o corte parou.
           </p>
+
+        <div
+          class="producao-aviso"
+          id="producaoAviso"
+        >
+          Selecione um corte em andamento ou busque pelo número para registrar a produção.
+        </div>
         </div>
       </div>
 
@@ -290,13 +307,39 @@
       </div>
     </section>
 
-    <section class="section-card" id="blocoItensCorte" style="display: none;">
-      <h2><span class="step-number">4</span> Informar PIs cortados</h2>
+    <section
+      class="section-card"
+      id="blocoItensCorte"
+      style="display: none;"
+    >
+      <h2>PIs cortados</h2>
+
       <p class="section-help">
-        Preencha os materiais, cores, metragem e quantidade de peças produzidas.
+        Registre os produtos e materiais utilizados neste corte.
       </p>
 
-      <div class="form-grid">
+      <!-- Aparece quando os PIs já foram registrados -->
+      <div
+        id="itensFinalizadosAviso"
+        class="itens-finalizados-aviso"
+        style="display: none;"
+      >
+        <div>
+          <strong>✓ PIs registrados</strong>
+          <span>
+            Os itens deste corte já foram confirmados e estão bloqueados para alteração.
+          </span>
+        </div>
+
+        <small>
+          Para alterar algum item, reabra o corte pela tela Admin.
+        </small>
+      </div>
+
+      <!-- Formulário aparece somente enquanto os PIs podem ser alterados -->
+      <div id="formItensCorte">
+
+        <div class="form-grid">
         <div class="form-group">
           <label for="modeloItem">Produto Cortado</label>
           <input type="text" id="modeloItem" placeholder="Digite o Produto Cortado">
@@ -364,13 +407,26 @@
         </div>
       </div>
 
-      <input type="hidden" id="itemEditandoId">
-      <div class="button-row">
-        <button id="salvarItemCorte">Salvar item do corte</button>
-        <button id="finalizarItensCorte">Registrar itens do corte</button>
-      </div>
+          <input
+            type="hidden"
+            id="itemEditandoId"
+          >
 
-      <div class="table-wrap">
+          <div class="button-row">
+            <button id="salvarItemCorte">
+              Salvar item
+            </button>
+
+            <button id="finalizarItensCorte">
+              Confirmar PIs
+            </button>
+          </div>
+
+        </div>
+        <!-- fim de formItensCorte -->
+
+
+        <div class="table-wrap">
         <table>
           <thead>
             <tr>
@@ -390,30 +446,58 @@
       </div>
     </section>
 
-    <section class="section-card">
-      <h2><span class="step-number">5</span>Histórico de Produção</h2>
-      <p class="section-help">
-        Veja o histórico dos turnos.
-      </p>
+    <section class="section-card historico-card">
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Turno</th>
-              <th>Operador</th>
-              <th>Hora início</th>
-              <th>Hora Fim</th>
-              <th>Duração</th>
-              <th>Folha início</th>
-              <th>Folha parou</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="historicoCorte"></tbody>
-        </table>
+      <div class="historico-header">
+        <div>
+          <h2>Histórico de Produção</h2>
+
+          <p class="section-help">
+            Consulte os lançamentos registrados para este corte.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          id="alternarHistorico"
+          class="btn-historico"
+        >
+          Mostrar histórico
+        </button>
       </div>
+
+      <div
+        id="historicoVazio"
+        class="historico-vazio"
+      >
+        Nenhum lançamento registrado para este corte.
+      </div>
+
+      <div
+        id="conteudoHistorico"
+        style="display: none;"
+      >
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Turno</th>
+                <th>Operador</th>
+                <th>Hora início</th>
+                <th>Hora fim</th>
+                <th>Duração</th>
+                <th>Folha início</th>
+                <th>Folha parou</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+
+            <tbody id="historicoCorte"></tbody>
+          </table>
+        </div>
+      </div>
+
     </section>
 
     <div id="toastContainer" class="toast-container"></div>

@@ -46,8 +46,21 @@ export function habilitarProducao() {
   document.getElementById("turno").disabled = false
   document.getElementById("operador").disabled = false
   document.getElementById("operadorOutro").disabled = false
+  document.getElementById("horaInicio").disabled = false
+  document.getElementById("horaFim").disabled = false
   document.getElementById("folhaParouInput").disabled = false
   document.getElementById("statusProducao").disabled = false
+
+  const aviso =
+    document.getElementById("producaoAviso")
+
+  if (aviso) {
+    aviso.style.display = "none"
+  }
+
+  document
+    .querySelector(".producao-card")
+    ?.classList.remove("producao-bloqueada")
 }
 
 export function desabilitarProducao() {
@@ -56,16 +69,83 @@ export function desabilitarProducao() {
   document.getElementById("turno").disabled = true
   document.getElementById("operador").disabled = true
   document.getElementById("operadorOutro").disabled = true
+  document.getElementById("horaInicio").disabled = true
+  document.getElementById("horaFim").disabled = true
   document.getElementById("folhaParouInput").disabled = true
   document.getElementById("statusProducao").disabled = true
+
+  const aviso =
+    document.getElementById("producaoAviso")
+
+  if (aviso) {
+    aviso.style.display = "block"
+  }
+
+  document
+    .querySelector(".producao-card")
+    ?.classList.add("producao-bloqueada")
 }
 
 export function habilitarItens() {
-  document.getElementById("salvarItemCorte").disabled = false
-  document.getElementById("finalizarItensCorte").disabled = false
+  const botaoSalvar =
+    document.getElementById("salvarItemCorte")
+
+  const botaoFinalizar =
+    document.getElementById("finalizarItensCorte")
+
+  const formulario =
+    document.getElementById("formItensCorte")
+
+  const aviso =
+    document.getElementById("itensFinalizadosAviso")
+
+
+  if (botaoSalvar) {
+    botaoSalvar.disabled = false
+  }
+
+  if (botaoFinalizar) {
+    botaoFinalizar.disabled = false
+  }
+
+  if (formulario) {
+    formulario.style.display = "block"
+  }
+
+  if (aviso) {
+    aviso.style.display = "none"
+  }
 }
 
 export function desabilitarItens() {
-  document.getElementById("salvarItemCorte").disabled = true
-  document.getElementById("finalizarItensCorte").disabled = true
+  const botaoSalvar =
+    document.getElementById("salvarItemCorte")
+
+  const botaoFinalizar =
+    document.getElementById("finalizarItensCorte")
+
+  const formulario =
+    document.getElementById("formItensCorte")
+
+  const aviso =
+    document.getElementById("itensFinalizadosAviso")
+
+
+  if (botaoSalvar) {
+    botaoSalvar.disabled = true
+  }
+
+  if (botaoFinalizar) {
+    botaoFinalizar.disabled = true
+  }
+
+  // Esconde formulário e botões
+  if (formulario) {
+    formulario.style.display = "none"
+  }
+
+  // Mostra aviso de conclusão
+  if (aviso) {
+    aviso.style.display = "flex"
+  }
 }
