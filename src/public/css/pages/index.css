@@ -524,3 +524,137 @@
 
   text-align: center;
 }
+
+/* =========================================================
+   COMPACTAR TOPO PARA CABER MELHOR NA TELA
+   ========================================================= */
+
+.container {
+  max-width: 1180px;
+}
+
+/* Menos espaço geral entre os blocos */
+.app-header {
+  margin-bottom: 16px;
+  padding: 16px 20px;
+}
+
+.dashboard-top {
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.dashboard-top-card {
+  min-height: 86px;
+  padding: 14px 16px;
+}
+
+.dashboard-top-card strong {
+  font-size: 22px;
+}
+
+.section-card {
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.section-card h2 {
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  font-size: 18px;
+}
+
+/* Tabela de cortes em andamento mais compacta */
+.tabela-topo {
+  max-height: 210px;
+}
+
+.tabela-topo table {
+  min-width: 620px;
+}
+
+.tabela-topo th {
+  padding: 10px 12px;
+  font-size: 11px;
+}
+
+.tabela-topo td {
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+/* Buscar corte mais compacto */
+.busca-corte-card {
+  padding: 16px 18px 18px;
+}
+
+.busca-corte-card .section-help {
+  margin: 8px 0 14px;
+  font-size: 13px;
+}
+
+.busca-corte-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 130px 130px;
+  gap: 10px;
+  align-items: end;
+}
+
+.busca-corte-bar input {
+  height: 42px;
+}
+
+.busca-corte-bar #buscarCorte,
+.busca-corte-bar #gerarProximoCorte {
+  height: 42px;
+  min-width: 0;
+  padding: 0 14px;
+  font-size: 13px;
+}
+
+/* Header mais enxuto */
+.logo-box {
+  width: 72px;
+  height: 72px;
+}
+
+.app-logo {
+  width: 52px;
+  height: 52px;
+}
+
+.system-tag {
+  margin-bottom: 6px;
+  font-size: 10px;
+  padding: 4px 10px;
+}
+
+.app-header h1 {
+  font-size: 24px;
+  line-height: 1.1;
+}
+
+.app-header p {
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+/* Botões do topo */
+.header-btn,
+.sync-status {
+  height: 38px;
+  font-size: 12px;
+  min-width: 96px;
+}
+
+/* Cards mais baixos no topo */
+.dashboard-top-label {
+  font-size: 10px;
+  margin-bottom: 5px;
+}
+
+/* Bloco de cortes em andamento mais enxuto */
+.topo-andamento {
+  max-width: 860px;
+  margin: 0 auto 16px;
+}

@@ -8,56 +8,35 @@
    ========================================================= */
 
 @media (max-width: 1000px) {
-
   body {
-    padding: 18px;
+    padding: 14px;
   }
 
-
-  /* ---------- Consulta ---------- */
+  .dashboard-top {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
 
   .consulta-layout {
     grid-template-columns: 1fr;
     gap: 18px;
   }
 
-
-  /* ---------- Corte selecionado ---------- */
-
   .corte-selecionado-bar {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .corte-produto {
     grid-column: span 2;
   }
 
-
-  /* ---------- Produção ---------- */
-
   .producao-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
-
-  /* ---------- Cards ---------- */
-
-  .dashboard-grid,
-  .info-grid-top {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-  }
-
-
-  /* ---------- Resumo antigo / compatibilidade ---------- */
 
   .corte-resumo-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
 }
 
 
@@ -198,15 +177,10 @@
     grid-template-columns: 1fr;
   }
 
-
   .busca-corte-bar #buscarCorte,
-  .busca-corte-bar #gerarProximoCorte,
-  .btn-buscar-corte,
-  .btn-proximo-corte {
+  .busca-corte-bar #gerarProximoCorte {
     width: 100%;
-    min-width: 0;
   }
-
 
   .campo-numero-corte {
     grid-template-columns: 1fr;
