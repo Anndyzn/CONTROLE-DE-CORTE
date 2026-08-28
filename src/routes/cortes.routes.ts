@@ -304,4 +304,139 @@ router.post("/cortes/:numero/reabrir-itens", async (req, res) => {
   }
 })
 
+// ========================================
+// EXCLUIR CORTE COMPLETO
+// ========================================
+
+router.delete(
+  "/cortes/:numero",
+  async (req, res) => {
+
+    const { numero } = req.params
+
+    const client =
+      await dbPg.connect()
+
+    try {
+
+      await client.query("BEGIN")
+
+
+      // ========================================
+      // CONFIRMAR SE O CORTE EXISTE
+      // ========================================
+
+      const corte =
+        await client.query(
+          `
+          SELECT *
+          FROM cortes
+          WHERE numero = $1
+          `,
+          [numero]
+        )
+
+
+      if (corte.rows.length === 0) {
+
+        await client.query(
+          "ROLLBACK"
+        )
+
+        return res
+          .status(404)
+          .json({
+            erro:
+              "Corte não encontrado"
+          })
+      }
+
+
+      // ========================================
+      // EXCLUIR PIs
+      // ========================================
+
+      const itens =
+        await client.query(
+          `
+          DELETE FROM itens_corte
+          WHERE numero_corte = $1
+          RETURNING id
+          `,
+          [numero]
+        )
+
+
+      // ========================================
+      // EXCLUIR PRODUÇÕES
+      // ========================================
+
+      const producoes =
+        await client.query(
+          `
+          DELETE FROM producao
+          WHERE numero_corte = $1
+          RETURNING id
+          `,
+          [numero]
+        )
+
+
+      // ========================================
+      // EXCLUIR CORTE
+      // ========================================
+
+      await client.query(
+        `
+        DELETE FROM cortes
+        WHERE numero = $1
+        `,
+        [numero]
+      )
+
+
+      await client.query(
+        "COMMIT"
+      )
+
+
+      res.json({
+        mensagem:
+          `Corte ${numero} excluído com sucesso`,
+
+        itens_excluidos:
+          itens.rowCount,
+
+        producoes_excluidas:
+          producoes.rowCount
+      })
+
+
+    } catch (erro) {
+
+      await client.query(
+        "ROLLBACK"
+      )
+
+
+      console.error(
+        "Erro ao excluir corte:",
+        erro
+      )
+
+
+      res.status(500).json({
+        erro:
+          "Erro ao excluir corte"
+      })
+
+
+    } finally {
+
+      client.release()
+
+    }
+  }
+)
+
 export default router

@@ -590,3 +590,50 @@
 
   box-shadow: none;
 }
+
+/* =========================================================
+   EXCLUSÃO DO CORTE
+   ========================================================= */
+
+.admin-action-danger {
+  margin-top: 12px;
+
+  background:
+    rgb(200 60 60 / 0.05);
+
+  border-color:
+    rgb(200 60 60 / 0.18);
+}
+
+
+.admin-action-danger
+.admin-action-info strong {
+  color: var(--danger);
+}
+
+
+.btn-admin-danger {
+  min-width: 145px;
+
+  color: #ffffff;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--danger),
+      var(--danger-hover)
+    );
+
+  border: 0;
+
+  box-shadow:
+    0 6px 15px
+    rgb(200 60 60 / 0.18);
+}
+
+
+.btn-admin-danger:hover {
+  box-shadow:
+    0 9px 20px
+    rgb(200 60 60 / 0.26);
+}
