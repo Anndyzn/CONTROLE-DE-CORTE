@@ -1,0 +1,592 @@
+/* =========================================================
+   ADMIN
+   ========================================================= */
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.admin-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 38px;
+
+  padding: 0 16px;
+
+  color: var(--warning-text);
+  background: var(--warning-bg);
+
+  border: 1px solid
+    rgb(210 138 20 / 0.20);
+
+  border-radius: var(--radius-pill);
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   BUSCA
+   ========================================================= */
+
+.admin-busca {
+  max-width: 900px;
+
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.admin-section-header h2 {
+  margin-bottom: 6px;
+}
+
+.admin-busca-bar {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    150px;
+
+  gap: 12px;
+
+  align-items: end;
+}
+
+.admin-busca-bar .form-group {
+  margin: 0;
+}
+
+.admin-busca-bar input {
+  width: 100%;
+}
+
+.admin-btn-buscar {
+  width: 100%;
+  min-width: 0;
+
+  height: 44px;
+}
+
+
+/* =========================================================
+   DETALHES
+   ========================================================= */
+
+.admin-detalhes {
+  display: grid;
+
+  gap: 16px;
+
+  margin-top: 16px;
+}
+
+.admin-detalhes .section-card {
+  margin-bottom: 0;
+}
+
+
+/* =========================================================
+   AÇÕES DE CORREÇÃO
+   ========================================================= */
+
+.admin-acoes {
+  border-color:
+    rgb(210 138 20 / 0.25);
+}
+
+.admin-action-card {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 20px;
+
+  padding: 16px 18px;
+
+  background: var(--warning-bg);
+
+  border: 1px solid
+    rgb(210 138 20 / 0.22);
+
+  border-radius: var(--radius-md);
+}
+
+.admin-action-info {
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.admin-action-info strong {
+  color: var(--warning-text);
+
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.admin-action-info span {
+  color: var(--text-soft);
+
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.btn-admin-alerta {
+  min-width: 145px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #d28a14,
+      #a76508
+    );
+
+  box-shadow:
+    0 6px 15px
+    rgb(210 138 20 / 0.20);
+}
+
+.btn-admin-alerta:hover {
+  box-shadow:
+    0 9px 20px
+    rgb(210 138 20 / 0.28);
+}
+
+
+/* =========================================================
+   TABELAS ADMIN
+   ========================================================= */
+
+.admin-detalhes thead th {
+  background: var(--primary-deep);
+}
+
+.admin-detalhes .table-wrap {
+  max-height: 300px;
+}
+
+
+/* =========================================================
+   CELULAR
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  .admin-busca-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-btn-buscar {
+    width: 100%;
+  }
+
+  .admin-action-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-admin-alerta {
+    width: 100%;
+  }
+
+}
+
+/* =========================================================
+   EDIÇÃO DE PRODUÇÃO
+   ========================================================= */
+
+.admin-edicao {
+  margin-top: 18px;
+
+  padding: 18px;
+
+  background: var(--surface-2);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+
+.admin-edicao-header {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 16px;
+
+  margin-bottom: 18px;
+}
+
+
+.admin-edicao-header h3 {
+  margin: 0 0 4px;
+
+  color: var(--text);
+
+  font-size: 16px;
+  font-weight: 800;
+}
+
+
+.admin-edicao-header p {
+  margin: 0;
+
+  color: var(--text-muted);
+
+  font-size: 12px;
+}
+
+
+.admin-edicao-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 14px;
+}
+
+
+.admin-edicao-actions {
+  display: flex;
+
+  justify-content: flex-end;
+
+  margin-top: 18px;
+}
+
+
+.btn-editar-producao-admin {
+  min-width: 70px;
+  height: 30px;
+
+  padding: 0 10px;
+
+  color: var(--primary-deep);
+
+  background: var(--primary-soft);
+
+  border:
+    1px solid rgb(31 95 211 / 0.16);
+
+  box-shadow: none;
+
+  font-size: 11px;
+}
+
+
+.btn-admin-secundario {
+  min-width: 90px;
+
+  color: var(--text-soft);
+
+  background: var(--surface);
+
+  border: 1px solid var(--border-strong);
+
+  box-shadow: none;
+}
+
+
+@media (max-width: 900px) {
+
+  .admin-edicao-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+@media (max-width: 700px) {
+
+  .admin-edicao-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-edicao-header {
+    flex-direction: column;
+  }
+
+  .admin-edicao-actions {
+    justify-content: stretch;
+  }
+
+  #salvarEdicaoProducao {
+    width: 100%;
+  }
+
+}
+
+/* =========================================================
+   CORTE SELECIONADO - ADMIN
+   ========================================================= */
+
+.admin-corte-selecionado {
+  padding: 20px;
+}
+
+.admin-corte-grid {
+  display: grid;
+
+  grid-template-columns:
+    120px
+    minmax(260px, 2fr)
+    140px
+    170px;
+
+  gap: 12px;
+
+  width: 100%;
+}
+
+
+/* Cada informação do corte */
+
+.admin-corte-item {
+  min-width: 0;
+  min-height: 76px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  gap: 6px;
+
+  padding: 14px 16px;
+
+  background: var(--surface-2);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  box-shadow: var(--shadow-xs);
+}
+
+
+/* Labels */
+
+.admin-corte-item > span {
+  color: var(--text-muted);
+
+  font-size: 10px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+
+/* Valores */
+
+.admin-corte-item strong {
+  color: var(--text);
+
+  font-size: 16px;
+  font-weight: 800;
+
+  line-height: 1.25;
+}
+
+
+/* Número do corte */
+
+#adminCorteNumero {
+  color: var(--primary-deep);
+
+  font-size: 24px;
+}
+
+
+/* Produto pode ser grande */
+
+.admin-corte-produto strong {
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* Status */
+
+#adminCorteStatus {
+  min-height: 28px;
+
+  display: flex;
+  align-items: center;
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .admin-corte-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-corte-produto {
+    grid-column: span 2;
+  }
+
+}
+
+
+/* =========================================================
+   CELULAR
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  .admin-corte-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-corte-produto {
+    grid-column: auto;
+  }
+
+}
+
+/* =========================================================
+   AÇÕES DA TABELA DE PRODUÇÃO
+   ========================================================= */
+
+.admin-acoes-tabela {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+
+.btn-editar-producao-admin,
+.btn-excluir-producao-admin {
+  min-width: 66px;
+
+  height: 30px;
+
+  padding: 0 10px;
+
+  border-radius: 8px;
+
+  box-shadow: none;
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+
+/* Editar */
+
+.btn-editar-producao-admin {
+  color: var(--primary-deep);
+
+  background: var(--primary-soft);
+
+  border:
+    1px solid
+    rgb(31 95 211 / 0.18);
+}
+
+
+.btn-editar-producao-admin:hover {
+  color: #ffffff;
+
+  background: var(--primary);
+
+  box-shadow: none;
+}
+
+
+/* Excluir */
+
+.btn-excluir-producao-admin {
+  color: var(--danger);
+
+  background:
+    rgb(200 60 60 / 0.07);
+
+  border:
+    1px solid
+    rgb(200 60 60 / 0.18);
+}
+
+
+.btn-excluir-producao-admin:hover {
+  color: #ffffff;
+
+  background: var(--danger);
+
+  box-shadow: none;
+}
+
+/* =========================================================
+   AÇÕES DOS PIs
+   ========================================================= */
+
+.btn-editar-item-admin,
+.btn-excluir-item-admin {
+  min-width: 66px;
+  height: 30px;
+
+  padding: 0 10px;
+
+  border-radius: 8px;
+
+  box-shadow: none;
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+
+.btn-editar-item-admin {
+  color: var(--primary-deep);
+
+  background: var(--primary-soft);
+
+  border:
+    1px solid
+    rgb(31 95 211 / 0.18);
+}
+
+
+.btn-editar-item-admin:hover {
+  color: #ffffff;
+
+  background: var(--primary);
+
+  box-shadow: none;
+}
+
+
+.btn-excluir-item-admin {
+  color: var(--danger);
+
+  background:
+    rgb(200 60 60 / 0.07);
+
+  border:
+    1px solid
+    rgb(200 60 60 / 0.18);
+}
+
+
+.btn-excluir-item-admin:hover {
+  color: #ffffff;
+
+  background: var(--danger);
+
+  box-shadow: none;
+}

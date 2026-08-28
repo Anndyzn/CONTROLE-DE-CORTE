@@ -394,3 +394,132 @@ td:first-child {
 
   overflow: auto;
 }
+
+/* =========================================================
+   CONSULTA MAIS COMPACTA
+   ========================================================= */
+
+.consulta-layout {
+  width: 100%;
+  max-width: 1080px;
+
+  margin: 0 auto 18px;
+
+  display: grid;
+  grid-template-columns: 1fr;
+
+  gap: 16px;
+}
+
+
+/* =========================================================
+   FILTROS
+   ========================================================= */
+
+.consulta-filtros {
+  padding: 20px 22px;
+
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow-sm);
+}
+
+
+.consulta-filtros h2 {
+  margin-bottom: 6px;
+}
+
+
+.consulta-filtros .section-help {
+  margin: 0 0 18px;
+
+  font-size: 13px;
+}
+
+
+/* Grid dos campos */
+
+.consulta-filtros .form-grid {
+  display: grid;
+
+  grid-template-columns:
+    0.9fr
+    1.2fr
+    1fr;
+
+  gap: 14px 16px;
+
+  margin-bottom: 16px;
+}
+
+
+/* Número */
+.consulta-filtros
+.form-group:nth-child(1) {
+  grid-column: 1;
+}
+
+
+/* Produto ocupa mais espaço */
+.consulta-filtros
+.form-group:nth-child(2) {
+  grid-column: 2 / 4;
+}
+
+
+/* Data inicial */
+.consulta-filtros
+.form-group:nth-child(3) {
+  grid-column: 1;
+}
+
+
+/* Data final */
+.consulta-filtros
+.form-group:nth-child(4) {
+  grid-column: 2;
+}
+
+
+/* Status */
+.consulta-filtros
+.form-group:nth-child(5) {
+  grid-column: 3;
+}
+
+
+/* Botão */
+
+.consulta-filtros .button-row {
+  display: flex;
+  justify-content: flex-end;
+
+  margin: 0;
+}
+
+
+.consulta-filtros .btn-filtrar {
+  width: 150px;
+  min-width: 150px;
+
+  height: 42px;
+}
+
+.consulta-filtros input,
+.consulta-filtros select {
+  height: 42px;
+
+  font-size: 13px;
+}
+
+.consulta-resultados {
+  width: 100%;
+  max-width: 1080px;
+
+  margin: 0 auto;
+
+  padding: 20px 22px;
+}

@@ -59,6 +59,35 @@
     grid-template-columns: 1fr;
   }
 
+
+  .consulta-filtros
+  .form-group:nth-child(1),
+  .consulta-filtros
+  .form-group:nth-child(2),
+  .consulta-filtros
+  .form-group:nth-child(3),
+  .consulta-filtros
+  .form-group:nth-child(4),
+  .consulta-filtros
+  .form-group:nth-child(5) {
+    grid-column: auto;
+  }
+
+
+  .consulta-filtros .button-row {
+    justify-content: stretch;
+  }
+
+
+  .consulta-filtros .btn-filtrar {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .consulta-filtros .form-grid {
+    grid-template-columns: 1fr;
+  }
+
   .consulta-filtros .button-row {
     justify-content: stretch;
   }

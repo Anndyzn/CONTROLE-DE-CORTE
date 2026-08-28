@@ -1,81 +1,669 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin - Correções</title>
-  <link rel="stylesheet" href="css/style.css">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Admin - Correções de Cortes</title>
+
+  <!-- CSS PRINCIPAL DO SISTEMA -->
+  <link
+    rel="stylesheet"
+    href="css/style.css"
+  >
 </head>
+
+
 <body>
+
   <div class="container">
-    <h1>Admin - Correções</h1>
 
-    <section class="section-card">
-      <h2>Buscar corte</h2>
+    <!-- ========================================
+         HEADER
+         ======================================== -->
 
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="numeroCorteAdmin">Número do corte</label>
-          <input type="number" id="numeroCorteAdmin" placeholder="Digite o número do corte">
+    <header class="app-header app-header-modern">
+
+      <div class="header-main">
+
+        <div class="logo-box">
+
+          <img
+            src="img/logo.png"
+            alt="Logo Dimepor"
+            class="app-logo"
+          >
+
         </div>
+
+
+        <div class="header-text">
+
+          <span class="system-tag">
+            Área administrativa
+          </span>
+
+          <h1>
+            Correções de Cortes
+          </h1>
+
+          <p>
+            Consulte e corrija lançamentos registrados no sistema
+          </p>
+
+        </div>
+
       </div>
 
-      <div class="button-row">
-        <button id="buscarCorteAdmin">Buscar corte</button>
-        <button id="reabrirItensCorte">Reabrir itens do corte</button>
-        <a href="index.html" class="link-button">Voltar para início</a>
+
+      <div class="header-actions">
+
+        <a
+          href="index.html"
+          class="header-btn header-btn-secondary"
+        >
+          Início
+        </a>
+
+        <span class="admin-status">
+          Admin
+        </span>
+
       </div>
+
+    </header>
+
+
+    <!-- ========================================
+         BUSCAR CORTE
+         ======================================== -->
+
+    <section class="section-card admin-busca">
+
+      <div class="admin-section-header">
+
+        <div>
+
+          <h2>
+            Buscar corte
+          </h2>
+
+          <p class="section-help">
+            Digite o número do corte que precisa ser corrigido.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="admin-busca-bar">
+
+        <div class="form-group">
+
+          <label for="numeroCorteAdmin">
+            Número do corte
+          </label>
+
+          <input
+            type="number"
+            id="numeroCorteAdmin"
+            placeholder="Ex: 843"
+          >
+
+        </div>
+
+
+        <button
+          id="buscarCorteAdmin"
+          class="admin-btn-buscar"
+        >
+          Buscar
+        </button>
+
+      </div>
+
     </section>
 
-    <section class="section-card">
-      <h2>Histórico do corte</h2>
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Turno</th>
-              <th>Operador</th>
-              <th>Hora início</th>
-              <th>Hora fim</th>
-              <th>Folha início</th>
-              <th>Folha parou</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="historicoAdmin"></tbody>
-        </table>
-      </div>
-    </section>
+    <!-- ========================================
+         CONTEÚDO DO CORTE
+         ======================================== -->
 
-    <section class="section-card">
-      <h2>Itens do corte</h2>
+    <div
+      id="adminDetalhes"
+      class="admin-detalhes"
+      style="display: none;"
+    >
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Modelo</th>
-              <th>Cor</th>
-              <th>Tecido</th>
-              <th>Metragem</th>
-              <th>Sobra</th>
-              <th>Perda</th>
-              <th>Quantidade</th>
-            </tr>
-          </thead>
-          <tbody id="itensAdmin"></tbody>
-        </table>
-      </div>
-    </section>
+      <!-- ======================================
+           AÇÕES ADMINISTRATIVAS
+           ====================================== -->
+
+
+      <!-- ======================================
+     CORTE SELECIONADO
+     ====================================== -->
+
+      <section class="section-card admin-corte-selecionado">
+
+        <div class="admin-section-header">
+          <div>
+            <h2>Corte selecionado</h2>
+
+            <p class="section-help">
+              Confira os dados antes de realizar uma correção.
+            </p>
+          </div>
+        </div>
+
+
+        <div class="admin-corte-grid">
+
+          <div class="admin-corte-item">
+            <span>Número</span>
+
+            <strong id="adminCorteNumero">
+              --
+            </strong>
+          </div>
+
+
+          <div class="admin-corte-item admin-corte-produto">
+            <span>Produto</span>
+
+            <strong id="adminCorteProduto">
+              --
+            </strong>
+          </div>
+
+
+          <div class="admin-corte-item">
+            <span>Mesa</span>
+
+            <strong id="adminCorteMesa">
+              --
+            </strong>
+          </div>
+
+
+          <div class="admin-corte-item">
+            <span>Status</span>
+
+            <div id="adminCorteStatus">
+              --
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <section class="section-card admin-acoes">
+
+        <div class="admin-section-header">
+
+          <div>
+
+            <h2>
+              Ações de correção
+            </h2>
+
+            <p class="section-help">
+              Utilize estas ações somente quando for necessário
+              corrigir um lançamento.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="admin-action-card">
+
+          <div class="admin-action-info">
+
+            <strong>
+              Reabrir PIs do corte
+            </strong>
+
+            <span>
+              Libera novamente os itens para edição e novos lançamentos.
+            </span>
+
+          </div>
+
+
+          <button
+            id="reabrirItensCorte"
+            class="btn-admin-alerta"
+          >
+            Reabrir PIs
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <!-- ======================================
+           HISTÓRICO
+           ====================================== -->
+
+      <section class="section-card">
+
+        <h2>
+          Histórico de produção
+        </h2>
+
+        <p class="section-help">
+          Lançamentos registrados para este corte.
+        </p>
+
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Turno</th>
+                <th>Operador</th>
+                <th>Hora início</th>
+                <th>Hora fim</th>
+                <th>Folha início</th>
+                <th>Folha parou</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+
+            <tbody id="historicoAdmin"></tbody>
+
+          </table>
+
+        </div>
+
+        <!-- ======================================
+     EDITAR PRODUÇÃO
+     ====================================== -->
+
+        <div
+          id="editarProducaoAdmin"
+          class="admin-edicao"
+          style="display: none;"
+        >
+
+          <div class="admin-edicao-header">
+
+            <div>
+              <h3>Editar lançamento</h3>
+
+              <p>
+                Corrija somente as informações necessárias.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              id="cancelarEdicaoProducao"
+              class="btn-admin-secundario"
+            >
+              Cancelar
+            </button>
+
+          </div>
+
+
+          <input
+            type="hidden"
+            id="producaoEditandoId"
+          >
+
+
+          <div class="admin-edicao-grid">
+
+            <div class="form-group">
+              <label for="editarData">
+                Data
+              </label>
+
+              <input
+                type="date"
+                id="editarData"
+              >
+            </div>
+
+
+            <div class="form-group">
+              <label for="editarTurno">
+                Turno
+              </label>
+
+              <select id="editarTurno">
+                <option value="">Selecione</option>
+                <option value="1º TURNO">1º TURNO</option>
+                <option value="2º TURNO">2º TURNO</option>
+              </select>
+            </div>
+
+
+            <div class="form-group">
+              <label for="editarOperador">
+                Operador
+              </label>
+
+              <input
+                type="text"
+                id="editarOperador"
+              >
+            </div>
+
+
+            <div class="form-group">
+              <label for="editarHoraInicio">
+                Hora início
+              </label>
+
+              <input
+                type="time"
+                id="editarHoraInicio"
+              >
+            </div>
+
+
+            <div class="form-group">
+              <label for="editarHoraFim">
+                Hora fim
+              </label>
+
+              <input
+                type="time"
+                id="editarHoraFim"
+              >
+            </div>
+
+
+            <div class="form-group">
+              <label for="editarFolhaInicio">
+                Folha início
+              </label>
+
+              <input
+                type="number"
+                id="editarFolhaInicio"
+              >
+            </div>
+
+
+            <div class="form-group">
+              <label for="editarFolhaParou">
+                Folha parou
+              </label>
+
+              <input
+                type="number"
+                id="editarFolhaParou"
+              >
+            </div>
+
+
+            <div class="form-group">
+              <label for="editarStatus">
+                Status
+              </label>
+
+              <select id="editarStatus">
+                <option value="EM PRODUÇÃO">
+                  EM PRODUÇÃO
+                </option>
+
+                <option value="FINALIZADO">
+                  FINALIZADO
+                </option>
+              </select>
+            </div>
+
+          </div>
+
+
+          <div class="admin-edicao-actions">
+
+            <button
+              type="button"
+              id="salvarEdicaoProducao"
+            >
+              Salvar alteração
+            </button>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================
+           PIs
+           ====================================== -->
+
+      <section class="section-card">
+
+        <h2>
+          PIs do corte
+        </h2>
+
+        <p class="section-help">
+          Produtos e materiais registrados neste corte.
+        </p>
+
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Modelo</th>
+                <th>Cor</th>
+                <th>Tecido</th>
+                <th>Metragem</th>
+                <th>Sobra</th>
+                <th>Perda</th>
+                <th>Quantidade</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+
+            <tbody id="itensAdmin"></tbody>
+
+          </table>
+
+        </div>
+
+        <!-- ======================================
+     EDITAR PI
+     ====================================== -->
+
+        <div
+          id="editarItemAdmin"
+          class="admin-edicao"
+          style="display: none;"
+        >
+
+          <div class="admin-edicao-header">
+
+            <div>
+              <h3>Editar PI</h3>
+
+              <p>
+                Corrija somente os dados necessários.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              id="cancelarEdicaoItemAdmin"
+              class="btn-admin-secundario"
+            >
+              Cancelar
+            </button>
+
+          </div>
+
+
+          <input
+            type="hidden"
+            id="itemAdminEditandoId"
+          >
+
+
+          <div class="admin-edicao-grid">
+
+            <div class="form-group">
+              <label for="editarItemModeloAdmin">
+                Modelo
+              </label>
+
+              <input
+                type="text"
+                id="editarItemModeloAdmin"
+              >
+            </div>
+
+
+            <div class="form-group">
+              <label for="editarItemCorAdmin">
+                Cor
+              </label>
+
+              <input
+                type="text"
+                id="editarItemCorAdmin"
+              >
+            </div>
+
+
+            <div class="form-group">
+              <label for="editarItemTecidoAdmin">
+                Tecido
+              </label>
+
+              <input
+                type="text"
+                id="editarItemTecidoAdmin"
+              >
+            </div>
+
+
+            <div class="form-group">
+              <label for="editarItemMetragemAdmin">
+                Metragem
+              </label>
+
+              <input
+                type="number"
+                step="0.01"
+                id="editarItemMetragemAdmin"
+              >
+            </div>
+
+
+            <div class="form-group">
+              <label for="editarItemSobraAdmin">
+                Sobra
+              </label>
+
+              <input
+                type="number"
+                step="0.01"
+                id="editarItemSobraAdmin"
+              >
+            </div>
+
+
+            <div class="form-group">
+              <label for="editarItemPerdaAdmin">
+                Perda
+              </label>
+
+              <input
+                type="number"
+                step="0.01"
+                id="editarItemPerdaAdmin"
+              >
+            </div>
+
+
+            <div class="form-group">
+              <label for="editarItemFaltantesAdmin">
+                Metros faltantes
+              </label>
+
+              <input
+                type="number"
+                step="0.01"
+                id="editarItemFaltantesAdmin"
+              >
+            </div>
+
+
+            <div class="form-group">
+              <label for="editarItemQuantidadeAdmin">
+                Quantidade
+              </label>
+
+              <input
+                type="number"
+                id="editarItemQuantidadeAdmin"
+              >
+            </div>
+
+          </div>
+
+
+          <div class="admin-edicao-actions">
+
+            <button
+              type="button"
+              id="salvarEdicaoItemAdmin"
+            >
+              Salvar alteração
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
   </div>
 
-  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- ========================================
+       TOAST
+       ======================================== -->
+
+  <div
+    id="toastContainer"
+    class="toast-container"
+  ></div>
+
+
+  <!-- ========================================
+       JAVASCRIPT
+       ======================================== -->
 
   <script
     type="module"
     src="js/admin/main.js"
   ></script>
+
 </body>
+
 </html>
