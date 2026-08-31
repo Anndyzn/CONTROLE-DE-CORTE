@@ -361,7 +361,9 @@ export async function carregarResultadosConsulta() {
   // ========================================
 
   const resultadosExibidos =
-    resultados.slice(0, 20)
+    produto
+      ? resultados
+      : resultados.slice(0, 20)
 
 
   // ========================================

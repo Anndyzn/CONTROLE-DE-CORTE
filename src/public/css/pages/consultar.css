@@ -1,87 +1,22 @@
-.consulta-layout {
-  display: grid;
-  grid-template-columns: 1fr;
-
-  gap: 16px;
-
-  width: 100%;
-  margin-bottom: 16px;
-}
-
-.consulta-filtros,
-.consulta-resultados {
-  width: 100%;
-  min-width: 0;
-  margin: 0;
-}
-
-.consulta-filtros .form-grid {
-  grid-template-columns: 1fr;
-}
-
-.consulta-resultados {
-  overflow: hidden;
-}
-
-.consulta-resultados .table-wrap {
-  width: 100%;
-  max-width: 100%;
-  overflow: auto;
-}
-
-.detalhe-corte {
-  width: 100%;
-  max-width: var(--container);
-  margin: 0 auto;
-}
-
-#dashboardCorte {
-  margin-top: 0;
-}
-
-/* ---------- Total da consulta ---------- */
-.total-consulta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: -8px 0 16px;
-  color: var(--text-soft);
-  font-size: 14px;
-}
-
-.total-consulta strong {
-  color: var(--primary);
-  font-size: 18px;
-}
-
-.total-consulta {
-  width: fit-content;
-  padding: 8px 12px;
-  margin: -8px 0 16px;
-  background: var(--primary-soft);
-  border: 1px solid hsl(221 83% 53% / 0.18);
-  border-radius: var(--radius-sm);
-}
-
-.total-consulta strong {
-  font-size: 20px;
-}
-
 /* =========================================================
-   CONSULTAR - VISUAL MODERNO
+   CONSULTAR
    ========================================================= */
 
 
-/* Header utiliza o mesmo padrão da página principal */
+/* =========================================================
+   LAYOUT PRINCIPAL
+   ========================================================= */
 
 .consulta-layout {
+  width: 100%;
+  max-width: 1080px;
+
   display: grid;
   grid-template-columns: 1fr;
 
   gap: 16px;
 
-  width: 100%;
-  margin-bottom: 16px;
+  margin: 0 auto 18px;
 }
 
 
@@ -90,28 +25,132 @@
    ========================================================= */
 
 .consulta-filtros {
-  padding: 18px;
+  width: 100%;
+  min-width: 0;
+
+  padding: 18px 20px;
+
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow-sm);
 }
+
+
+.consulta-filtros h2 {
+  margin: 0 0 4px;
+}
+
+
+.consulta-filtros .section-help {
+  margin: 0 0 14px;
+
+  color: var(--text-soft);
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   GRID DOS FILTROS
+   ========================================================= */
 
 .consulta-filtros .form-grid {
   display: grid;
 
   grid-template-columns:
-    repeat(3, minmax(0, 1fr));
+    0.8fr
+    1.4fr
+    0.9fr;
 
-  gap: 14px;
+  gap: 12px 14px;
 
-  margin-bottom: 14px;
+  margin: 0;
 }
 
-.consulta-filtros .button-row {
-  margin-bottom: 0;
+
+/* Número */
+
+.consulta-filtros
+.form-group:nth-child(1) {
+  grid-column: 1;
+  grid-row: 1;
 }
+
+
+/* Produto */
+
+.consulta-filtros
+.form-group:nth-child(2) {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+
+/* Data inicial */
+
+.consulta-filtros
+.form-group:nth-child(3) {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+
+/* Data final */
+
+.consulta-filtros
+.form-group:nth-child(4) {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+
+/* Status */
+
+.consulta-filtros
+.form-group:nth-child(5) {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+
+/* Botão Buscar */
+
+.consulta-filtros .filtro-acao {
+  grid-column: 3;
+  grid-row: 2;
+
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+
+
+/* =========================================================
+   CAMPOS
+   ========================================================= */
+
+.consulta-filtros input,
+.consulta-filtros select {
+  width: 100%;
+  height: 40px;
+
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   BOTÃO BUSCAR
+   ========================================================= */
 
 .consulta-filtros .btn-filtrar {
-  width: 100%;
+  width: 150px;
+  min-width: 150px;
+  height: 40px;
 
-  min-width: 0;
+  margin: 0;
 
   background:
     linear-gradient(
@@ -127,10 +166,21 @@
    ========================================================= */
 
 .consulta-resultados {
+  width: 100%;
+  max-width: 1080px;
   min-width: 0;
 
-  padding: 18px;
+  margin: 0 auto;
+
+  padding: 18px 20px;
+
+  overflow: hidden;
 }
+
+
+/* =========================================================
+   CABEÇALHO DOS RESULTADOS
+   ========================================================= */
 
 .consulta-resultados-header {
   display: flex;
@@ -143,9 +193,23 @@
   margin-bottom: 14px;
 }
 
+
 .consulta-resultados-header h2 {
-  margin-bottom: 8px;
+  margin: 0 0 6px;
 }
+
+
+.consulta-resultados-header
+.section-help {
+  margin: 0;
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   TOTAL ENCONTRADO
+   ========================================================= */
 
 .consulta-total-badge {
   display: flex;
@@ -159,10 +223,12 @@
   background: var(--primary-soft);
 
   border:
-    1px solid rgb(31 95 211 / 0.14);
+    1px solid
+    rgb(31 95 211 / 0.14);
 
   border-radius: var(--radius-sm);
 }
+
 
 .consulta-total-badge strong {
   color: var(--primary-deep);
@@ -171,12 +237,14 @@
   font-weight: 800;
 }
 
+
 .consulta-total-badge span {
   color: var(--text-muted);
 
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
 
+  letter-spacing: 0.3px;
   text-transform: uppercase;
 }
 
@@ -186,95 +254,36 @@
    ========================================================= */
 
 .tabela-consulta {
+  width: 100%;
+  max-width: 100%;
+  max-height: 520px;
+
   margin-top: 0;
 
-  max-height: 390px;
+  overflow: auto;
 
   border-radius: var(--radius-md);
 }
 
-.tabela-consulta thead th {
-  background: var(--primary-deep);
-}
-
-#resultadoFiltros tr {
-  cursor: pointer;
-}
-
-#resultadoFiltros tr:hover td {
-  background: var(--primary-soft);
-}
-
-#resultadoFiltros td:first-child {
-  color: var(--primary-deep);
-
-  font-weight: 800;
-}
-
-
-/* =========================================================
-   DETALHES
-   ========================================================= */
-
-.detalhe-corte {
-  display: grid;
-
-  gap: 16px;
-}
-
-.detalhe-corte .section-card {
-  margin-bottom: 0;
-}
-
-
-/* =========================================================
-   DASHBOARD DO CORTE
-   ========================================================= */
-
-#dashboardCorte .dashboard-grid {
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
-
-  gap: 12px;
-
-  margin-bottom: 0;
-}
-
-#dashboardCorte .dashboard-card {
-  min-height: 85px;
-
-  padding: 14px;
-}
-
-#dashboardCorte .dashboard-card strong {
-  font-size: 21px;
-}
-
-/* =========================================================
-   RESULTADOS - AJUSTE DE TABELA
-   ========================================================= */
-
-.consulta-resultados {
-  min-width: 0;
-  overflow: hidden;
-}
-
-.tabela-consulta {
-  width: 100%;
-  max-width: 100%;
-
-  overflow-x: auto;
-}
 
 .tabela-consulta table {
   width: 100%;
+
   min-width: 680px;
 
   table-layout: fixed;
 }
 
 
+/* Cabeçalho */
+
+.tabela-consulta thead th {
+  background: var(--primary-deep);
+}
+
+
 /* Número */
+
 .tabela-consulta th:nth-child(1),
 .tabela-consulta td:nth-child(1) {
   width: 12%;
@@ -282,6 +291,7 @@
 
 
 /* Produto */
+
 .tabela-consulta th:nth-child(2),
 .tabela-consulta td:nth-child(2) {
   width: 38%;
@@ -289,6 +299,7 @@
 
 
 /* Mesa */
+
 .tabela-consulta th:nth-child(3),
 .tabela-consulta td:nth-child(3) {
   width: 11%;
@@ -296,6 +307,7 @@
 
 
 /* Data */
+
 .tabela-consulta th:nth-child(4),
 .tabela-consulta td:nth-child(4) {
   width: 14%;
@@ -303,6 +315,7 @@
 
 
 /* Última folha */
+
 .tabela-consulta th:nth-child(5),
 .tabela-consulta td:nth-child(5) {
   width: 12%;
@@ -310,13 +323,17 @@
 
 
 /* Status */
+
 .tabela-consulta th:nth-child(6),
 .tabela-consulta td:nth-child(6) {
   width: 13%;
+
+  text-align: center;
 }
 
 
-/* Produto grande não quebra a tabela */
+/* Produto muito grande */
+
 .tabela-consulta td:nth-child(2) {
   overflow: hidden;
 
@@ -325,37 +342,35 @@
 }
 
 
-/* Status centralizado */
-.tabela-consulta th:nth-child(6),
-.tabela-consulta td:nth-child(6) {
-  text-align: center;
-}
-
-
-/* Badge não pode sair da célula */
-.tabela-consulta .status-badge {
-  min-width: 0;
-
-  width: auto;
-
-  max-width: 100%;
-
-  padding: 5px 9px;
-
-  font-size: 10px;
-
-  white-space: nowrap;
-}
-
 /* =========================================================
-   CORTE SELECIONADO NA CONSULTA
+   LINHAS DA CONSULTA
    ========================================================= */
+
+#resultadoFiltros tr {
+  cursor: pointer;
+}
+
+
+#resultadoFiltros tr:hover td {
+  background: var(--primary-soft);
+}
+
+
+#resultadoFiltros td:first-child {
+  color: var(--primary-deep);
+
+  font-weight: 800;
+}
+
+
+/* Corte selecionado */
 
 #resultadoFiltros
 tr.consulta-linha-selecionada
 td {
   background: var(--primary-soft);
 }
+
 
 #resultadoFiltros
 tr.consulta-linha-selecionada
@@ -368,158 +383,182 @@ td:first-child {
     inset 4px 0 0 var(--primary);
 }
 
-.consulta-filtros .button-row {
-  display: flex;
-  justify-content: flex-end;
 
-  margin: 0;
-}
+/* =========================================================
+   STATUS NA TABELA
+   ========================================================= */
 
-.consulta-filtros .btn-filtrar {
-  width: 150px;
-  min-width: 150px;
-}
-
-.consulta-resultados {
-  width: 100%;
+.tabela-consulta .status-badge {
+  width: auto;
+  max-width: 100%;
   min-width: 0;
 
-  padding: 18px;
+  padding: 5px 9px;
+
+  font-size: 10px;
+
+  white-space: nowrap;
 }
 
-.tabela-consulta {
-  width: 100%;
-
-  max-height: 520px;
-
-  overflow: auto;
-}
 
 /* =========================================================
-   CONSULTA MAIS COMPACTA
+   DETALHES DO CORTE
    ========================================================= */
 
-.consulta-layout {
+.detalhe-corte {
   width: 100%;
   max-width: 1080px;
 
-  margin: 0 auto 18px;
-
   display: grid;
-  grid-template-columns: 1fr;
 
   gap: 16px;
+
+  margin: 0 auto;
+}
+
+
+.detalhe-corte .section-card {
+  margin-bottom: 0;
 }
 
 
 /* =========================================================
-   FILTROS
+   DASHBOARD DO CORTE
    ========================================================= */
 
-.consulta-filtros {
-  padding: 20px 22px;
-
-  background: var(--surface);
-
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-
-  box-shadow: var(--shadow-sm);
+#dashboardCorte {
+  margin-top: 0;
 }
 
 
-.consulta-filtros h2 {
-  margin-bottom: 6px;
-}
-
-
-.consulta-filtros .section-help {
-  margin: 0 0 18px;
-
-  font-size: 13px;
-}
-
-
-/* Grid dos campos */
-
-.consulta-filtros .form-grid {
-  display: grid;
-
+#dashboardCorte .dashboard-grid {
   grid-template-columns:
-    0.9fr
-    1.2fr
-    1fr;
+    repeat(4, minmax(0, 1fr));
 
-  gap: 14px 16px;
+  gap: 12px;
 
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 
 
-/* Número */
-.consulta-filtros
-.form-group:nth-child(1) {
-  grid-column: 1;
+#dashboardCorte .dashboard-card {
+  min-height: 85px;
+
+  padding: 14px;
 }
 
 
-/* Produto ocupa mais espaço */
-.consulta-filtros
-.form-group:nth-child(2) {
-  grid-column: 2 / 4;
+#dashboardCorte .dashboard-card strong {
+  font-size: 21px;
 }
 
 
-/* Data inicial */
-.consulta-filtros
-.form-group:nth-child(3) {
-  grid-column: 1;
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .consulta-filtros .form-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+
+  .consulta-filtros
+  .form-group:nth-child(1),
+  .consulta-filtros
+  .form-group:nth-child(2),
+  .consulta-filtros
+  .form-group:nth-child(3),
+  .consulta-filtros
+  .form-group:nth-child(4),
+  .consulta-filtros
+  .form-group:nth-child(5),
+  .consulta-filtros
+  .filtro-acao {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+
+  .consulta-filtros .filtro-acao {
+    justify-content: stretch;
+  }
+
+
+  .consulta-filtros .btn-filtrar {
+    width: 100%;
+    min-width: 0;
+  }
+
+
+  #dashboardCorte .dashboard-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
 }
 
 
-/* Data final */
-.consulta-filtros
-.form-group:nth-child(4) {
-  grid-column: 2;
-}
+/* =========================================================
+   CELULAR
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  .consulta-layout {
+    gap: 12px;
+  }
 
 
-/* Status */
-.consulta-filtros
-.form-group:nth-child(5) {
-  grid-column: 3;
-}
+  .consulta-filtros,
+  .consulta-resultados {
+    padding: 14px;
+  }
 
 
-/* Botão */
-
-.consulta-filtros .button-row {
-  display: flex;
-  justify-content: flex-end;
-
-  margin: 0;
-}
+  .consulta-filtros .form-grid {
+    grid-template-columns: 1fr;
+  }
 
 
-.consulta-filtros .btn-filtrar {
-  width: 150px;
-  min-width: 150px;
+  .consulta-filtros
+  .form-group:nth-child(1),
+  .consulta-filtros
+  .form-group:nth-child(2),
+  .consulta-filtros
+  .form-group:nth-child(3),
+  .consulta-filtros
+  .form-group:nth-child(4),
+  .consulta-filtros
+  .form-group:nth-child(5),
+  .consulta-filtros
+  .filtro-acao {
+    grid-column: auto;
+    grid-row: auto;
+  }
 
-  height: 42px;
-}
 
-.consulta-filtros input,
-.consulta-filtros select {
-  height: 42px;
+  .consulta-filtros .btn-filtrar {
+    width: 100%;
+  }
 
-  font-size: 13px;
-}
 
-.consulta-resultados {
-  width: 100%;
-  max-width: 1080px;
+  .consulta-resultados-header {
+    flex-direction: column;
+  }
 
-  margin: 0 auto;
 
-  padding: 20px 22px;
+  .consulta-total-badge {
+    width: 100%;
+
+    align-items: flex-start;
+  }
+
+
+  #dashboardCorte .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
 }
