@@ -3,6 +3,10 @@ import {
 } from "../../core/api.js"
 
 import {
+  definirCarregamento
+} from "../../core/ui.js"
+
+import {
   maiusculo,
   formatarData
 } from "../../utils/formatters.js"
@@ -17,7 +21,20 @@ import {
 } from "./dashboard.js"
 
 
-let corteConsultaAtual = null
+const QUANTIDADE_POR_PAGINA =
+  20
+
+let corteConsultaAtual =
+  null
+
+let resultadosConsulta =
+  []
+
+let quantidadeResultadosVisiveis =
+  QUANTIDADE_POR_PAGINA
+
+let consultaComProduto =
+  false
 
 
 // ========================================
@@ -34,7 +51,8 @@ export function obterCorteConsultaAtual() {
 // ========================================
 
 function limparDetalhesCorte() {
-  corteConsultaAtual = null
+  corteConsultaAtual =
+    null
 
   const detalheCorte =
     document.getElementById(
@@ -70,12 +88,14 @@ function limparDetalhesCorte() {
 
 
   if (historicoConsulta) {
-    historicoConsulta.innerHTML = ""
+    historicoConsulta.innerHTML =
+      ""
   }
 
 
   if (itensConsulta) {
-    itensConsulta.innerHTML = ""
+    itensConsulta.innerHTML =
+      ""
   }
 }
 
@@ -113,39 +133,29 @@ async function abrirDetalhesCorte(
   linha
 ) {
   try {
-
-    // Guarda o número do corte atual
     corteConsultaAtual =
       item.numero
 
 
-    // Destaca visualmente a linha
     destacarLinhaSelecionada(
       linha
     )
 
 
-    // Carrega histórico
     await carregarHistoricoConsulta(
       item.numero
     )
 
 
-    // Carrega itens
     await carregarItensConsulta(
       item.numero
     )
 
 
-    // Carrega dashboard
     await carregarDashboardCorte(
       item.numero
     )
 
-
-    // ========================================
-    // MOSTRAR DETALHES
-    // ========================================
 
     const detalheCorte =
       document.getElementById(
@@ -159,18 +169,12 @@ async function abrirDetalhesCorte(
     }
 
 
-    // ========================================
-    // SCROLL AUTOMÁTICO
-    // ========================================
-
     setTimeout(() => {
-
       detalheCorte
         ?.scrollIntoView({
           behavior: "smooth",
           block: "start"
         })
-
     }, 100)
 
   } catch (erro) {
@@ -183,10 +187,225 @@ async function abrirDetalhesCorte(
 
 
 // ========================================
+// RESULTADOS DA CONSULTA
+// ========================================
+
+function obterClasseStatus(status) {
+  return status === "FINALIZADO"
+    ? "status-badge status-finalizado"
+    : status === "EM PRODUÇÃO"
+    ? "status-badge status-em-producao"
+    : "status-badge status-default"
+}
+
+
+function criarLinhaResultado(item) {
+  const linha =
+    document.createElement("tr")
+
+
+  linha.innerHTML = `
+    <td>
+      ${item.numero}
+    </td>
+
+    <td>
+      ${maiusculo(
+        item.produto ?? "-"
+      )}
+    </td>
+
+    <td>
+      ${maiusculo(
+        item.mesa ?? "-"
+      )}
+    </td>
+
+    <td>
+      ${
+        item.data
+          ? formatarData(item.data)
+          : "-"
+      }
+    </td>
+
+    <td>
+      ${item.folha_parou ?? "-"}
+    </td>
+
+    <td>
+      <span class="${obterClasseStatus(item.status)}">
+        ${item.status ?? "-"}
+      </span>
+    </td>
+  `
+
+
+  linha.addEventListener(
+    "click",
+    async () => {
+      await abrirDetalhesCorte(
+        item,
+        linha
+      )
+    }
+  )
+
+
+  if (
+    String(item.numero) ===
+    String(corteConsultaAtual)
+  ) {
+    linha.classList.add(
+      "consulta-linha-selecionada"
+    )
+  }
+
+
+  return linha
+}
+
+
+function atualizarControleCarregarMais() {
+  const area =
+    document.getElementById(
+      "consultaCarregarMais"
+    )
+
+  const botao =
+    document.getElementById(
+      "carregarMaisCortes"
+    )
+
+  const resumo =
+    document.getElementById(
+      "consultaExibidos"
+    )
+
+
+  if (!area || !botao || !resumo) {
+    return
+  }
+
+
+  const total =
+    resultadosConsulta.length
+
+  const exibidos =
+    consultaComProduto
+      ? total
+      : Math.min(
+          quantidadeResultadosVisiveis,
+          total
+        )
+
+  const restantes =
+    total - exibidos
+
+
+  resumo.textContent =
+    `Mostrando ${exibidos} de ${total} cortes`
+
+
+  if (
+    consultaComProduto ||
+    restantes <= 0
+  ) {
+    area.style.display =
+      "none"
+
+    botao.disabled =
+      true
+
+    return
+  }
+
+
+  area.style.display =
+    "flex"
+
+  botao.disabled =
+    false
+
+  botao.textContent =
+    restantes > QUANTIDADE_POR_PAGINA
+      ? `Carregar mais ${QUANTIDADE_POR_PAGINA}`
+      : `Carregar mais ${restantes}`
+}
+
+
+function renderizarResultadosConsulta() {
+  const tabela =
+    document.getElementById(
+      "resultadoFiltros"
+    )
+
+
+  if (!tabela) {
+    console.error(
+      "Tabela resultadoFiltros nao encontrada."
+    )
+
+    return
+  }
+
+
+  tabela.innerHTML =
+    ""
+
+
+  if (resultadosConsulta.length === 0) {
+    tabela.innerHTML = `
+      <tr>
+        <td colspan="6">
+          Nenhum corte encontrado
+        </td>
+      </tr>
+    `
+
+    atualizarControleCarregarMais()
+
+    return
+  }
+
+
+  const resultadosExibidos =
+    consultaComProduto
+      ? resultadosConsulta
+      : resultadosConsulta.slice(
+          0,
+          quantidadeResultadosVisiveis
+        )
+
+
+  resultadosExibidos.forEach((item) => {
+    tabela.appendChild(
+      criarLinhaResultado(item)
+    )
+  })
+
+
+  atualizarControleCarregarMais()
+}
+
+
+function carregarMaisResultadosConsulta() {
+  quantidadeResultadosVisiveis +=
+    QUANTIDADE_POR_PAGINA
+
+  renderizarResultadosConsulta()
+}
+
+
+// ========================================
 // CARREGAR RESULTADOS DA CONSULTA
 // ========================================
 
 export async function carregarResultadosConsulta() {
+  const botaoBuscar =
+    document.getElementById(
+      "buscarFiltros"
+    )
 
   const campoNumero =
     document.getElementById(
@@ -230,10 +449,6 @@ export async function carregarResultadosConsulta() {
   const status =
     campoStatus?.value ?? ""
 
-
-  // ========================================
-  // MONTAR PARÂMETROS
-  // ========================================
 
   const params =
     new URLSearchParams()
@@ -280,20 +495,16 @@ export async function carregarResultadosConsulta() {
 
 
   try {
-
-    // ========================================
-    // CONSULTAR API
-    // ========================================
+    definirCarregamento(
+      botaoBuscar,
+      true,
+      "Buscar"
+    )
 
     const resultados =
       await apiGet(
         `/consultar-cortes?${params.toString()}`
       )
-
-
-    // ========================================
-    // TOTAL ENCONTRADO
-    // ========================================
 
     const totalConsulta =
       document.getElementById(
@@ -307,148 +518,97 @@ export async function carregarResultadosConsulta() {
     }
 
 
-    // ========================================
-    // TABELA
-    // ========================================
+    resultadosConsulta =
+      resultados
 
-    const tabela =
-      document.getElementById(
-        "resultadoFiltros"
-      )
+    consultaComProduto =
+      Boolean(produto)
 
-
-    if (!tabela) {
-      console.error(
-        "Tabela resultadoFiltros não encontrada."
-      )
-
-      return
-    }
+    quantidadeResultadosVisiveis =
+      consultaComProduto
+        ? resultadosConsulta.length
+        : QUANTIDADE_POR_PAGINA
 
 
-    tabela.innerHTML = ""
-
-
-    // Nova pesquisa:
-    // remove detalhes do corte anterior.
     limparDetalhesCorte()
 
-
-    // ========================================
-    // NENHUM RESULTADO
-    // ========================================
-
-    // ========================================
-// NENHUM RESULTADO
-// ========================================
-
-  if (resultados.length === 0) {
-
-    tabela.innerHTML = `
-      <tr>
-        <td colspan="6">
-          Nenhum corte encontrado
-        </td>
-      </tr>
-    `
-
-    return
-  }
-
-
-  // ========================================
-  // LIMITAR RESULTADOS EXIBIDOS
-  // ========================================
-
-  const resultadosExibidos =
-    produto
-      ? resultados
-      : resultados.slice(0, 20)
-
-
-  // ========================================
-  // MONTAR RESULTADOS
-  // ========================================
-
-  resultadosExibidos.forEach((item) => {
-
-    const statusClasse =
-      item.status === "FINALIZADO"
-        ? "status-badge status-finalizado"
-        : item.status === "EM PRODUÇÃO"
-        ? "status-badge status-em-producao"
-        : "status-badge status-default"
-
-
-    const linha =
-      document.createElement("tr")
-
-
-    linha.innerHTML = `
-      <td>
-        ${item.numero}
-      </td>
-
-      <td>
-        ${maiusculo(
-          item.produto ?? "-"
-        )}
-      </td>
-
-      <td>
-        ${maiusculo(
-          item.mesa ?? "-"
-        )}
-      </td>
-
-      <td>
-        ${
-          item.data
-            ? formatarData(item.data)
-            : "-"
-        }
-      </td>
-
-      <td>
-        ${item.folha_parou ?? "-"}
-      </td>
-
-      <td>
-        <span class="${statusClasse}">
-          ${item.status ?? "-"}
-        </span>
-      </td>
-    `
-
-
-    linha.style.cursor =
-      "pointer"
-
-
-    linha.addEventListener(
-      "click",
-      async () => {
-
-        await abrirDetalhesCorte(
-          item,
-          linha
-        )
-      }
-    )
-
-
-    tabela.appendChild(
-      linha
-    )
-  })
+    renderizarResultadosConsulta()
 
   } catch (erro) {
-
     console.error(
       "Erro ao consultar cortes:",
       erro
     )
+
+  } finally {
+    definirCarregamento(
+      botaoBuscar,
+      false,
+      "Buscar"
+    )
   }
+}
+
+
+function limparFiltrosConsulta() {
+  const campos =
+    [
+      "filtroNumero",
+      "filtroProduto",
+      "filtroDataInicial",
+      "filtroDataFinal",
+      "filtroStatus"
+    ]
+
+
+  campos.forEach((id) => {
+    const campo =
+      document.getElementById(id)
+
+    if (campo) {
+      campo.value =
+        ""
+    }
+  })
+
+
+  document
+    .getElementById("filtroNumero")
+    ?.focus()
+
+  carregarResultadosConsulta()
+}
+
+
+function configurarBuscaComEnter() {
+  const campos =
+    [
+      "filtroNumero",
+      "filtroProduto",
+      "filtroDataInicial",
+      "filtroDataFinal",
+      "filtroStatus"
+    ]
+
+
+  campos.forEach((id) => {
+    const campo =
+      document.getElementById(id)
+
+    campo?.addEventListener(
+      "keydown",
+      async (evento) => {
+        if (evento.key !== "Enter") {
+          return
+        }
+
+
+        evento.preventDefault()
+
+        await carregarResultadosConsulta()
+      }
+    )
+  })
 }
 
 
@@ -457,16 +617,25 @@ export async function carregarResultadosConsulta() {
 // ========================================
 
 export function inicializarFiltros() {
-
   const botaoBuscarFiltros =
     document.getElementById(
       "buscarFiltros"
     )
 
+  const botaoCarregarMais =
+    document.getElementById(
+      "carregarMaisCortes"
+    )
+
+  const botaoLimparFiltros =
+    document.getElementById(
+      "limparFiltros"
+    )
+
 
   if (!botaoBuscarFiltros) {
     console.error(
-      "Botão buscarFiltros não encontrado."
+      "Botao buscarFiltros nao encontrado."
     )
 
     return
@@ -477,4 +646,24 @@ export function inicializarFiltros() {
     "click",
     carregarResultadosConsulta
   )
+
+  botaoLimparFiltros
+    ?.addEventListener(
+      "click",
+      limparFiltrosConsulta
+    )
+
+
+  botaoCarregarMais
+    ?.addEventListener(
+      "click",
+      carregarMaisResultadosConsulta
+    )
+
+
+  configurarBuscaComEnter()
+
+  document
+    .getElementById("filtroNumero")
+    ?.focus()
 }

@@ -80,7 +80,10 @@ Sistema web interno que permite:
 - Node.js
 - Express
 - TypeScript
-- SQLite
+
+### Banco de dados
+- PostgreSQL
+- Supabase
 
 ### Frontend
 - HTML5
@@ -90,6 +93,7 @@ Sistema web interno que permite:
 ### Infraestrutura
 - Docker
 - Docker Compose
+- Render
 
 ---
 

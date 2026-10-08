@@ -131,10 +131,6 @@ router.get("/cortes/proximo-numero", async (req, res) => {
 })
 
 router.get("/cortes/:numero", async (req, res) => {
-  // sua rota atual continua aqui
-})
-
-router.get("/cortes/:numero", async (req, res) => {
   const { numero } = req.params
 
   try {

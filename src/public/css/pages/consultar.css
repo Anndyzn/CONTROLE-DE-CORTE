@@ -123,6 +123,8 @@
   grid-row: 2;
 
   display: flex;
+  gap: 8px;
+
   justify-content: flex-end;
   align-items: flex-end;
 }
@@ -158,6 +160,31 @@
       var(--primary),
       var(--primary-deep)
     );
+}
+
+
+.consulta-filtros .btn-limpar-filtros {
+  width: 110px;
+  min-width: 110px;
+  height: 40px;
+
+  margin: 0;
+
+  color: var(--text);
+
+  background: var(--surface-2);
+
+  border: 1px solid var(--border);
+
+  box-shadow: none;
+}
+
+
+.consulta-filtros
+.btn-limpar-filtros:hover {
+  box-shadow:
+    0 8px 18px
+    rgb(15 23 42 / 0.10);
 }
 
 
@@ -402,6 +429,38 @@ td:first-child {
 
 
 /* =========================================================
+   CARREGAR MAIS
+   ========================================================= */
+
+.consulta-carregar-mais {
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 12px;
+
+  margin-top: 14px;
+}
+
+
+.consulta-carregar-mais span {
+  color: var(--text-muted);
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+
+.btn-carregar-mais {
+  min-width: 160px;
+  height: 38px;
+
+  padding: 0 16px;
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
    DETALHES DO CORTE
    ========================================================= */
 
@@ -554,6 +613,17 @@ td:first-child {
     width: 100%;
 
     align-items: flex-start;
+  }
+
+
+  .consulta-carregar-mais {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+
+  .btn-carregar-mais {
+    width: 100%;
   }
 
 

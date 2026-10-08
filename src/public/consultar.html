@@ -56,7 +56,8 @@
   </header>
 
     <div class="consulta-layout">
-      <h2>Filtros</h2>
+      <section class="section-card consulta-filtros">
+        <h2>Filtros</h2>
         <p class="section-help">
           Encontre cortes por número, produto, período ou status.
         </p>
@@ -94,15 +95,24 @@
               <option value="FINALIZADO">FINALIZADO</option>
             </select>
           </div>
-        </div>
 
-        <div class="form-group filtro-acao">
-          <button
-            id="buscarFiltros"
-            class="btn-filtrar"
-          >
-            Buscar
-          </button>
+          <div class="form-group filtro-acao">
+            <button
+              type="button"
+              id="buscarFiltros"
+              class="btn-filtrar"
+            >
+              Buscar
+            </button>
+
+            <button
+              type="button"
+              id="limparFiltros"
+              class="btn-limpar-filtros"
+            >
+              Limpar
+            </button>
+          </div>
         </div>
       </section>
 
@@ -140,6 +150,22 @@
 
             <tbody id="resultadoFiltros"></tbody>
           </table>
+        </div>
+
+        <div
+          class="consulta-carregar-mais"
+          id="consultaCarregarMais"
+          style="display: none;"
+        >
+          <span id="consultaExibidos"></span>
+
+          <button
+            type="button"
+            id="carregarMaisCortes"
+            class="btn-carregar-mais"
+          >
+            Carregar mais
+          </button>
         </div>
 
       </section>

@@ -7,12 +7,10 @@ import {
   carregarItensCorte
 } from "../pages/index/itens.js"
 
-
-const SUPABASE_URL =
-  "https://znpmlfrwkftzfufywskr.supabase.co"
-
-const SUPABASE_PUBLIC_KEY =
-  "sb_publishable_WUTuenRk7EC1KIORYpOb7A_4Vyurr6U"
+import {
+  SUPABASE_PUBLIC_KEY,
+  SUPABASE_URL
+} from "./supabase-config.js"
 
 
 let canalRealtime = null
