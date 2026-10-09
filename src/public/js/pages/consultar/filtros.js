@@ -3,7 +3,8 @@ import {
 } from "../../core/api.js"
 
 import {
-  definirCarregamento
+  definirCarregamento,
+  mostrarToast
 } from "../../core/ui.js"
 
 import {
@@ -501,6 +502,21 @@ export async function carregarResultadosConsulta() {
       "Buscar"
     )
 
+    const tabela =
+      document.getElementById(
+        "resultadoFiltros"
+      )
+
+    if (tabela) {
+      tabela.innerHTML = `
+        <tr>
+          <td colspan="6">
+            Carregando resultados...
+          </td>
+        </tr>
+      `
+    }
+
     const resultados =
       await apiGet(
         `/consultar-cortes?${params.toString()}`
@@ -538,6 +554,47 @@ export async function carregarResultadosConsulta() {
     console.error(
       "Erro ao consultar cortes:",
       erro
+    )
+
+    const tabela =
+      document.getElementById(
+        "resultadoFiltros"
+      )
+
+    if (tabela) {
+      tabela.innerHTML = `
+        <tr>
+          <td colspan="6">
+            Não foi possível carregar os cortes.
+          </td>
+        </tr>
+      `
+    }
+
+    const totalConsulta =
+      document.getElementById(
+        "totalConsulta"
+      )
+
+    if (totalConsulta) {
+      totalConsulta.textContent =
+        "0"
+    }
+
+    document
+      .getElementById(
+        "consultaCarregarMais"
+      )
+      ?.style
+      .setProperty(
+        "display",
+        "none"
+      )
+
+    mostrarToast(
+      "Não foi possível carregar os resultados da consulta.",
+      "erro",
+      "Erro na consulta"
     )
 
   } finally {

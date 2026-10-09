@@ -19,6 +19,132 @@ import {
 } from "./cortes.js"
 
 
+const camposProducao =
+  [
+    "data",
+    "turno",
+    "operador",
+    "operadorOutro",
+    "horaInicio",
+    "horaFim",
+    "folhaParouInput",
+    "statusProducao"
+  ]
+
+
+function obterCampo(id) {
+  return document.getElementById(id)
+}
+
+
+function limparCampoInvalido(campo) {
+  campo
+    ?.closest(".form-group")
+    ?.classList
+    .remove("campo-invalido")
+}
+
+
+function limparErrosValidacaoProducao() {
+  camposProducao.forEach((id) => {
+    limparCampoInvalido(
+      obterCampo(id)
+    )
+  })
+}
+
+
+function marcarCamposObrigatorios(ids) {
+  limparErrosValidacaoProducao()
+
+  ids.forEach((id) => {
+    obterCampo(id)
+      ?.closest(".form-group")
+      ?.classList
+      .add("campo-invalido")
+  })
+
+  obterCampo(ids[0])
+    ?.focus()
+}
+
+
+function obterCamposInvalidos({
+  data,
+  turno,
+  operadorSelecionado,
+  operador,
+  horaInicio,
+  horaFim,
+  folhaParou,
+  status
+}) {
+  const camposInvalidos = []
+
+  if (!data) camposInvalidos.push("data")
+
+  if (!turno) camposInvalidos.push("turno")
+
+  if (!operadorSelecionado) {
+    camposInvalidos.push("operador")
+  } else if (
+    operadorSelecionado === "OUTRO" &&
+    !operador
+  ) {
+    camposInvalidos.push("operadorOutro")
+  }
+
+  if (!horaInicio) camposInvalidos.push("horaInicio")
+
+  if (!horaFim) camposInvalidos.push("horaFim")
+
+  if (!folhaParou) {
+    camposInvalidos.push("folhaParouInput")
+  }
+
+  if (!status) {
+    camposInvalidos.push("statusProducao")
+  }
+
+  return camposInvalidos
+}
+
+
+function obterHoraAtual() {
+  const agora = new Date()
+
+  const horas =
+    String(
+      agora.getHours()
+    ).padStart(2, "0")
+
+  const minutos =
+    String(
+      agora.getMinutes()
+    ).padStart(2, "0")
+
+  return `${horas}:${minutos}`
+}
+
+
+function preencherHorarioAtual(idCampo) {
+  const campo =
+    obterCampo(idCampo)
+
+  if (
+    !campo ||
+    campo.disabled
+  ) {
+    return
+  }
+
+  campo.value =
+    obterHoraAtual()
+
+  limparCampoInvalido(campo)
+}
+
+
 // ========================================
 // REGISTRAR PRODUÇÃO
 // ========================================
@@ -36,8 +162,11 @@ export async function salvarProducao() {
   const turno =
     document.getElementById("turno").value
 
-  let operador =
+  const operadorSelecionado =
     document.getElementById("operador").value
+
+  let operador =
+    operadorSelecionado
 
   if (operador === "OUTRO") {
     operador =
@@ -67,18 +196,42 @@ export async function salvarProducao() {
   // VALIDAÇÃO
   // ========================================
 
-  if (
-    !numeroCorte ||
-    !data ||
-    !turno ||
-    !operador ||
-    !horaInicio ||
-    !horaFim ||
-    !folhaParou ||
-    !status
-  ) {
+  limparErrosValidacaoProducao()
+
+  if (!numeroCorte) {
     mostrarToast(
-      "Preencha todos os campos obrigatórios antes de salvar.",
+      "Selecione um corte antes de registrar a produção.",
+      "atencao",
+      "Corte obrigatório"
+    )
+
+    document
+      .getElementById("numeroCorte")
+      ?.focus()
+
+    return
+  }
+
+
+  const camposInvalidos =
+    obterCamposInvalidos({
+      data,
+      turno,
+      operadorSelecionado,
+      operador,
+      horaInicio,
+      horaFim,
+      folhaParou,
+      status
+    })
+
+  if (camposInvalidos.length > 0) {
+    marcarCamposObrigatorios(
+      camposInvalidos
+    )
+
+    mostrarToast(
+      "Preencha os campos destacados antes de salvar.",
       "atencao",
       "Campos obrigatórios"
     )
@@ -99,6 +252,7 @@ export async function salvarProducao() {
     status
   }
 
+  let producaoBloqueada = false
 
   try {
     definirCarregamento(
@@ -112,7 +266,6 @@ export async function salvarProducao() {
       "/producao",
       producao
     )
-
 
     // ========================================
     // AVISO DE SUCESSO
@@ -165,6 +318,8 @@ export async function salvarProducao() {
 
       desabilitarProducao()
 
+      producaoBloqueada = true
+
       blocoItens.scrollIntoView({
         behavior: "smooth",
         block: "start"
@@ -186,6 +341,16 @@ export async function salvarProducao() {
     )
 
   } finally {
+    if (
+      producaoBloqueada
+    ) {
+      botaoSalvar.textContent =
+        botaoSalvar.dataset.textoOriginal ||
+        "Salvar produção"
+
+      return
+    }
+
     definirCarregamento(
       botaoSalvar,
       false,
@@ -199,7 +364,15 @@ export async function salvarProducao() {
 // LIMPAR FORMULÁRIO
 // ========================================
 
-function limparFormularioProducao() {
+function limparFormularioProducao({
+  limparTurno = false
+} = {}) {
+  limparErrosValidacaoProducao()
+
+  if (limparTurno) {
+    document.getElementById("turno").value = ""
+  }
+
   document.getElementById("folhaParouInput").value = ""
 
   document.getElementById("horaInicio").value = ""
@@ -238,6 +411,17 @@ function configurarOperadorOutro() {
         selectOperador.value === "OUTRO"
           ? "block"
           : "none"
+
+      if (selectOperador.value !== "OUTRO") {
+        inputOperadorOutro.value = ""
+        limparCampoInvalido(
+          inputOperadorOutro
+        )
+      }
+
+      limparCampoInvalido(
+        selectOperador
+      )
     }
   )
 }
@@ -260,8 +444,91 @@ function configurarStatus() {
       // Os PIs só aparecem depois
       // que a produção FINALIZADA for salva.
       blocoItens.style.display = "none"
+
+      limparCampoInvalido(
+        selectStatus
+      )
     }
   )
+}
+
+
+function configurarBotoesHorario() {
+  const botaoHoraInicio =
+    document.getElementById(
+      "preencherHoraInicio"
+    )
+
+  const botaoHoraFim =
+    document.getElementById(
+      "preencherHoraFim"
+    )
+
+  botaoHoraInicio
+    ?.addEventListener(
+      "click",
+      () => preencherHorarioAtual(
+        "horaInicio"
+      )
+    )
+
+  botaoHoraFim
+    ?.addEventListener(
+      "click",
+      () => preencherHorarioAtual(
+        "horaFim"
+      )
+    )
+}
+
+
+function configurarLimparProducao() {
+  const botaoLimpar =
+    document.getElementById(
+      "limparProducao"
+    )
+
+  botaoLimpar
+    ?.addEventListener(
+      "click",
+      () => {
+        limparFormularioProducao({
+          limparTurno: true
+        })
+
+        mostrarToast(
+          "Campos do lançamento atual limpos.",
+          "info",
+          "Lançamento limpo"
+        )
+      }
+    )
+}
+
+
+function configurarValidacaoProducao() {
+  camposProducao.forEach((id) => {
+    const campo =
+      obterCampo(id)
+
+    if (!campo) {
+      return
+    }
+
+    const limparErro = () => {
+      limparCampoInvalido(campo)
+    }
+
+    campo.addEventListener(
+      "input",
+      limparErro
+    )
+
+    campo.addEventListener(
+      "change",
+      limparErro
+    )
+  })
 }
 
 
@@ -281,4 +548,10 @@ export function inicializarProducao() {
   configurarOperadorOutro()
 
   configurarStatus()
+
+  configurarBotoesHorario()
+
+  configurarLimparProducao()
+
+  configurarValidacaoProducao()
 }

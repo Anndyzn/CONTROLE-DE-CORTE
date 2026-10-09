@@ -79,6 +79,10 @@ export function habilitarProducao() {
   document.getElementById("folhaParouInput").disabled = false
   document.getElementById("statusProducao").disabled = false
 
+  document.getElementById("preencherHoraInicio").disabled = false
+  document.getElementById("preencherHoraFim").disabled = false
+  document.getElementById("limparProducao").disabled = false
+
   const aviso =
     document.getElementById("producaoAviso")
 
@@ -128,6 +132,18 @@ export function desabilitarProducao(
 
   document.getElementById(
     "statusProducao"
+  ).disabled = true
+
+  document.getElementById(
+    "preencherHoraInicio"
+  ).disabled = true
+
+  document.getElementById(
+    "preencherHoraFim"
+  ).disabled = true
+
+  document.getElementById(
+    "limparProducao"
   ).disabled = true
 
 

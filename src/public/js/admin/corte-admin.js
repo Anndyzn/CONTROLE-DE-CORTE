@@ -4,7 +4,8 @@ import {
 } from "../core/api.js"
 
 import {
-  mostrarToast
+  mostrarToast,
+  definirCarregamento
 } from "../core/ui.js"
 
 import {
@@ -28,6 +29,11 @@ import {
 // ========================================
 
 async function buscarCorteAdmin() {
+  const botaoBuscar =
+    document.getElementById(
+      "buscarCorteAdmin"
+    )
+
   const numeroCorte =
     document.getElementById(
       "numeroCorteAdmin"
@@ -51,6 +57,41 @@ async function buscarCorteAdmin() {
 
 
   try {
+    definirCarregamento(
+      botaoBuscar,
+      true,
+      "Buscar"
+    )
+
+    const historico =
+      document.getElementById(
+        "historicoAdmin"
+      )
+
+    const itens =
+      document.getElementById(
+        "itensAdmin"
+      )
+
+    if (historico) {
+      historico.innerHTML = `
+        <tr>
+          <td colspan="9">
+            Carregando lançamentos...
+          </td>
+        </tr>
+      `
+    }
+
+    if (itens) {
+      itens.innerHTML = `
+        <tr>
+          <td colspan="8">
+            Carregando PIs...
+          </td>
+        </tr>
+      `
+    }
 
     // ========================================
     // CONFIRMAR SE CORTE EXISTE
@@ -125,6 +166,12 @@ async function buscarCorteAdmin() {
       `Corte ${numeroCorte} não encontrado.`,
       "atencao",
       "Corte não encontrado"
+    )
+  } finally {
+    definirCarregamento(
+      botaoBuscar,
+      false,
+      "Buscar"
     )
   }
 }

@@ -157,7 +157,6 @@
     0 0 0 4px hsl(142 71% 36% / 0.12);
 }
 
-
 /* =========================================================
    DASHBOARD DO TOPO
    ========================================================= */
@@ -305,6 +304,18 @@
   border-top: 1px solid var(--border);
 }
 
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 16px;
+}
+
+.section-title-row > div {
+  min-width: 0;
+}
+
 
 /* =========================================================
    CORTE SELECIONADO
@@ -393,6 +404,52 @@
 }
 
 
+.btn-limpar-corte,
+.btn-atualizar-cortes,
+.btn-limpar-producao {
+  min-width: 140px;
+  height: 38px;
+
+  padding: 0 14px;
+
+  color: var(--text-soft);
+
+  background: var(--surface-2);
+
+  border: 1px solid var(--border);
+
+  box-shadow: none;
+
+  font-size: 12px;
+}
+
+.btn-limpar-corte:hover:not(:disabled),
+.btn-atualizar-cortes:hover:not(:disabled),
+.btn-limpar-producao:hover:not(:disabled) {
+  color: var(--primary-deep);
+
+  background: var(--primary-soft);
+
+  border-color: var(--primary);
+
+  box-shadow:
+    0 8px 18px
+    rgb(31 95 211 / 0.14);
+}
+
+.btn-atualizar-cortes {
+  min-width: 112px;
+
+  flex-shrink: 0;
+}
+
+.btn-limpar-producao {
+  min-width: 152px;
+
+  flex-shrink: 0;
+}
+
+
 /* =========================================================
    REGISTRAR PRODUÇÃO
    ========================================================= */
@@ -406,10 +463,78 @@
   gap: 14px;
 }
 
+.form-group-time {
+  min-width: 0;
+}
+
+.time-input-row {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    76px;
+
+  gap: 8px;
+
+  align-items: center;
+}
+
+.time-input-row input {
+  min-width: 0;
+}
+
+.btn-time-now {
+  width: 76px;
+  min-width: 0;
+  height: 42px;
+
+  padding: 0 10px;
+
+  color: var(--primary-deep);
+
+  background: var(--primary-soft);
+
+  border: 1px solid
+    rgb(31 95 211 / 0.16);
+
+  box-shadow: none;
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.btn-time-now:hover:not(:disabled) {
+  color: #ffffff;
+
+  background: var(--primary);
+
+  border-color: var(--primary);
+}
+
+.campo-folha-parou input {
+  font-weight: 800;
+}
+
+.form-group.campo-invalido label {
+  color: var(--danger);
+}
+
+.form-group.campo-invalido input,
+.form-group.campo-invalido select {
+  background: hsl(0 86% 98%);
+
+  border-color: var(--danger);
+
+  box-shadow:
+    0 0 0 4px hsl(0 72% 51% / 0.10);
+}
+
 .producao-actions {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
 
+  gap: 10px;
   margin-top: 18px;
 }
 
@@ -1010,4 +1135,38 @@ td:first-child {
   font-weight: 800;
 
   letter-spacing: -0.025em;
+}
+
+
+/* =========================================================
+   IDENTIDADE VISUAL DA TELA PRINCIPAL
+   ========================================================= */
+
+.page-index .dashboard-top {
+  gap: 10px;
+}
+
+.page-index .dashboard-top-card {
+  min-height: 78px;
+
+  background: #ffffff;
+
+  border-color: #d8e0ea;
+  border-radius: 8px;
+
+  box-shadow:
+    0 1px 2px rgb(16 35 63 / 0.05);
+}
+
+.page-index .dashboard-top-card:hover {
+  transform: none;
+
+  border-color: #c9d3df;
+
+  box-shadow:
+    0 8px 18px rgb(16 35 63 / 0.07);
+}
+
+.page-index .btn-proximo-corte {
+  background: var(--primary-deep);
 }

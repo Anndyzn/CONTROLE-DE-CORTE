@@ -1,0 +1,240 @@
+/* =========================================================
+   CASCA VISUAL DAS TELAS DO SISTEMA
+   ========================================================= */
+
+.page-index,
+.page-consultar,
+.page-admin {
+  background: #f3f5f8;
+}
+
+.page-index .container,
+.page-consultar .container,
+.page-admin .container {
+  max-width: 1240px;
+}
+
+.page-index .container button::after,
+.page-index .container .link-button::after,
+.page-consultar .container button::after,
+.page-consultar .container .link-button::after,
+.page-admin .container button::after,
+.page-admin .container .link-button::after {
+  display: none;
+}
+
+.page-index .app-header-modern,
+.page-consultar .app-header-modern,
+.page-admin .app-header-modern {
+  position: relative;
+
+  padding: 16px 20px;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: 1px solid #d8e0ea;
+  border-left: 4px solid var(--primary-deep);
+  border-radius: 8px;
+
+  box-shadow:
+    0 1px 2px rgb(16 35 63 / 0.05),
+    0 12px 28px rgb(16 35 63 / 0.06);
+}
+
+.page-index .app-header-modern::before,
+.page-consultar .app-header-modern::before,
+.page-admin .app-header-modern::before {
+  display: none;
+}
+
+.page-index .header-main,
+.page-consultar .header-main,
+.page-admin .header-main {
+  gap: 14px;
+}
+
+.page-index .logo-box,
+.page-consultar .logo-box,
+.page-admin .logo-box {
+  width: 78px;
+  height: 78px;
+
+  overflow: hidden;
+
+  background:
+    #ffffff
+    url("../../img/logo.png")
+    center 0 / 150px auto
+    no-repeat;
+
+  border: 1px solid #d5deea;
+  border-radius: 8px;
+
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.90),
+    0 4px 12px rgb(16 35 63 / 0.06);
+}
+
+.page-index .app-logo,
+.page-consultar .app-logo,
+.page-admin .app-logo {
+  width: 1px;
+  height: 1px;
+
+  opacity: 0;
+}
+
+.page-index .system-tag,
+.page-consultar .system-tag,
+.page-admin .system-tag {
+  margin-bottom: 5px;
+  padding: 0;
+
+  color: var(--primary-deep);
+
+  background: transparent;
+
+  border-radius: 0;
+
+  font-size: 12px;
+  letter-spacing: 0.7px;
+}
+
+.page-index .app-header h1,
+.page-consultar .app-header h1,
+.page-admin .app-header h1 {
+  font-size: 25px;
+
+  letter-spacing: 0;
+}
+
+.page-index .app-header p,
+.page-consultar .app-header p,
+.page-admin .app-header p {
+  margin-top: 4px;
+
+  color: #5f6f82;
+}
+
+.page-index .header-btn,
+.page-index .sync-status,
+.page-consultar .header-btn,
+.page-consultar .sync-status,
+.page-admin .header-btn,
+.page-admin .admin-status {
+  height: 38px;
+
+  border-radius: 8px;
+}
+
+.page-index .header-btn-secondary,
+.page-consultar .header-btn-secondary,
+.page-admin .header-btn-secondary {
+  color: var(--primary-deep);
+
+  background: #ffffff;
+
+  box-shadow: none;
+}
+
+.page-index .header-btn-secondary:hover,
+.page-consultar .header-btn-secondary:hover,
+.page-admin .header-btn-secondary:hover {
+  background: #f2f6fb;
+
+  transform: none;
+}
+
+.page-index .section-card,
+.page-consultar .section-card,
+.page-admin .section-card {
+  background: #ffffff;
+
+  border-color: #d8e0ea;
+  border-radius: 8px;
+
+  box-shadow:
+    0 1px 2px rgb(16 35 63 / 0.05);
+}
+
+.page-index .section-card:hover,
+.page-consultar .section-card:hover,
+.page-admin .section-card:hover {
+  transform: none;
+
+  box-shadow:
+    0 8px 18px rgb(16 35 63 / 0.06);
+}
+
+.page-index .btn-buscar-corte,
+.page-index .btn-novo-corte-topo,
+.page-index .primary-action,
+.page-index #salvarProducao,
+.page-consultar .consulta-filtros .btn-filtrar,
+.page-consultar .btn-carregar-mais,
+.page-admin .admin-btn-buscar,
+.page-admin #salvarEdicaoProducao,
+.page-admin #salvarEdicaoItemAdmin {
+  background: var(--primary);
+
+  box-shadow:
+    0 6px 14px rgb(31 95 211 / 0.16);
+}
+
+.page-index .btn-buscar-corte:hover:not(:disabled),
+.page-index .btn-novo-corte-topo:hover:not(:disabled),
+.page-index .primary-action:hover:not(:disabled),
+.page-index #salvarProducao:hover:not(:disabled),
+.page-consultar .consulta-filtros .btn-filtrar:hover:not(:disabled),
+.page-consultar .btn-carregar-mais:hover:not(:disabled),
+.page-admin .admin-btn-buscar:hover:not(:disabled),
+.page-admin #salvarEdicaoProducao:hover:not(:disabled),
+.page-admin #salvarEdicaoItemAdmin:hover:not(:disabled) {
+  box-shadow:
+    0 8px 18px rgb(31 95 211 / 0.20);
+
+  filter: none;
+}
+
+.page-index .topo-andamento thead th,
+.page-consultar .tabela-consulta thead th,
+.page-admin .admin-detalhes thead th {
+  background: #12243d;
+}
+
+
+/* =========================================================
+   STATUS DE SINCRONIZAÇÃO
+   ========================================================= */
+
+.sync-status-warning {
+  color: hsl(38 92% 34%);
+
+  background: hsl(45 93% 94%);
+
+  border-color: hsl(38 92% 50% / 0.24);
+}
+
+.sync-status-warning .sync-dot {
+  background: hsl(38 92% 50%);
+
+  box-shadow:
+    0 0 0 4px hsl(38 92% 50% / 0.14);
+}
+
+.sync-status-error {
+  color: var(--danger);
+
+  background: hsl(0 86% 97%);
+
+  border-color: hsl(0 72% 51% / 0.20);
+}
+
+.sync-status-error .sync-dot {
+  background: var(--danger);
+
+  box-shadow:
+    0 0 0 4px hsl(0 72% 51% / 0.12);
+}

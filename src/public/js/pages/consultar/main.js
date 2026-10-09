@@ -19,14 +19,55 @@ import {
 } from "../../core/supabase-config.js"
 
 
+function atualizarStatusConsulta(
+  texto,
+  tipo = "ok"
+) {
+  const indicador =
+    document.getElementById(
+      "syncStatusConsulta"
+    )
+
+  if (!indicador) {
+    return
+  }
+
+  indicador.classList.remove(
+    "sync-status-ok",
+    "sync-status-warning",
+    "sync-status-error"
+  )
+
+  indicador.classList.add(
+    `sync-status-${tipo}`
+  )
+
+  indicador.innerHTML = `
+    <span class="sync-dot"></span>
+    ${texto}
+  `
+}
+
+
 function inicializarRealtimeConsulta() {
   if (!window.supabase) {
     console.error(
       "Supabase não carregado"
     )
 
+    atualizarStatusConsulta(
+      "Sem tempo real",
+      "error"
+    )
+
     return
   }
+
+
+  atualizarStatusConsulta(
+    "Conectando",
+    "warning"
+  )
 
 
   const supabaseConsulta =
@@ -130,6 +171,34 @@ function inicializarRealtimeConsulta() {
         "Status Realtime Consulta:",
         status
       )
+
+      if (status === "SUBSCRIBED") {
+        atualizarStatusConsulta(
+          "Consulta ativa",
+          "ok"
+        )
+
+        return
+      }
+
+      if (
+        status === "CHANNEL_ERROR" ||
+        status === "TIMED_OUT"
+      ) {
+        atualizarStatusConsulta(
+          "Reconectando",
+          "warning"
+        )
+
+        return
+      }
+
+      if (status === "CLOSED") {
+        atualizarStatusConsulta(
+          "Offline",
+          "error"
+        )
+      }
     })
 }
 

@@ -8,6 +8,7 @@
 @import url("./components/tables.css");
 @import url("./components/status.css");
 @import url("./components/toast.css");
+@import url("./components/page-shell.css");
 @import url("./pages/index.css");
 @import url("./pages/consultar.css");
 @import url("./pages/admin.css");

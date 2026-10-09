@@ -632,3 +632,43 @@ td:first-child {
   }
 
 }
+
+
+/* =========================================================
+   IDENTIDADE VISUAL DA CONSULTA
+   ========================================================= */
+
+.page-consultar .consulta-layout,
+.page-consultar .detalhe-corte,
+.page-consultar .consulta-resultados {
+  max-width: 1240px;
+}
+
+.page-consultar .consulta-filtros .btn-limpar-filtros {
+  color: var(--text-soft);
+
+  background: #f8fafc;
+
+  border-color: #d8e0ea;
+}
+
+.page-consultar .consulta-total-badge {
+  background: #f5f8fc;
+
+  border-color: #d8e0ea;
+  border-radius: 8px;
+}
+
+.page-consultar .tabela-consulta {
+  border-radius: 8px;
+}
+
+.page-consultar #dashboardCorte .dashboard-card {
+  background: #ffffff;
+
+  border: 1px solid #d8e0ea;
+  border-radius: 8px;
+
+  box-shadow:
+    0 1px 2px rgb(16 35 63 / 0.05);
+}

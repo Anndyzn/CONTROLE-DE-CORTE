@@ -16,14 +16,57 @@ import {
 let canalRealtime = null
 
 
+function atualizarStatusSincronizacao(
+  texto,
+  tipo = "ok"
+) {
+  const indicador =
+    document.getElementById(
+      "syncStatus"
+    )
+
+
+  if (!indicador) {
+    return
+  }
+
+
+  indicador.classList.remove(
+    "sync-status-ok",
+    "sync-status-warning",
+    "sync-status-error"
+  )
+
+  indicador.classList.add(
+    `sync-status-${tipo}`
+  )
+
+  indicador.innerHTML = `
+    <span class="sync-dot"></span>
+    ${texto}
+  `
+}
+
+
 export function inicializarRealtime() {
   if (!window.supabase) {
     console.error(
       "Biblioteca do Supabase não foi carregada."
     )
 
+    atualizarStatusSincronizacao(
+      "Sem tempo real",
+      "error"
+    )
+
     return
   }
+
+
+  atualizarStatusSincronizacao(
+    "Conectando",
+    "warning"
+  )
 
 
   const supabaseRealtime =
@@ -157,5 +200,36 @@ export function inicializarRealtime() {
         "Status Realtime:",
         status
       )
+
+
+      if (status === "SUBSCRIBED") {
+        atualizarStatusSincronizacao(
+          "Sincronizado",
+          "ok"
+        )
+
+        return
+      }
+
+
+      if (
+        status === "CHANNEL_ERROR" ||
+        status === "TIMED_OUT"
+      ) {
+        atualizarStatusSincronizacao(
+          "Reconectando",
+          "warning"
+        )
+
+        return
+      }
+
+
+      if (status === "CLOSED") {
+        atualizarStatusSincronizacao(
+          "Offline",
+          "error"
+        )
+      }
     })
 }

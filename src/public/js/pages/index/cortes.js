@@ -33,6 +33,133 @@ import {
 const blocoItensCorte =
   document.getElementById("blocoItensCorte")
 
+function definirCorteSelecionadoAtivo(ativo) {
+  const botaoLimpar =
+    document.getElementById(
+      "limparCorteSelecionado"
+    )
+
+  if (botaoLimpar) {
+    botaoLimpar.disabled =
+      !ativo
+  }
+}
+
+
+function limparFormularioProducaoVisual() {
+  const campos =
+    [
+      "turno",
+      "operador",
+      "operadorOutro",
+      "horaInicio",
+      "horaFim",
+      "folhaInicio",
+      "folhaParouInput",
+      "statusProducao"
+    ]
+
+
+  campos.forEach((id) => {
+    const campo =
+      document.getElementById(id)
+
+    if (campo) {
+      campo.value =
+        ""
+    }
+  })
+
+
+  const operadorOutro =
+    document.getElementById(
+      "operadorOutro"
+    )
+
+  if (operadorOutro) {
+    operadorOutro.style.display =
+      "none"
+  }
+
+
+  document
+    .querySelectorAll(
+      ".producao-card .campo-invalido"
+    )
+    .forEach((grupo) => {
+      grupo.classList.remove(
+        "campo-invalido"
+      )
+    })
+}
+
+
+export function limparCorteSelecionado() {
+  document.getElementById("numeroCorte").value = ""
+  document.getElementById("produto").textContent = "--"
+  document.getElementById("mesa").textContent = "--"
+  document.getElementById("folhaParou").textContent = "0"
+  document.getElementById("numeroCorteSelecionado").textContent = "--"
+
+  renderizarStatus("--")
+
+  limparTabelaHistorico()
+  limparTabelaItens()
+  limparCamposItens()
+  limparFormularioProducaoVisual()
+
+  document.getElementById("novoCorte").style.display = "none"
+  blocoItensCorte.style.display = "none"
+
+  const historicoVazio =
+    document.getElementById("historicoVazio")
+
+  if (historicoVazio) {
+    historicoVazio.style.display =
+      "block"
+  }
+
+
+  const conteudoHistorico =
+    document.getElementById("conteudoHistorico")
+
+  if (conteudoHistorico) {
+    conteudoHistorico.style.display =
+      "none"
+  }
+
+
+  const botaoHistorico =
+    document.getElementById("alternarHistorico")
+
+  if (botaoHistorico) {
+    botaoHistorico.textContent =
+      "Mostrar histórico"
+  }
+
+
+  document
+    .querySelectorAll(
+      "#cortesEmAndamento tr"
+    )
+    .forEach((linhaTabela) => {
+      linhaTabela.classList.remove(
+        "corte-linha-selecionada"
+      )
+    })
+
+
+  definirCorteSelecionadoAtivo(false)
+
+  desabilitarProducao(
+    "SEM_CORTE"
+  )
+
+  document
+    .getElementById("numeroCorte")
+    ?.focus()
+}
+
 
 export async function carregarFinalizacaoItens(numeroCorte) {
   try {
@@ -58,7 +185,12 @@ export async function buscarCorte(numeroCorte) {
   document.getElementById("statusProducao").value = ""
 
   if (!numeroCorte) {
-    alert("Digite o número do corte")
+    mostrarToast(
+      "Digite o número do corte para buscar.",
+      "atencao",
+      "Número obrigatório"
+    )
+
     return
   }
 
@@ -68,6 +200,8 @@ export async function buscarCorte(numeroCorte) {
       await apiGet(`/cortes/${numeroCorte}/resumo`)
 
     document.getElementById("novoCorte").style.display = "none"
+
+    definirCorteSelecionadoAtivo(true)
 
     const statusAtual =
       dados.ultima_producao?.status ?? "EM PRODUÇÃO"
@@ -172,7 +306,11 @@ export async function buscarCorte(numeroCorte) {
 
     console.error("Erro ao buscar corte:", erro)
 
-    alert("Erro ao conectar com o servidor")
+    mostrarToast(
+      "Não foi possível conectar ao servidor.",
+      "erro",
+      "Erro na busca"
+    )
   }
 }
 
@@ -192,6 +330,9 @@ export function prepararNovoCorte(numeroCorte) {
   limparCamposItens()
 
   document.getElementById("novoCorte").style.display = "block"
+  blocoItensCorte.style.display = "none"
+
+  definirCorteSelecionadoAtivo(true)
 
   habilitarProducao()
   habilitarItens()
@@ -297,13 +438,30 @@ async function atualizarUltimosCortes() {
   }
 }
 
-export async function carregarCortesEmAndamento() {
+export async function carregarCortesEmAndamento({
+  mostrarCarregamento = false,
+  avisarErro = false
+} = {}) {
+  const tabela =
+    document.getElementById("cortesEmAndamento")
+
+  if (!tabela) {
+    return
+  }
+
   try {
+    if (mostrarCarregamento && tabela) {
+      tabela.innerHTML = `
+        <tr>
+          <td colspan="6">
+            Carregando cortes em andamento...
+          </td>
+        </tr>
+      `
+    }
+
     const cortes =
       await apiGet("/cortes-em-andamento")
-
-    const tabela =
-      document.getElementById("cortesEmAndamento")
 
     tabela.innerHTML = ""
 
@@ -325,6 +483,14 @@ export async function carregarCortesEmAndamento() {
         </tr>
       `
     } else {
+      const numeroSelecionado =
+        document
+          .getElementById(
+            "numeroCorteSelecionado"
+          )
+          ?.textContent
+          ?.trim()
+
       cortes.forEach((corte) => {
         const statusClasse =
           corte.status === "FINALIZADO"
@@ -368,6 +534,17 @@ export async function carregarCortesEmAndamento() {
         `
 
       linha.style.cursor = "pointer"
+
+      if (
+        numeroSelecionado &&
+        numeroSelecionado !== "--" &&
+        String(corte.numero) ===
+          numeroSelecionado
+      ) {
+        linha.classList.add(
+          "corte-linha-selecionada"
+        )
+      }
 
 
       const abrirCorte = async () => {
@@ -423,9 +600,7 @@ export async function carregarCortesEmAndamento() {
           // o clique da linha
           evento.stopPropagation()
 
-          await buscarCorte(
-            corte.numero
-          )
+          await abrirCorte()
         }
       )
 
@@ -442,6 +617,24 @@ export async function carregarCortesEmAndamento() {
       "Erro ao carregar cortes em andamento:",
       erro
     )
+
+    if (tabela) {
+      tabela.innerHTML = `
+        <tr>
+          <td colspan="6">
+            Não foi possível carregar os cortes em andamento.
+          </td>
+        </tr>
+      `
+    }
+
+    if (avisarErro) {
+      mostrarToast(
+        "Não foi possível atualizar os cortes em andamento.",
+        "erro",
+        "Erro ao atualizar"
+      )
+    }
   }
 }
 
@@ -481,10 +674,43 @@ export function inicializarCortes() {
   const botaoNovoCorte =
     document.getElementById("gerarProximoCorte")
 
+  const botaoLimparCorte =
+    document.getElementById("limparCorteSelecionado")
+
+  const botaoAtualizarCortes =
+    document.getElementById(
+      "atualizarCortesEmAndamento"
+    )
+
   const campoNumeroCorte =
   document.getElementById(
     "numeroCorte"
   )
+
+
+  const executarBuscaCorte = async () => {
+    const numeroCorte =
+      campoNumeroCorte.value
+
+    try {
+      definirCarregamento(
+        botaoBuscar,
+        true,
+        "Buscar"
+      )
+
+      await buscarCorte(
+        numeroCorte
+      )
+
+    } finally {
+      definirCarregamento(
+        botaoBuscar,
+        false,
+        "Buscar"
+      )
+    }
+  }
 
 
   // ========================================
@@ -493,12 +719,7 @@ export function inicializarCortes() {
 
   botaoBuscar.addEventListener(
     "click",
-    async () => {
-      const numeroCorte =
-        document.getElementById("numeroCorte").value
-
-      await buscarCorte(numeroCorte)
-    }
+    executarBuscaCorte
   )
 
   // Buscar também com ENTER
@@ -512,14 +733,41 @@ export function inicializarCortes() {
 
       evento.preventDefault()
 
-      const numeroCorte =
-        campoNumeroCorte.value
-
-      await buscarCorte(
-        numeroCorte
-      )
+      await executarBuscaCorte()
     }
   )
+
+  botaoLimparCorte
+    ?.addEventListener(
+      "click",
+      limparCorteSelecionado
+    )
+
+  botaoAtualizarCortes
+    ?.addEventListener(
+      "click",
+      async () => {
+        try {
+          definirCarregamento(
+            botaoAtualizarCortes,
+            true,
+            "Atualizar"
+          )
+
+          await carregarCortesEmAndamento({
+            mostrarCarregamento: true,
+            avisarErro: true
+          })
+
+        } finally {
+          definirCarregamento(
+            botaoAtualizarCortes,
+            false,
+            "Atualizar"
+          )
+        }
+      }
+    )
 
   // ========================================
   // NOVO CORTE / PRÓXIMO NÚMERO
@@ -618,6 +866,12 @@ export function inicializarCortes() {
 
 
       try {
+        definirCarregamento(
+          botaoCadastrar,
+          true,
+          "Cadastrar corte"
+        )
+
         await cadastrarCorte({
           numero,
           produto,
@@ -663,6 +917,12 @@ export function inicializarCortes() {
             "Não foi possível cadastrar o corte.",
           "erro",
           "Erro no cadastro"
+        )
+      } finally {
+        definirCarregamento(
+          botaoCadastrar,
+          false,
+          "Cadastrar corte"
         )
       }
     }

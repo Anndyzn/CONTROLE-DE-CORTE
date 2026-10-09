@@ -637,3 +637,100 @@
     0 9px 20px
     rgb(200 60 60 / 0.26);
 }
+
+
+/* =========================================================
+   IDENTIDADE VISUAL DO ADMIN
+   ========================================================= */
+
+.page-admin .app-header-modern {
+  border-left: 4px solid var(--warning);
+}
+
+.page-admin .admin-status {
+  gap: 7px;
+
+  color: #7a4c04;
+
+  background: #fff8e7;
+
+  border-color: rgb(210 138 20 / 0.24);
+}
+
+.page-admin .admin-status::before {
+  content: "";
+
+  width: 8px;
+  height: 8px;
+
+  background: var(--warning);
+
+  border-radius: 50%;
+
+  box-shadow:
+    0 0 0 4px rgb(210 138 20 / 0.12);
+}
+
+.page-admin .admin-busca,
+.page-admin .admin-detalhes {
+  max-width: 1240px;
+}
+
+.page-admin .admin-corte-item,
+.page-admin .admin-edicao {
+  background: #f8fafc;
+
+  border-color: #d8e0ea;
+  border-radius: 8px;
+
+  box-shadow: none;
+}
+
+.page-admin .admin-action-card {
+  background: #fff8e7;
+
+  border-color: rgb(210 138 20 / 0.22);
+  border-radius: 8px;
+}
+
+.page-admin .admin-action-danger {
+  background: #fff6f6;
+
+  border-color: rgb(200 60 60 / 0.18);
+}
+
+.page-admin .btn-admin-alerta {
+  background: var(--warning);
+
+  box-shadow:
+    0 6px 14px rgb(210 138 20 / 0.16);
+}
+
+.page-admin .btn-admin-danger {
+  background: var(--danger);
+
+  box-shadow:
+    0 6px 14px rgb(200 60 60 / 0.16);
+}
+
+.page-admin .btn-admin-alerta:hover:not(:disabled),
+.page-admin .btn-admin-danger:hover:not(:disabled) {
+  filter: none;
+
+  box-shadow:
+    0 8px 18px rgb(16 35 63 / 0.14);
+}
+
+.page-admin .btn-admin-secundario {
+  background: #ffffff;
+
+  border-color: #d8e0ea;
+  border-radius: 8px;
+}
+
+.page-admin .btn-editar-producao-admin,
+.page-admin .btn-editar-item-admin,
+.page-admin .btn-excluir-producao-admin,
+.page-admin .btn-excluir-item-admin {
+  border-radius: 6px;
+}

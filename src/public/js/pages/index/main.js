@@ -85,7 +85,9 @@ desabilitarProducao("SEM_CORTE")
   // DADOS INICIAIS
   // ========================================
 
-  await carregarCortesEmAndamento()
+  await carregarCortesEmAndamento({
+    mostrarCarregamento: true
+  })
 
 
   // ========================================
