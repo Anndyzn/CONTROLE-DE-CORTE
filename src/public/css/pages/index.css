@@ -2,6 +2,39 @@
    PÁGINA PRINCIPAL - CONTROLE DE CORTES
    ========================================================= */
 
+.planilha-setor-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.planilha-setor-card > div {
+  min-width: 0;
+}
+
+.page-index .planilha-setor-card h2 {
+  margin-bottom: 8px;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.planilha-setor-card .section-help {
+  margin: 0;
+}
+
+.planilha-setor-card .link-button {
+  flex-shrink: 0;
+}
+
+@media (max-width: 700px) {
+  .planilha-setor-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+}
+
 
 /* =========================================================
    NOVO CORTE / ITENS
