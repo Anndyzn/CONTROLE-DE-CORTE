@@ -1,7 +1,38 @@
 import { Router } from "express"
 import dbPg from "../database-pg"
+import { periodoResumo } from "../utils/periodo-resumo"
 
 const router = Router()
+
+router.get("/cortes-finalizados-recentes", async (req, res) => {
+  const periodo = periodoResumo()
+
+  try {
+    const resultado = await dbPg.query(
+      `
+      SELECT c.numero, c.produto, c.mesa,
+        TO_CHAR(p.data, 'YYYY-MM-DD') AS data_finalizacao
+      FROM cortes c
+      JOIN LATERAL (
+        SELECT p2.id, p2.data, p2.status
+        FROM producao p2
+        WHERE p2.numero_corte = c.numero
+        ORDER BY p2.id DESC
+        LIMIT 1
+      ) p ON TRUE
+      WHERE p.status = 'FINALIZADO'
+        AND p.data BETWEEN $1::date AND $2::date
+      ORDER BY p.data DESC, p.id DESC
+      `,
+      [periodo.data_inicial, periodo.hoje]
+    )
+
+    res.json({ ...periodo, cortes: resultado.rows })
+  } catch (erro) {
+    console.error("Erro ao consultar cortes finalizados recentes:", erro)
+    res.status(500).json({ erro: "Não foi possível carregar os cortes finalizados." })
+  }
+})
 
 router.get("/consultar-cortes", async (req, res) => {
 

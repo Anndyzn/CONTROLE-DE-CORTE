@@ -8,6 +8,7 @@ import {
 import {
   mostrarToast
 } from "../../core/ui.js"
+import { validarValoresItem } from "../../utils/validations.js"
 
 import {
   maiusculo,
@@ -319,6 +320,15 @@ export async function salvarItemCorte() {
     return
   }
 
+
+  const erroValores = validarValoresItem({
+    metragem, sobra: sobra || 0, perda: perda || 0,
+    faltantes: metrosFaltantes || 0, quantidade
+  })
+  if (erroValores) {
+    mostrarToast(erroValores, "atencao", "Valores inválidos")
+    return
+  }
 
   const itemEditandoId =
     document.getElementById(

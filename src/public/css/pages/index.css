@@ -2,39 +2,6 @@
    PÁGINA PRINCIPAL - CONTROLE DE CORTES
    ========================================================= */
 
-.planilha-setor-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-}
-
-.planilha-setor-card > div {
-  min-width: 0;
-}
-
-.page-index .planilha-setor-card h2 {
-  margin-bottom: 8px;
-  padding-bottom: 0;
-  border-bottom: 0;
-}
-
-.planilha-setor-card .section-help {
-  margin: 0;
-}
-
-.planilha-setor-card .link-button {
-  flex-shrink: 0;
-}
-
-@media (max-width: 700px) {
-  .planilha-setor-card {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 14px;
-  }
-}
-
 
 /* =========================================================
    NOVO CORTE / ITENS
@@ -115,6 +82,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
 
   min-width: 110px;
   height: 42px;
@@ -1202,4 +1170,162 @@ td:first-child {
 
 .page-index .btn-proximo-corte {
   background: var(--primary-deep);
+}
+
+/* Visão rápida: cortes em andamento e finalizados */
+.cortes-visao-rapida {
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) minmax(300px, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.cortes-visao-rapida > .section-card {
+  max-width: none;
+  margin: 0;
+}
+
+.cortes-visao-rapida .topo-andamento .table-wrap {
+  overflow-x: auto;
+}
+
+.cortes-visao-rapida .topo-andamento table {
+  min-width: 740px;
+}
+
+.cortes-visao-rapida .topo-andamento th,
+.cortes-visao-rapida .topo-andamento td {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+/* Resumo dos cortes finalizados */
+.finalizados-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.finalizados-cabecalho > div {
+  min-width: 0;
+}
+
+.page-index .finalizados-recentes-card h2 {
+  margin-bottom: 6px;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.finalizados-recentes-card .section-help {
+  margin: 0;
+  font-size: 13px;
+}
+
+.finalizados-total {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  color: var(--success-text);
+  background: var(--success-bg);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.finalizados-periodo {
+  display: flex;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.finalizados-periodo button {
+  min-width: 0;
+  height: 36px;
+  padding: 0 14px;
+  color: var(--text-soft);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  box-shadow: none;
+  font-size: 12px;
+}
+
+.finalizados-periodo button[aria-pressed="true"] {
+  color: var(--primary-deep);
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+
+.finalizados-lista {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.finalizados-lista .finalizado-recente {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  height: auto;
+  padding: 12px 14px;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: none;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: left;
+  letter-spacing: 0;
+}
+
+.finalizado-recente strong {
+  color: var(--primary-deep);
+  font-size: 14px;
+}
+
+.finalizado-produto {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.finalizado-detalhe,
+.finalizados-estado {
+  color: var(--text-soft);
+  font-size: 12px;
+}
+
+.finalizados-estado {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.finalizados-periodo button:hover,
+.finalizados-lista .finalizado-recente:hover {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  box-shadow: none;
+  transform: none;
+  filter: none;
+}
+
+.finalizados-periodo button:focus-visible,
+.finalizados-lista .finalizado-recente:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+@media (max-width: 1100px) {
+  .cortes-visao-rapida {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .finalizados-periodo button {
+    flex: 1;
+  }
 }

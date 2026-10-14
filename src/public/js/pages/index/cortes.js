@@ -1,4 +1,5 @@
 import { apiGet, apiPost } from "../../core/api.js"
+import { carregarResumoFinalizados } from "./finalizados.js"
 
 import {
   mostrarToast,
@@ -635,6 +636,8 @@ export async function carregarCortesEmAndamento({
         "Erro ao atualizar"
       )
     }
+  } finally {
+    carregarResumoFinalizados()
   }
 }
 

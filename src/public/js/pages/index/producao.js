@@ -1,4 +1,5 @@
 import { apiPost } from "../../core/api.js"
+import { validarFolhas } from "../../utils/validations.js"
 
 import {
   mostrarToast,
@@ -240,6 +241,13 @@ export async function salvarProducao() {
   }
 
 
+  const erroFolhas = validarFolhas(folhaInicio, folhaParou)
+  if (erroFolhas) {
+    marcarCamposObrigatorios(["folhaParouInput"])
+    mostrarToast(erroFolhas, "atencao", "Folhas inválidas")
+    return
+  }
+
   const producao = {
     data,
     numero_corte: Number(numeroCorte),
@@ -327,6 +335,13 @@ export async function salvarProducao() {
     }
 
   } catch (erro) {
+    if (erro.status === 409) {
+      renderizarStatus("FINALIZADO")
+      desabilitarProducao("FINALIZADO")
+      producaoBloqueada = true
+      await carregarCortesEmAndamento()
+    }
+
     console.error(
       "Erro ao salvar produção:",
       erro

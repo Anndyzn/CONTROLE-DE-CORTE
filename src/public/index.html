@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Controle de Corte</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="stylesheet" href="css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,11 +27,11 @@
 
       <div class="header-actions">
         <a href="consultar.html" class="header-btn header-btn-secondary">
-          Consultar
+          Consultar <span aria-hidden="true">🔎</span>
         </a>
 
         <a href="admin.html" class="header-btn header-btn-secondary">
-          Admin
+          Admin <span aria-hidden="true">⚙️</span>
         </a>
 
         <a
@@ -82,62 +83,61 @@
       </div>
     </section>
 
-    <section
-      class="section-card planilha-setor-card"
-      aria-labelledby="tituloPlanilhaCortinas"
-    >
-      <div>
-        <h2 id="tituloPlanilhaCortinas">Planilha de CORTINAS</h2>
-        <p class="section-help">
-          Acesse a planilha do setor de cortinas em uma nova aba.
-        </p>
-      </div>
+    <div class="cortes-visao-rapida">
+      <section class="section-card topo-andamento">
+        <div class="section-title-row">
+          <div>
+            <h2>Cortes em andamento</h2>
 
-      <a
-        href="https://docs.google.com/spreadsheets/d/1A_95JQXkPPbAtUFMIEWzeNV5xCOVqjls8ynQtAl3vOg/edit?usp=sharing"
-        class="link-button primary-action"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Abrir planilha
-      </a>
-    </section>
+            <p class="section-help">
+              Acompanhe os cortes ainda abertos.
+            </p>
+          </div>
 
-    <section class="section-card topo-andamento">
-      <div class="section-title-row">
-        <div>
-          <h2>Cortes em andamento</h2>
-
-          <p class="section-help">
-            Acompanhe os cortes ainda abertos.
-          </p>
+          <button
+            type="button"
+            id="atualizarCortesEmAndamento"
+            class="btn-atualizar-cortes"
+          >
+            Atualizar
+          </button>
         </div>
 
-        <button
-          type="button"
-          id="atualizarCortesEmAndamento"
-          class="btn-atualizar-cortes"
-        >
-          Atualizar
-        </button>
-      </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Número</th>
+                <th>Produto</th>
+                <th>Mesa</th>
+                <th>Última folha</th>
+                <th>Status</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="cortesEmAndamento"></tbody>
+          </table>
+        </div>
+      </section>
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Número</th>
-              <th>Produto</th>
-              <th>Mesa</th>
-              <th>Última folha</th>
-              <th>Status</th>
-              <th>Ação</th>
-            </tr>
-          </thead>
-          <tbody id="cortesEmAndamento"></tbody>
-        </table>
-      </div>
-    </section>
+      <section class="section-card finalizados-recentes-card" aria-labelledby="tituloFinalizadosRecentes">
+        <div class="finalizados-cabecalho">
+          <div>
+            <h2 id="tituloFinalizadosRecentes">Cortes finalizados</h2>
+            <p class="section-help">Hoje ou até 2 dias atrás.</p>
+          </div>
+          <span class="finalizados-total" id="totalFinalizadosRecentes" aria-live="polite">—</span>
+        </div>
+
+        <div class="finalizados-periodo" role="group" aria-label="Período dos cortes finalizados">
+          <button type="button" data-periodo-finalizados="hoje" aria-pressed="true" aria-controls="listaFinalizadosRecentes">Hoje</button>
+          <button type="button" data-periodo-finalizados="recentes" aria-pressed="false" aria-controls="listaFinalizadosRecentes">Até 2 dias atrás</button>
+        </div>
+
+        <p id="estadoFinalizadosRecentes" class="finalizados-estado" role="status">Carregando cortes finalizados...</p>
+        <div id="listaFinalizadosRecentes" class="finalizados-lista"></div>
+      </section>
+    </div>
 
     <section class="section-card busca-corte-card">
       <div class="section-title-row">

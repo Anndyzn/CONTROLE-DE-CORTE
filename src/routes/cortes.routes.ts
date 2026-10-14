@@ -1,10 +1,16 @@
 import { Router } from "express"
 import dbPg from "../database-pg"
+import { numeroCorteValido } from "../utils/validacoes"
+import { ErroRegra, executarNoCorte } from "../services/corte-bloqueado"
 
 const router = Router()
 
 router.post("/cortes", async (req, res) => {
-  const { numero, produto, mesa } = req.body
+  const { numero, produto, mesa } = req.body ?? {}
+
+  if (!numeroCorteValido(numero) || !String(produto ?? "").trim() || !String(mesa ?? "").trim()) {
+    return res.status(400).json({ erro: "Informe um número de corte positivo, produto e mesa." })
+  }
 
   try {
     const resultado = await dbPg.query(
@@ -17,7 +23,7 @@ router.post("/cortes", async (req, res) => {
       VALUES ($1, $2, $3)
       RETURNING *
       `,
-      [numero, produto, mesa]
+      [Number(numero), produto, mesa]
     )
 
     res.status(201).json({
@@ -222,44 +228,30 @@ router.get("/cortes-em-andamento", async (req, res) => {
 router.post("/cortes/:numero/finalizar-itens", async (req, res) => {
   const { numero } = req.params
 
+  if (!numeroCorteValido(numero)) return res.status(400).json({ erro: "Informe um número de corte válido." })
+
   try {
-    const contagem = await dbPg.query(
-      `
-      SELECT COUNT(*)::int AS total
-      FROM itens_corte
-      WHERE numero_corte = $1
-      `,
-      [numero]
-    )
+    await executarNoCorte(Number(numero), async (client) => {
+      const contagem = await client.query(
+        "SELECT COUNT(*)::int AS total FROM itens_corte WHERE numero_corte = $1",
+        [numero]
+      )
 
-    const total = contagem.rows[0].total
+      if (contagem.rows[0].total === 0) {
+        throw new ErroRegra(400, "Adicione pelo menos um PI antes de registrar os itens do corte.")
+      }
 
-    if (total === 0) {
-      return res.status(400).json({
-        erro: "Adicione pelo menos um PI antes de registrar os itens do corte."
-      })
-    }
-
-    const resultado = await dbPg.query(
-      `
-      UPDATE cortes
-      SET itens_finalizados = 1
-      WHERE numero = $1
-      RETURNING *
-      `,
-      [numero]
-    )
-
-    if (resultado.rows.length === 0) {
-      return res.status(404).json({
-        erro: "Corte não encontrado"
-      })
-    }
+      await client.query(
+        "UPDATE cortes SET itens_finalizados = 1 WHERE numero = $1",
+        [numero]
+      )
+    })
 
     res.json({
       mensagem: "Itens do corte registrados com sucesso"
     })
   } catch (erro) {
+    if (erro instanceof ErroRegra) return res.status(erro.status).json({ erro: erro.message })
     console.error(erro)
 
     res.status(500).json({

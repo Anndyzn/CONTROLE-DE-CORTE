@@ -1,9 +1,17 @@
 import { Router } from "express"
 import dbPg from "../database-pg"
+import { numeroCorteValido, validarProducao } from "../utils/validacoes"
+import { ErroRegra, executarNoCorte } from "../services/corte-bloqueado"
 
 const router = Router()
 
 router.post("/producao", async (req, res) => {
+  const erroValidacao = validarProducao(req.body ?? {})
+  if (erroValidacao) return res.status(400).json({ erro: erroValidacao })
+  if (!numeroCorteValido(req.body.numero_corte)) {
+    return res.status(400).json({ erro: "Informe um número de corte válido." })
+  }
+
   const {
     data,
     numero_corte,
@@ -17,43 +25,39 @@ router.post("/producao", async (req, res) => {
   } = req.body
 
   try {
-    const resultado = await dbPg.query(
-      `
-      INSERT INTO producao (
-        data,
-        numero_corte,
-        turno,
-        operador,
-        folha_inicio,
-        folha_parou,
-        status,
-        hora_inicio,
-        hora_fim
+    const resultado = await executarNoCorte(Number(numero_corte), async (client, corte) => {
+      const ultima = await client.query(
+        "SELECT status FROM producao WHERE numero_corte = $1 ORDER BY id DESC LIMIT 1",
+        [Number(numero_corte)]
       )
-      VALUES (
-        $1, $2, $3, $4, $5,
-        $6, $7, $8, $9
+
+      if (ultima.rows[0]?.status === "FINALIZADO" || Number(corte.itens_finalizados) === 1) {
+        throw new ErroRegra(409, "Este corte já está finalizado. Novos lançamentos de produção estão bloqueados.")
+      }
+
+      return client.query(
+        `
+        INSERT INTO producao (
+          data, numero_corte, turno, operador, folha_inicio,
+          folha_parou, status, hora_inicio, hora_fim
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        RETURNING *
+        `,
+        [
+          data, Number(numero_corte), turno, operador,
+          Number(folha_inicio), Number(folha_parou), status,
+          hora_inicio || null, hora_fim || null
+        ]
       )
-      RETURNING *
-      `,
-      [
-        data,
-        numero_corte,
-        turno,
-        operador,
-        folha_inicio,
-        folha_parou,
-        status,
-        hora_inicio,
-        hora_fim
-      ]
-    )
+    })
 
     res.status(201).json({
       mensagem: "Produção salva com sucesso",
       id: resultado.rows[0].id
     })
   } catch (erro) {
+    if (erro instanceof ErroRegra) return res.status(erro.status).json({ erro: erro.message })
     console.error(erro)
 
     res.status(500).json({
@@ -142,6 +146,9 @@ router.get("/producao", async (req, res) => {
 // ========================================
 
 router.put("/producao/:id", async (req, res) => {
+  const erroValidacao = validarProducao(req.body ?? {})
+  if (erroValidacao) return res.status(400).json({ erro: erroValidacao })
+
   const { id } = req.params
 
   const {
@@ -154,20 +161,6 @@ router.put("/producao/:id", async (req, res) => {
     hora_inicio,
     hora_fim
   } = req.body
-
-
-  if (
-    !data ||
-    !turno ||
-    !operador ||
-    folha_inicio === undefined ||
-    folha_parou === undefined ||
-    !status
-  ) {
-    return res.status(400).json({
-      erro: "Preencha todos os campos obrigatórios"
-    })
-  }
 
 
   try {
@@ -190,8 +183,8 @@ router.put("/producao/:id", async (req, res) => {
         data,
         turno,
         operador,
-        folha_inicio,
-        folha_parou,
+        Number(folha_inicio),
+        Number(folha_parou),
         status,
         hora_inicio || null,
         hora_fim || null,

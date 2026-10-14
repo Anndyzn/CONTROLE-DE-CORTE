@@ -1,6 +1,7 @@
 import {
   inicializarCortes,
-  carregarCortesEmAndamento
+  carregarCortesEmAndamento,
+  buscarCorte
 } from "./cortes.js"
 
 import {
@@ -22,6 +23,7 @@ import {
 import {
   inicializarHistoricoUI
 } from "./historico.js"
+import { inicializarResumoFinalizados } from "./finalizados.js"
 
 
 async function iniciarPagina() {
@@ -37,6 +39,7 @@ async function iniciarPagina() {
   
 
   inicializarCortes()
+  inicializarResumoFinalizados(buscarCorte)
 
 
   // ========================================

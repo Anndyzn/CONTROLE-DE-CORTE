@@ -7,6 +7,7 @@ import {
 import {
   mostrarToast
 } from "../core/ui.js"
+import { validarFolhas } from "../utils/validations.js"
 
 import {
   formatarData,
@@ -363,12 +364,10 @@ async function salvarEdicaoProducao() {
   }
 
 
-  if (
-    Number(folhaParou) <
-    Number(folhaInicio)
-  ) {
+  const erroFolhas = validarFolhas(folhaInicio, folhaParou)
+  if (erroFolhas) {
     mostrarToast(
-      "A folha final não pode ser menor que a folha inicial.",
+      erroFolhas,
       "atencao",
       "Folhas inválidas"
     )

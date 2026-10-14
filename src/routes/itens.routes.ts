@@ -1,5 +1,7 @@
 import { Router } from "express"
 import dbPg from "../database-pg"
+import { numeroCorteValido, validarItem } from "../utils/validacoes"
+import { ErroRegra, executarNoCorte } from "../services/corte-bloqueado"
 
 const router = Router()
 
@@ -7,6 +9,12 @@ const router = Router()
 // CADASTRAR ITEM DO CORTE
 // ========================================
 router.post("/itens-corte", async (req, res) => {
+  const erroValidacao = validarItem(req.body ?? {})
+  if (erroValidacao) return res.status(400).json({ erro: erroValidacao })
+  if (!numeroCorteValido(req.body.numero_corte)) {
+    return res.status(400).json({ erro: "Informe um número de corte válido." })
+  }
+
   const {
     numero_corte,
     modelo,
@@ -20,37 +28,28 @@ router.post("/itens-corte", async (req, res) => {
   } = req.body
 
   try {
-    const resultado = await dbPg.query(
-      `
-      INSERT INTO itens_corte (
-        numero_corte,
-        modelo,
-        cor,
-        tecido,
-        metragem_usada,
-        sobra_metros,
-        perda_metros,
-        metros_faltantes,
-        quantidade_pecas
+    const resultado = await executarNoCorte(Number(numero_corte), async (client, corte) => {
+      if (Number(corte.itens_finalizados) === 1) {
+        throw new ErroRegra(409, "Os PIs deste corte já foram confirmados. Reabra os itens pelo Admin antes de adicionar outro PI.")
+      }
+
+      return client.query(
+        `
+        INSERT INTO itens_corte (
+          numero_corte, modelo, cor, tecido, metragem_usada,
+          sobra_metros, perda_metros, metros_faltantes, quantidade_pecas
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        RETURNING *
+        `,
+        [
+          Number(numero_corte), modelo, cor, tecido,
+          Number(metragem_usada), Number(sobra_metros ?? 0),
+          Number(perda_metros ?? 0), Number(metros_faltantes ?? 0),
+          Number(quantidade_pecas)
+        ]
       )
-      VALUES (
-        $1, $2, $3, $4, $5,
-        $6, $7, $8, $9
-      )
-      RETURNING *
-      `,
-      [
-        numero_corte,
-        modelo,
-        cor,
-        tecido,
-        metragem_usada,
-        sobra_metros || 0,
-        perda_metros || 0,
-        metros_faltantes || 0,
-        quantidade_pecas
-      ]
-    )
+    })
 
     res.status(201).json({
       mensagem: "Item do corte salvo com sucesso",
@@ -58,6 +57,7 @@ router.post("/itens-corte", async (req, res) => {
     })
 
   } catch (erro) {
+    if (erro instanceof ErroRegra) return res.status(erro.status).json({ erro: erro.message })
     console.error("Erro ao cadastrar item:", erro)
 
     res.status(500).json({
@@ -100,6 +100,9 @@ router.get("/itens-corte/:numero", async (req, res) => {
 // EDITAR ITEM
 // ========================================
 router.put("/itens-corte/:id", async (req, res) => {
+  const erroValidacao = validarItem(req.body ?? {})
+  if (erroValidacao) return res.status(400).json({ erro: erroValidacao })
+
   const { id } = req.params
 
   const {
@@ -133,11 +136,11 @@ router.put("/itens-corte/:id", async (req, res) => {
         modelo,
         cor,
         tecido,
-        metragem_usada,
-        sobra_metros || 0,
-        perda_metros || 0,
-        metros_faltantes || 0,
-        quantidade_pecas,
+        Number(metragem_usada),
+        Number(sobra_metros ?? 0),
+        Number(perda_metros ?? 0),
+        Number(metros_faltantes ?? 0),
+        Number(quantidade_pecas),
         id
       ]
     )

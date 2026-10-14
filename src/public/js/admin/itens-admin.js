@@ -8,6 +8,7 @@ import {
 import {
   mostrarToast
 } from "../core/ui.js"
+import { validarValoresItem } from "../utils/validations.js"
 
 import {
   formatarNumero,
@@ -355,16 +356,14 @@ async function salvarEdicaoItemAdmin() {
   }
 
 
-  if (
-    Number(metragem) < 0 ||
-    Number(sobra || 0) < 0 ||
-    Number(perda || 0) < 0 ||
-    Number(faltantes || 0) < 0 ||
-    Number(quantidade) < 0
-  ) {
+  const erroValores = validarValoresItem({
+    metragem, sobra: sobra || 0, perda: perda || 0,
+    faltantes: faltantes || 0, quantidade
+  })
+  if (erroValores) {
 
     mostrarToast(
-      "Os valores não podem ser negativos.",
+      erroValores,
       "atencao",
       "Valores inválidos"
     )

@@ -32,10 +32,12 @@ export async function apiPost(
     await resposta.json()
 
   if (!resposta.ok) {
-    throw new Error(
+    const erro = new Error(
       dados.erro ||
       "Erro ao salvar dados"
     )
+    erro.status = resposta.status
+    throw erro
   }
 
   return dados
