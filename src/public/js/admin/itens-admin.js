@@ -1,3 +1,4 @@
+import { solicitarJustificativa } from "./justificativa.js"
 import {
   apiGet,
   apiPost,
@@ -372,13 +373,12 @@ async function salvarEdicaoItemAdmin() {
   }
 
 
-  const confirmar =
-    confirm(
-      "Salvar as alterações deste PI?"
-    )
+  const justificativa = await solicitarJustificativa({
+    titulo: "Corrigir PI", descricao: `Corte ${numeroCorte}: informe o motivo da correção deste PI.`
+  })
 
 
-  if (!confirmar) {
+  if (!justificativa) {
     return
   }
 
@@ -388,6 +388,7 @@ async function salvarEdicaoItemAdmin() {
     await apiPut(
       `/itens-corte/${id}`,
       {
+        ...justificativa,
         modelo,
         cor,
         tecido,
@@ -508,9 +509,11 @@ async function excluirItemAdmin(item) {
 
   try {
 
-    await apiDelete(
-      `/itens-corte/${item.id}`
-    )
+    const justificativa = await solicitarJustificativa({
+      titulo: "Excluir PI", descricao: `Corte ${numeroCorte}: este PI será excluído. Informe o motivo.`
+    })
+    if (!justificativa) return
+    await apiDelete(`/itens-corte/${item.id}`, justificativa)
 
 
     mostrarToast(
@@ -593,9 +596,11 @@ async function reabrirItensCorte() {
 
   try {
 
-    await apiPost(
-      `/cortes/${numeroCorte}/reabrir-itens`
-    )
+    const justificativa = await solicitarJustificativa({
+      titulo: "Reabrir PIs", descricao: `Corte ${numeroCorte}: os PIs poderão ser adicionados novamente. Informe o motivo.`
+    })
+    if (!justificativa) return
+    await apiPost(`/cortes/${numeroCorte}/reabrir-itens`, justificativa)
 
 
     mostrarToast(

@@ -13,6 +13,7 @@ import {
 import {
   esconderDetalhesAdmin
 } from "./ui-admin.js"
+import { inicializarHistoricoAdmin } from "./historico-admin.js"
 
 
 function iniciarAdmin() {
@@ -27,6 +28,7 @@ function iniciarAdmin() {
   inicializarProducaoAdmin()
 
   inicializarItensAdmin()
+  inicializarHistoricoAdmin()
 
   console.log(
     "✅ Painel administrativo inicializado"

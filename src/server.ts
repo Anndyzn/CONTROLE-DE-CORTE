@@ -5,6 +5,8 @@ import cortesRoutes from "./routes/cortes.routes"
 import producaoRoutes from "./routes/producao.routes"
 import itensRoutes from "./routes/itens.routes"
 import consultasRoutes from "./routes/consultas.routes"
+import historicoAdminRoutes from "./routes/historico-admin.routes"
+import { prepararHistoricoAdmin } from "./services/historico-admin"
 
 const app = express()
 
@@ -30,12 +32,16 @@ app.use(cortesRoutes)
 app.use(producaoRoutes)
 app.use(itensRoutes)
 app.use(consultasRoutes)
+app.use(historicoAdminRoutes)
 
 const PORT =
   process.env.PORT || 3000
 
-app.listen(PORT, () => {
-  console.log(
-    `Servidor rodando na porta ${PORT}`
-  )
+prepararHistoricoAdmin().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`)
+  })
+}).catch(erro => {
+  console.error("Não foi possível preparar o histórico administrativo:", erro)
+  process.exit(1)
 })

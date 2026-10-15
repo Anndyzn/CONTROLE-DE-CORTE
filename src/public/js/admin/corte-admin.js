@@ -1,3 +1,4 @@
+import { solicitarJustificativa } from "./justificativa.js"
 import {
   apiGet,
   apiDelete
@@ -233,32 +234,19 @@ async function excluirCorteAdmin() {
   // SEGUNDA CONFIRMAÇÃO
   // ========================================
 
-  const numeroConfirmacao =
-    prompt(
-      `Para confirmar, digite o número do corte:\n\n${numeroCorte}`
-    )
-
-
-  if (
-    numeroConfirmacao !==
-    numeroCorte
-  ) {
-
-    mostrarToast(
-      "O número informado não corresponde ao corte.",
-      "atencao",
-      "Exclusão cancelada"
-    )
-
-    return
-  }
+  const justificativa = await solicitarJustificativa({
+    titulo: "Excluir corte completo",
+    descricao: `O corte ${numeroCorte}, seus lançamentos e PIs serão excluídos. O motivo e os dados removidos ficarão no histórico.`,
+    numeroConfirmacao: numeroCorte
+  })
+  if (!justificativa) return
 
 
   try {
 
     const resultado =
       await apiDelete(
-        `/cortes/${numeroCorte}`
+        `/cortes/${numeroCorte}`, justificativa
       )
 
 

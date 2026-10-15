@@ -734,3 +734,40 @@
 .page-admin .btn-excluir-item-admin {
   border-radius: 6px;
 }
+.justificativa-dialog {
+  width: min(520px, calc(100vw - 24px));
+  max-height: calc(100dvh - 32px);
+  padding: 24px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  overflow-y: auto;
+}
+.justificativa-dialog::backdrop { background: rgb(16 35 63 / 0.5); }
+.justificativa-dialog h2 { font-size: 20px; margin-bottom: 12px; }
+.justificativa-dialog p, .justificativa-dialog small { color: var(--text-soft); line-height: 1.5; }
+.justificativa-dialog .form-group { margin: 16px 0; }
+.justificativa-dialog textarea { width: 100%; min-height: 90px; padding: 10px; font: inherit; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); resize: vertical; }
+.justificativa-dialog textarea:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.justificativa-dialog [hidden] { display: none; }
+.historico-admin-filtro { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin-bottom: 18px; }
+.historico-admin-filtro .form-group { margin: 0; flex: 1; min-width: 180px; }
+.historico-admin-lista { display: grid; gap: 12px; margin-bottom: 16px; }
+.historico-admin-painel [hidden] { display: none; }
+.historico-admin-registro { padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-2); overflow-wrap: anywhere; }
+.historico-admin-cabecalho { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+.historico-admin-cabecalho time { color: var(--text-soft); font-size: 12px; }
+.historico-admin-registro p { margin: 10px 0; font-size: 13px; color: var(--text-soft); }
+.historico-admin-registro .historico-admin-motivo { color: var(--text); white-space: pre-wrap; }
+.historico-admin-registro summary { cursor: pointer; color: var(--primary-deep); font-size: 13px; padding: 8px 0; }
+.historico-admin-registro summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.historico-admin-dados { display: grid; grid-template-columns: minmax(100px, 1fr) minmax(0, 3fr); gap: 8px; margin: 12px 0; font-size: 13px; border-top: 1px solid var(--border); padding-top: 12px; }
+.historico-admin-dados dt { color: var(--text-soft); }
+.historico-admin-dados dd { margin: 0; white-space: pre-wrap; }
+@media (max-width: 700px) {
+  .historico-admin-filtro button { width: 100%; }
+  .historico-admin-dados { grid-template-columns: minmax(0, 1fr); gap: 5px; }
+  .historico-admin-dados dd { margin-bottom: 8px; }
+}

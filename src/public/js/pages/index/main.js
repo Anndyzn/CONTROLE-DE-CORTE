@@ -24,6 +24,7 @@ import {
   inicializarHistoricoUI
 } from "./historico.js"
 import { inicializarResumoFinalizados } from "./finalizados.js"
+import { inicializarRascunhos } from "./rascunho.js"
 
 
 async function iniciarPagina() {
@@ -43,29 +44,6 @@ async function iniciarPagina() {
 
 
   // ========================================
-  // BOTÃO NOVO CORTE DO TOPO
-  // ========================================
-
-  const botaoNovoCorteTopo =
-    document.getElementById("novoCorteTopo")
-
-  const botaoNovoCorteOriginal =
-    document.getElementById("gerarProximoCorte")
-
-  if (
-    botaoNovoCorteTopo &&
-    botaoNovoCorteOriginal
-  ) {
-    botaoNovoCorteTopo.addEventListener(
-      "click",
-      () => {
-        botaoNovoCorteOriginal.click()
-      }
-    )
-  }
-
-
-  // ========================================
   // PRODUÇÃO
   // ========================================
 
@@ -82,6 +60,7 @@ desabilitarProducao("SEM_CORTE")
   inicializarItens()
 
   inicializarHistoricoUI()
+  inicializarRascunhos(buscarCorte)
 
 
   // ========================================

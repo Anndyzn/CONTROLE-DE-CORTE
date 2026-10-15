@@ -9,6 +9,8 @@ import {
   mostrarToast
 } from "../../core/ui.js"
 import { validarValoresItem } from "../../utils/validations.js"
+import { solicitarJustificativa } from "../../admin/justificativa.js"
+import { definirBaseItemRascunho, limparRascunhoGrupo, versaoRascunho } from "./rascunho.js"
 
 import {
   maiusculo,
@@ -146,6 +148,7 @@ function configurarEdicao(linha, item) {
     linha.querySelector(".btn-editar-item")
 
   botaoEditar.addEventListener("click", () => {
+    definirBaseItemRascunho(item)
     document.getElementById("itemEditandoId").value =
       item.id
 
@@ -204,9 +207,9 @@ function configurarExclusao(
       if (!confirmar) return
 
       try {
-        await apiDelete(
-          `/itens-corte/${item.id}`
-        )
+        const justificativa = await solicitarJustificativa({titulo:"Excluir PI", descricao:`Corte ${numeroCorte}: informe o motivo da exclusão deste PI.`})
+        if (!justificativa) return
+        await apiDelete(`/itens-corte/${item.id}`, justificativa)
 
         mostrarToast(
           "Item excluído com sucesso.",
@@ -350,11 +353,14 @@ export async function salvarItemCorte() {
   }
 
 
+  const versao = versaoRascunho("item", numeroCorte)
   try {
     if (itemEditandoId) {
+      const justificativa = await solicitarJustificativa({titulo:"Corrigir PI", descricao:`Corte ${numeroCorte}: informe o motivo da correção deste PI.`})
+      if (!justificativa) return
       await apiPut(
         `/itens-corte/${itemEditandoId}`,
-        dadosItem
+        {...dadosItem, ...justificativa}
       )
     } else {
       await apiPost(
@@ -364,6 +370,7 @@ export async function salvarItemCorte() {
     }
 
 
+    limparRascunhoGrupo("item", numeroCorte, versao)
     mostrarToast(
       itemEditandoId
         ? "O item do corte foi atualizado."

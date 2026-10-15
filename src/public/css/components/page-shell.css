@@ -169,7 +169,6 @@
 }
 
 .page-index .btn-buscar-corte,
-.page-index .btn-novo-corte-topo,
 .page-index .primary-action,
 .page-index #salvarProducao,
 .page-consultar .consulta-filtros .btn-filtrar,
@@ -184,7 +183,6 @@
 }
 
 .page-index .btn-buscar-corte:hover:not(:disabled),
-.page-index .btn-novo-corte-topo:hover:not(:disabled),
 .page-index .primary-action:hover:not(:disabled),
 .page-index #salvarProducao:hover:not(:disabled),
 .page-consultar .consulta-filtros .btn-filtrar:hover:not(:disabled),

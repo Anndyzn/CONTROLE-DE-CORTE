@@ -37,6 +37,19 @@ Sistema web interno que permite:
 
 ## ⚙️ Funcionalidades
 
+### Rascunhos e histórico administrativo
+- Os campos do cadastro do corte, da produção e dos PIs são salvos automaticamente neste navegador, separados por corte.
+- Ao voltar, use **Restaurar** ou **Descartar** no aviso de rascunho. Restaurar preenche os campos; o envio continua manual.
+- Após um envio confirmado, somente o rascunho daquele formulário é removido. Falhas de conexão mantêm o rascunho.
+- A restauração consulta o estado atual do corte. Produção com lançamento mais recente, cortes já finalizados e PIs registrados ou alterados não recebem valores antigos automaticamente.
+- Rascunhos de `localhost` e do site no Render são separados, assim como navegadores e computadores diferentes.
+- Correções, reaberturas e exclusões pedem **responsável** e **motivo**, validados também pelo servidor. Isso inclui correções e exclusões de PIs na tela inicial.
+- O responsável é informado pela pessoa; o sistema ainda não autentica sua identidade.
+- O Admin oferece um histórico paginado, com filtro por corte, data e hora, motivo e dados anteriores/posteriores. Exclusões completas conservam também os lançamentos e PIs removidos nesse histórico; isso não substitui um backup.
+- A tabela `historico_admin` e seu índice são preparados automaticamente na inicialização, sem modificar os registros existentes de cortes, produção ou PIs. A conexão PostgreSQL precisa poder criar a tabela na primeira execução. O acesso direto à tabela pelo cliente Supabase fica bloqueado por RLS; a aplicação usa sua conexão de servidor.
+- A alteração principal e o registro no histórico são feitos na mesma transação: se o histórico falhar, a alteração é desfeita.
+- O histórico cobre as ações feitas após a instalação desta versão; alterações anteriores não são reconstruídas.
+
 ### 📋 Gestão de cortes
 - 🔍 Buscar corte
 - ➕ Criar novo corte

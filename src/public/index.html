@@ -50,37 +50,21 @@
       </div>
     </header>
 
-    <section class="dashboard-top">
-      <div class="dashboard-top-card">
-        <span class="dashboard-top-label">Em andamento</span>
-        <strong id="resumoEmAndamento">0</strong>
+    <aside id="avisoRascunho" class="rascunho-aviso" aria-label="Rascunhos" hidden>
+      <p id="estadoRascunho" role="status"></p>
+      <div id="acoesRascunho" class="rascunho-acoes">
+        <label for="rascunhoSelecionado">Rascunho</label>
+        <select id="rascunhoSelecionado"></select>
+        <button id="restaurarRascunho" type="button">Restaurar</button>
+        <button id="descartarRascunho" type="button" class="btn-secondary">Descartar</button>
       </div>
+    </aside>
 
-      <div class="dashboard-top-card">
-        <span class="dashboard-top-label">Último finalizado</span>
-        <strong id="resumoUltimoFinalizado">--</strong>
-      </div>
-
-      <div class="dashboard-top-card">
-        <span class="dashboard-top-label">
-          Último corte criado
-        </span>
-        <strong id="resumoUltimoCorte">--</strong>
-      </div>
-
-      <div class="dashboard-top-card dashboard-top-card-action">
-        <span class="dashboard-top-label">
-          Ação rápida
-        </span>
-
-        <button
-          type="button"
-          id="novoCorteTopo"
-          class="btn-novo-corte-topo"
-        >
-          + Novo corte
-        </button>
-      </div>
+    <section class="section-card mesas-painel" aria-labelledby="tituloPainelMesas">
+      <h2 id="tituloPainelMesas">Ocupação das mesas</h2>
+      <p class="section-help">Veja onde há um corte em andamento e quais mesas estão livres.</p>
+      <p id="estadoPainelMesas" class="mesas-estado" role="status">Consultando ocupação das mesas...</p>
+      <div id="painelMesas" class="mesas-grid"></div>
     </section>
 
     <div class="cortes-visao-rapida">
@@ -196,7 +180,7 @@
 
           <div class="form-group">
             <label for="mesaNova">Mesa</label>
-            <select id="mesaNova">
+            <select id="mesaNova" aria-describedby="avisoMesaOcupada">
               <option value="">Selecione</option>
               <option value="MESA 1">MESA 1</option>
               <option value="MESA 2">MESA 2</option>
@@ -204,6 +188,8 @@
             </select>
           </div>
         </div>
+
+        <p id="avisoMesaOcupada" class="mesa-ocupada-aviso" role="alert" hidden></p>
 
         <div class="button-row">
           <button

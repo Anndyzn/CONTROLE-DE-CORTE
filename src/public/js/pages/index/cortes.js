@@ -1,5 +1,10 @@
 import { apiGet, apiPost } from "../../core/api.js"
 import { carregarResumoFinalizados } from "./finalizados.js"
+import { selecionarContextoRascunho, limparRascunhoGrupo, versaoRascunho } from "./rascunho.js"
+import {
+  atualizarControleMesas, atualizarOcupacaoMesas, definirCadastroEmAndamento,
+  informarMesaOcupada, informarFalhaOcupacaoMesas, inicializarControleMesas, verificarDisponibilidadeMesa
+} from "./mesas.js"
 
 import {
   mostrarToast,
@@ -96,6 +101,7 @@ function limparFormularioProducaoVisual() {
 
 
 export function limparCorteSelecionado() {
+  selecionarContextoRascunho(null)
   document.getElementById("numeroCorte").value = ""
   document.getElementById("produto").textContent = "--"
   document.getElementById("mesa").textContent = "--"
@@ -200,6 +206,11 @@ export async function buscarCorte(numeroCorte) {
     const dados =
       await apiGet(`/cortes/${numeroCorte}/resumo`)
 
+    if (document.getElementById("numeroCorteSelecionado").textContent.trim() !== String(numeroCorte)) {
+      limparFormularioProducaoVisual()
+      limparCamposItens()
+    }
+
     document.getElementById("novoCorte").style.display = "none"
 
     definirCorteSelecionadoAtivo(true)
@@ -238,6 +249,7 @@ export async function buscarCorte(numeroCorte) {
 
     const producaoFinalizada =
       statusAtual === "FINALIZADO"
+    selecionarContextoRascunho({ numero: String(numeroCorte), novo: false, ultimaProducaoId: dados.ultima_producao?.id })
 
     if (producaoFinalizada) {
       desabilitarProducao(
@@ -292,6 +304,7 @@ export async function buscarCorte(numeroCorte) {
       }
 
     }, 100)
+    return dados
 
   } catch (erro) {
 
@@ -302,7 +315,7 @@ export async function buscarCorte(numeroCorte) {
         .includes("não encontrado")
     ) {
       prepararNovoCorte(numeroCorte)
-      return
+      return { novo: true }
     }
 
     console.error("Erro ao buscar corte:", erro)
@@ -317,6 +330,9 @@ export async function buscarCorte(numeroCorte) {
 
 
 export function prepararNovoCorte(numeroCorte) {
+  selecionarContextoRascunho({ numero: String(numeroCorte), novo: true })
+  document.getElementById("numeroCorteSelecionado").textContent = numeroCorte
+  limparFormularioProducaoVisual()
 
   document.getElementById("produto").textContent = ""
   document.getElementById("mesa").textContent = ""
@@ -340,103 +356,7 @@ export function prepararNovoCorte(numeroCorte) {
   desabilitarProducao(
     "NOVO_CORTE"
   )
-}
-
-async function atualizarUltimosCortes() {
-  try {
-    const todosCortes =
-      await apiGet("/consultar-cortes")
-
-    console.log(
-      "Cortes para dashboard:",
-      todosCortes
-    )
-
-    if (
-      !Array.isArray(todosCortes) ||
-      todosCortes.length === 0
-    ) {
-      return
-    }
-
-    // ==============================
-    // ÚLTIMO CORTE
-    // ==============================
-
-    const numerosValidos =
-      todosCortes
-        .map((corte) =>
-          Number(corte.numero)
-        )
-        .filter((numero) =>
-          !Number.isNaN(numero)
-        )
-
-    if (numerosValidos.length > 0) {
-      const ultimoCorte =
-        Math.max(...numerosValidos)
-
-      const elemento =
-        document.getElementById(
-          "resumoUltimoCorte"
-        )
-
-      if (elemento) {
-        elemento.textContent =
-          ultimoCorte
-      }
-    }
-
-    // ==============================
-    // ÚLTIMO FINALIZADO
-    // ==============================
-
-    const finalizados =
-      todosCortes.filter((corte) => {
-        return (
-          String(corte.status ?? "")
-            .trim()
-            .toUpperCase() ===
-          "FINALIZADO"
-        )
-      })
-
-    if (finalizados.length > 0) {
-      const numerosFinalizados =
-        finalizados
-          .map((corte) =>
-            Number(corte.numero)
-          )
-          .filter((numero) =>
-            !Number.isNaN(numero)
-          )
-
-      if (numerosFinalizados.length > 0) {
-        const ultimoFinalizado =
-          Math.max(
-            ...numerosFinalizados
-          )
-
-        const elemento =
-          document.getElementById(
-            "resumoUltimoFinalizado"
-          )
-
-        if (elemento) {
-          elemento.textContent =
-            ultimoFinalizado
-        }
-      }
-    }
-
-  } catch (erro) {
-    // Se o dashboard der erro,
-    // NÃO interfere na tabela principal.
-    console.error(
-      "Erro ao carregar últimos cortes:",
-      erro
-    )
-  }
+  atualizarControleMesas()
 }
 
 export async function carregarCortesEmAndamento({
@@ -464,16 +384,9 @@ export async function carregarCortesEmAndamento({
     const cortes =
       await apiGet("/cortes-em-andamento")
 
+    atualizarOcupacaoMesas(cortes)
+
     tabela.innerHTML = ""
-
-    // Atualiza somente a quantidade
-    const resumoEmAndamento =
-      document.getElementById("resumoEmAndamento")
-
-    if (resumoEmAndamento) {
-      resumoEmAndamento.textContent =
-        cortes.length
-    }
 
     if (cortes.length === 0) {
       tabela.innerHTML = `
@@ -609,11 +522,8 @@ export async function carregarCortesEmAndamento({
       })
     }
 
-    // IMPORTANTE:
-    // atualiza os outros cards separadamente
-    atualizarUltimosCortes()
-
   } catch (erro) {
+    informarFalhaOcupacaoMesas()
     console.error(
       "Erro ao carregar cortes em andamento:",
       erro
@@ -656,6 +566,7 @@ export async function cadastrarCorte({
   produto,
   mesa
 }) {
+  await verificarDisponibilidadeMesa(mesa)
 
   return apiPost(
     "/cortes",
@@ -668,6 +579,7 @@ export async function cadastrarCorte({
 }
 
 export function inicializarCortes() {
+  inicializarControleMesas()
   const botaoBuscar =
     document.getElementById("buscarCorte")
 
@@ -869,17 +781,20 @@ export function inicializarCortes() {
 
 
       try {
+        definirCadastroEmAndamento(true)
         definirCarregamento(
           botaoCadastrar,
           true,
           "Cadastrar corte"
         )
 
+        const versao = versaoRascunho("novo", numero)
         await cadastrarCorte({
           numero,
           produto,
           mesa
         })
+        limparRascunhoGrupo("novo", numero, versao)
 
 
         mostrarToast(
@@ -910,6 +825,13 @@ export function inicializarCortes() {
         await carregarCortesEmAndamento()
 
       } catch (erro) {
+        if (erro.codigo === "MESA_OCUPADA") {
+          informarMesaOcupada(erro.mesa, erro.cortes)
+          mostrarToast(erro.message, "atencao", "Mesa ocupada", 8000)
+          await carregarCortesEmAndamento()
+          return
+        }
+
         console.error(
           "Erro ao cadastrar corte:",
           erro
@@ -927,6 +849,7 @@ export function inicializarCortes() {
           false,
           "Cadastrar corte"
         )
+        definirCadastroEmAndamento(false)
       }
     }
   )

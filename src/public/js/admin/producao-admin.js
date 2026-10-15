@@ -1,3 +1,4 @@
+import { solicitarJustificativa } from "./justificativa.js"
 import {
   apiGet,
   apiPut,
@@ -376,13 +377,12 @@ async function salvarEdicaoProducao() {
   }
 
 
-  const confirmar =
-    confirm(
-      "Salvar as alterações deste lançamento?"
-    )
+  const justificativa = await solicitarJustificativa({
+    titulo: "Corrigir lançamento", descricao: `Corte ${numeroCorte}: informe o motivo da correção ou reabertura.`
+  })
 
 
-  if (!confirmar) {
+  if (!justificativa) {
     return
   }
 
@@ -391,6 +391,7 @@ async function salvarEdicaoProducao() {
     await apiPut(
       `/producao/${id}`,
       {
+        ...justificativa,
         data,
         turno,
         operador,
@@ -531,9 +532,11 @@ async function excluirProducao(
 
   try {
 
-    await apiDelete(
-      `/producao/${item.id}`
-    )
+    const justificativa = await solicitarJustificativa({
+      titulo: "Excluir lançamento", descricao: `Corte ${numeroCorte}: o lançamento será excluído. Informe o motivo.`
+    })
+    if (!justificativa) return
+    await apiDelete(`/producao/${item.id}`, justificativa)
 
 
     mostrarToast(

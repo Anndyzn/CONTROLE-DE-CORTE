@@ -2,35 +2,37 @@ import { Router } from "express"
 import dbPg from "../database-pg"
 import { numeroCorteValido } from "../utils/validacoes"
 import { ErroRegra, executarNoCorte } from "../services/corte-bloqueado"
+import { cadastrarCorteNaMesa, ErroMesaOcupada, MESAS, normalizarMesa } from "../services/mesa-disponivel"
+import { registrarAlteracaoAdmin, validarJustificativa } from "../services/historico-admin"
 
 const router = Router()
 
 router.post("/cortes", async (req, res) => {
   const { numero, produto, mesa } = req.body ?? {}
 
-  if (!numeroCorteValido(numero) || !String(produto ?? "").trim() || !String(mesa ?? "").trim()) {
+  if (!numeroCorteValido(numero) || typeof produto !== "string" || !produto.trim()) {
     return res.status(400).json({ erro: "Informe um número de corte positivo, produto e mesa." })
   }
 
+  const mesaNormalizada = normalizarMesa(mesa)
+  if (!MESAS.includes(mesaNormalizada)) {
+    return res.status(400).json({ erro: "Selecione uma mesa válida: MESA 1, MESA 2 ou MESA 3." })
+  }
+
   try {
-    const resultado = await dbPg.query(
-      `
-      INSERT INTO cortes (
-        numero,
-        produto,
-        mesa
-      )
-      VALUES ($1, $2, $3)
-      RETURNING *
-      `,
-      [Number(numero), produto, mesa]
-    )
+    const corte = await cadastrarCorteNaMesa(Number(numero), produto.trim(), mesaNormalizada)
 
     res.status(201).json({
       mensagem: "Corte cadastrado com sucesso",
-      corte: resultado.rows[0]
+      corte
     })
   } catch (erro: any) {
+    if (erro instanceof ErroMesaOcupada) {
+      return res.status(409).json({
+        erro: erro.message, codigo: "MESA_OCUPADA", mesa: erro.mesa, cortes: erro.cortes
+      })
+    }
+
     console.error(erro)
 
     if (erro.code === "23505") {
@@ -262,28 +264,25 @@ router.post("/cortes/:numero/finalizar-itens", async (req, res) => {
 
 router.post("/cortes/:numero/reabrir-itens", async (req, res) => {
   const { numero } = req.params
+  if (!numeroCorteValido(numero)) return res.status(400).json({ erro: "Informe um número de corte válido." })
 
   try {
-    const resultado = await dbPg.query(
-      `
-      UPDATE cortes
-      SET itens_finalizados = 0
-      WHERE numero = $1
-      RETURNING *
-      `,
-      [numero]
-    )
-
-    if (resultado.rows.length === 0) {
-      return res.status(404).json({
-        erro: "Corte não encontrado"
+    const justificativa = validarJustificativa(req.body)
+    await executarNoCorte(Number(numero), async (client, corte) => {
+      if (Number(corte.itens_finalizados) === 0) return
+      const anterior = await client.query("SELECT * FROM cortes WHERE numero = $1", [numero])
+      const resultado = await client.query("UPDATE cortes SET itens_finalizados = 0 WHERE numero = $1 RETURNING *", [numero])
+      await registrarAlteracaoAdmin(client, {
+        ...justificativa, numero: Number(numero), acao: "REABERTURA_PIS",
+        antes: anterior.rows[0], depois: resultado.rows[0]
       })
-    }
+    })
 
     res.json({
       mensagem: "Itens do corte reabertos com sucesso"
     })
   } catch (erro) {
+    if (erro instanceof ErroRegra) return res.status(erro.status).json({ erro: erro.message })
     console.error(erro)
 
     res.status(500).json({
@@ -301,6 +300,7 @@ router.delete(
   async (req, res) => {
 
     const { numero } = req.params
+    if (!numeroCorteValido(numero)) return res.status(400).json({ erro: "Informe um número de corte válido." })
 
     const client =
       await dbPg.connect()
@@ -308,6 +308,7 @@ router.delete(
     try {
 
       await client.query("BEGIN")
+      const justificativa = validarJustificativa(req.body)
 
 
       // ========================================
@@ -320,6 +321,7 @@ router.delete(
           SELECT *
           FROM cortes
           WHERE numero = $1
+          FOR UPDATE
           `,
           [numero]
         )
@@ -349,7 +351,7 @@ router.delete(
           `
           DELETE FROM itens_corte
           WHERE numero_corte = $1
-          RETURNING id
+          RETURNING *
           `,
           [numero]
         )
@@ -364,7 +366,7 @@ router.delete(
           `
           DELETE FROM producao
           WHERE numero_corte = $1
-          RETURNING id
+          RETURNING *
           `,
           [numero]
         )
@@ -382,6 +384,10 @@ router.delete(
         [numero]
       )
 
+      await registrarAlteracaoAdmin(client, {
+        ...justificativa, numero: Number(numero), acao: "EXCLUSAO_CORTE",
+        antes: { corte: corte.rows[0], producao: producoes.rows, itens: itens.rows }, depois: null
+      })
 
       await client.query(
         "COMMIT"
@@ -406,6 +412,7 @@ router.delete(
         "ROLLBACK"
       )
 
+      if (erro instanceof ErroRegra) return res.status(erro.status).json({ erro: erro.message })
 
       console.error(
         "Erro ao excluir corte:",

@@ -671,8 +671,21 @@
 
     </div>
 
+  <section class="section-card historico-admin-painel" aria-labelledby="tituloHistoricoAdmin">
+    <h2 id="tituloHistoricoAdmin">Histórico de alterações</h2>
+    <p class="section-help">Reaberturas, correções e exclusões, com responsável informado e motivo. Disponível também para cortes excluídos.</p>
+    <form id="formFiltroHistoricoAdmin" class="historico-admin-filtro">
+      <div class="form-group">
+        <label for="filtroHistoricoAdmin">Número do corte (opcional)</label>
+        <input id="filtroHistoricoAdmin" type="number" min="1" step="1" placeholder="Todos os cortes">
+      </div>
+      <button type="submit">Atualizar histórico</button>
+    </form>
+    <p id="estadoHistoricoAdmin" role="status">Carregando histórico...</p>
+    <div id="listaHistoricoAdmin" class="historico-admin-lista"></div>
+    <button id="maisHistoricoAdmin" type="button" hidden>Carregar anteriores</button>
+  </section>
   </div>
-
 
   <!-- ========================================
        TOAST

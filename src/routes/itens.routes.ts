@@ -1,5 +1,6 @@
 import { Router } from "express"
 import dbPg from "../database-pg"
+import { executarAlteracaoItem } from "../services/alteracao-item"
 import { numeroCorteValido, validarItem } from "../utils/validacoes"
 import { ErroRegra, executarNoCorte } from "../services/corte-bloqueado"
 
@@ -117,7 +118,7 @@ router.put("/itens-corte/:id", async (req, res) => {
   } = req.body
 
   try {
-    const resultado = await dbPg.query(
+    const resultado = await executarAlteracaoItem(id, false, req.body, client => client.query(
       `
       UPDATE itens_corte
       SET
@@ -143,7 +144,7 @@ router.put("/itens-corte/:id", async (req, res) => {
         Number(quantidade_pecas),
         id
       ]
-    )
+    ))
 
     if (resultado.rows.length === 0) {
       return res.status(404).json({
@@ -157,6 +158,7 @@ router.put("/itens-corte/:id", async (req, res) => {
     })
 
   } catch (erro) {
+    if (erro instanceof ErroRegra) return res.status(erro.status).json({ erro: erro.message })
     console.error("Erro ao atualizar item:", erro)
 
     res.status(500).json({
@@ -173,14 +175,14 @@ router.delete("/itens-corte/:id", async (req, res) => {
   const { id } = req.params
 
   try {
-    const resultado = await dbPg.query(
+    const resultado = await executarAlteracaoItem(id, true, req.body, client => client.query(
       `
       DELETE FROM itens_corte
       WHERE id = $1
       RETURNING *
       `,
       [id]
-    )
+    ))
 
     if (resultado.rows.length === 0) {
       return res.status(404).json({
@@ -193,6 +195,7 @@ router.delete("/itens-corte/:id", async (req, res) => {
     })
 
   } catch (erro) {
+    if (erro instanceof ErroRegra) return res.status(erro.status).json({ erro: erro.message })
     console.error("Erro ao excluir item:", erro)
 
     res.status(500).json({

@@ -2,6 +2,8 @@ import { Router } from "express"
 import dbPg from "../database-pg"
 import { numeroCorteValido, validarProducao } from "../utils/validacoes"
 import { ErroRegra, executarNoCorte } from "../services/corte-bloqueado"
+import { executarAlteracaoProducao } from "../services/alteracao-producao"
+import { ErroMesaOcupada } from "../services/mesa-disponivel"
 
 const router = Router()
 
@@ -164,7 +166,7 @@ router.put("/producao/:id", async (req, res) => {
 
 
   try {
-    const resultado = await dbPg.query(
+    const resultado = await executarAlteracaoProducao(id, status, req.body, client => client.query(
       `
       UPDATE producao
       SET
@@ -190,7 +192,7 @@ router.put("/producao/:id", async (req, res) => {
         hora_fim || null,
         id
       ]
-    )
+    ))
 
 
     if (resultado.rows.length === 0) {
@@ -209,6 +211,10 @@ router.put("/producao/:id", async (req, res) => {
     })
 
   } catch (erro) {
+    if (erro instanceof ErroMesaOcupada) {
+      return res.status(409).json({ erro: erro.message, codigo: "MESA_OCUPADA", mesa: erro.mesa, cortes: erro.cortes })
+    }
+    if (erro instanceof ErroRegra) return res.status(erro.status).json({ erro: erro.message })
     console.error(
       "Erro ao atualizar produção:",
       erro
@@ -235,14 +241,14 @@ router.delete(
     try {
 
       const resultado =
-        await dbPg.query(
+        await executarAlteracaoProducao(id, null, req.body, client => client.query(
           `
           DELETE FROM producao
           WHERE id = $1
           RETURNING *
           `,
           [id]
-        )
+        ))
 
 
       // ========================================
@@ -274,6 +280,10 @@ router.delete(
       })
 
     } catch (erro) {
+      if (erro instanceof ErroMesaOcupada) {
+        return res.status(409).json({ erro: erro.message, codigo: "MESA_OCUPADA", mesa: erro.mesa, cortes: erro.cortes })
+      }
+      if (erro instanceof ErroRegra) return res.status(erro.status).json({ erro: erro.message })
 
       console.error(
         "Erro ao excluir produção:",

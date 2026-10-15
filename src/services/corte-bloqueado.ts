@@ -7,9 +7,9 @@ export class ErroRegra extends Error {
   }
 }
 
-type Corte = { numero: number; itens_finalizados: number }
+type Corte = { numero: number; itens_finalizados: number; mesa: string }
 
-// Serializa os novos lançamentos e a confirmação dos PIs do mesmo corte.
+// Serializa lançamentos, correções e a confirmação dos PIs do mesmo corte.
 export async function executarNoCorte<T>(
   numero: number,
   operacao: (client: PoolClient, corte: Corte) => Promise<T>
@@ -17,9 +17,9 @@ export async function executarNoCorte<T>(
   const client = await dbPg.connect()
 
   try {
-    await client.query("BEGIN")
+    await client.query("BEGIN ISOLATION LEVEL READ COMMITTED")
     const resultado = await client.query<Corte>(
-      "SELECT numero, itens_finalizados FROM cortes WHERE numero = $1 FOR UPDATE",
+      "SELECT numero, itens_finalizados, mesa FROM cortes WHERE numero = $1 FOR UPDATE",
       [numero]
     )
 

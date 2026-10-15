@@ -1,5 +1,6 @@
 import { apiPost } from "../../core/api.js"
 import { validarFolhas } from "../../utils/validations.js"
+import { salvarRascunhoGrupo, limparRascunhoGrupo, versaoRascunho, atualizarBaseProducaoRascunho } from "./rascunho.js"
 
 import {
   mostrarToast,
@@ -143,6 +144,7 @@ function preencherHorarioAtual(idCampo) {
     obterHoraAtual()
 
   limparCampoInvalido(campo)
+  salvarRascunhoGrupo("producao")
 }
 
 
@@ -261,6 +263,7 @@ export async function salvarProducao() {
   }
 
   let producaoBloqueada = false
+  const versao = versaoRascunho("producao", numeroCorte)
 
   try {
     definirCarregamento(
@@ -270,10 +273,12 @@ export async function salvarProducao() {
     )
 
 
-    await apiPost(
+    const salvo = await apiPost(
       "/producao",
       producao
     )
+    limparRascunhoGrupo("producao", numeroCorte, versao)
+    atualizarBaseProducaoRascunho(numeroCorte, salvo.id)
 
     // ========================================
     // AVISO DE SUCESSO
@@ -510,6 +515,7 @@ function configurarLimparProducao() {
         limparFormularioProducao({
           limparTurno: true
         })
+        limparRascunhoGrupo("producao")
 
         mostrarToast(
           "Campos do lançamento atual limpos.",
