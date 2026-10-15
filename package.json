@@ -8,7 +8,14 @@
     "copy-public": "node -e \"require('fs').cpSync('src/public','dist/public',{recursive:true})\"",
     "build": "tsc && npm run copy-public",
     "start": "node dist/server.js",
-    "test": "npm run build && node --test"
+    "test": "npm run build && node --test",
+    "test:backup": "node --test tests/integracao-backup.cjs",
+    "backup:create": "node scripts/backup.cjs create",
+    "backup:verify": "node scripts/backup.cjs verify",
+    "backup:daily": "node scripts/backup.cjs daily",
+    "backup:status": "node scripts/backup.cjs status",
+    "backup:restore": "node scripts/backup.cjs restore",
+    "backup:schedule": "node scripts/agendar-backup.cjs"
   },
   "keywords": [],
   "author": "",

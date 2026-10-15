@@ -37,6 +37,13 @@ Sistema web interno que permite:
 
 ## ⚙️ Funcionalidades
 
+### Backup e testes no GitHub
+- Backup local do schema `public`, com SHA-256 e conferência por recuperação em PostgreSQL isolado.
+- Rotina diária no Windows, às 8h de Brasília, dependente do computador e do Docker Desktop disponíveis.
+- Comandos, requisitos e recuperação protegida: [Backup e recuperação](docs/backup-e-recuperacao.md).
+- GitHub Actions executa os testes em Node.js 22/24 e testa uma recuperação real com dados fictícios em PostgreSQL 17, em pushes e pull requests. Não são usadas credenciais de produção no CI.
+- Para o Render aguardar os testes, selecione **Settings → Auto-Deploy → After CI Checks Pass** depois de confirmar uma execução verde no GitHub. **On Commit** publica sem esperar esses testes.
+
 ### Rascunhos e histórico administrativo
 - Os campos do cadastro do corte, da produção e dos PIs são salvos automaticamente neste navegador, separados por corte.
 - Ao voltar, use **Restaurar** ou **Descartar** no aviso de rascunho. Restaurar preenche os campos; o envio continua manual.

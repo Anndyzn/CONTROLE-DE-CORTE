@@ -5,4 +5,7 @@ dist/
 .sql
 *.log
 backup/
+backups/
+*.dump
+*.backup
 *.db
