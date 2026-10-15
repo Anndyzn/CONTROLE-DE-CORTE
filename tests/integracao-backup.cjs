@@ -26,11 +26,13 @@ test('backup e recuperação reais conservam dados, chaves estrangeiras, sequên
     const c = await cliente(conexao(url))
     try {
       await c.query(`
+        CREATE ROLE anon NOLOGIN;
         CREATE TABLE cortes (id BIGSERIAL PRIMARY KEY, numero INTEGER UNIQUE, produto TEXT, mesa TEXT);
         CREATE TABLE producao (id BIGSERIAL PRIMARY KEY, numero_corte INTEGER REFERENCES cortes(numero), status TEXT);
         CREATE TABLE itens_corte (id BIGSERIAL PRIMARY KEY, numero_corte INTEGER REFERENCES cortes(numero), modelo TEXT, metragem NUMERIC);
         CREATE TABLE historico_admin (id BIGSERIAL PRIMARY KEY, numero_corte INTEGER, motivo TEXT, antes JSONB);
         ALTER TABLE historico_admin ENABLE ROW LEVEL SECURITY;
+        CREATE POLICY "anon pode ler cortes" ON cortes FOR SELECT TO anon USING (true);
         INSERT INTO cortes (numero,produto,mesa) VALUES (843,'VESTIDO RENDA','MESA 1');
         INSERT INTO producao (numero_corte,status) VALUES (843,'FINALIZADO');
         INSERT INTO itens_corte (numero_corte,modelo,metragem) VALUES (843,'PI AZUL',12.5);
@@ -40,6 +42,7 @@ test('backup e recuperação reais conservam dados, chaves estrangeiras, sequên
     backup = await criarBackup({url,diretorio:pasta,container:nome})
     assert.equal(backup.manifesto.tabelas.cortes,'1')
     assert.equal(backup.manifesto.verificadoEm,null)
+    assert.deepEqual(backup.manifesto.papeis,['anon'])
     await verificarBackup(backup.arquivo,{conferir:async (config,container) => {
       const sql = `SELECT json_build_object(
         'produto',(SELECT produto FROM cortes WHERE numero=843),
@@ -47,7 +50,9 @@ test('backup e recuperação reais conservam dados, chaves estrangeiras, sequên
         'motivo',(SELECT motivo FROM historico_admin WHERE numero_corte=843),
         'rls',(SELECT relrowsecurity FROM pg_class WHERE oid='historico_admin'::regclass),
         'proximo',nextval('cortes_id_seq'),
-        'fks',(SELECT COUNT(*) FROM pg_constraint WHERE contype='f' AND connamespace='public'::regnamespace)
+        'fks',(SELECT COUNT(*) FROM pg_constraint WHERE contype='f' AND connamespace='public'::regnamespace),
+        'loginAnon',(SELECT rolcanlogin FROM pg_roles WHERE rolname='anon'),
+        'politicas',(SELECT COUNT(*) FROM pg_policy WHERE polrelid='cortes'::regclass)
       )`
       const resultado = JSON.parse(await ferramentaPg('psql',['-X','-A','-t','--set=ON_ERROR_STOP=1','--command',sql],config,{container}))
       assert.equal(resultado.produto,'VESTIDO RENDA')
@@ -56,6 +61,8 @@ test('backup e recuperação reais conservam dados, chaves estrangeiras, sequên
       assert.equal(resultado.rls,true)
       assert.equal(resultado.proximo,2)
       assert.equal(resultado.fks,2)
+      assert.equal(resultado.loginAnon,false)
+      assert.equal(resultado.politicas,1)
     }})
     assert.ok((await validarBackup(backup.arquivo)).manifesto.verificadoEm)
   } finally {

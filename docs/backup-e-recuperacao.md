@@ -64,6 +64,8 @@ npm.cmd run backup:restore -- --file "backup/NOME-DA-COPIA.dump" --confirm RESTA
 
 O comando valida o hash, recusa o banco de origem e o banco em uso — inclusive aliases direto/Pooler do mesmo projeto Supabase — e bloqueia destinos com objetos em `public`. A importação usa uma transação e para em qualquer erro. Depois, confere as quantidades de registros.
 
+Papéis referenciados pelas políticas RLS são registrados no manifesto. Quando faltam no destino, são preparados sem login e sem privilégios administrativos; papéis já existentes não são alterados. Senhas, membros de papéis e permissões de plataforma não são exportados. Para voltar a operar no Supabase, confira também as permissões e o acesso em tempo real do projeto de destino.
+
 Para recuperar em um PostgreSQL local próprio, configure as ferramentas nativas em `PG_BIN_DIR`. O comando `backup:verify` já oferece o teste local descartável pelo Docker.
 
 5. Confira cortes, produção, PIs, histórico e um cadastro em ambiente de teste. Ao planejar uma troca definitiva, considere que os lançamentos posteriores à data da cópia não estarão nela. Pause os lançamentos e faça uma nova cópia do estado atual antes de alterar a conexão do serviço.

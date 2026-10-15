@@ -83,6 +83,15 @@ async function ferramentaPg(programa, args, config, {major = 17, arquivoSaida, a
 }
 
 function identificador(valor) { return '"' + String(valor).replaceAll('"','""') + '"' }
+function literal(valor) { return "'" + String(valor).replaceAll("'","''") + "'" }
+
+function prepararPapeisSql(papeis = []) {
+  if (!papeis.length) return null
+  const comandos = papeis.map(papel => `IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname=${literal(papel)}) THEN EXECUTE ${literal(`CREATE ROLE ${identificador(papel)} NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS`)}; END IF;`).join('\n')
+  let delimitador
+  do { delimitador = '$corte_'+crypto.randomBytes(8).toString('hex')+'$' } while (comandos.includes(delimitador))
+  return `DO ${delimitador} BEGIN ${comandos} END; ${delimitador};`
+}
 
 async function hashArquivo(arquivo) {
   const hash = crypto.createHash('sha256')
@@ -107,20 +116,21 @@ async function criarBackup({url, diretorio = BACKUP_DIR, container} = {}) {
     const major = Math.floor(Number((await c.query("SHOW server_version_num")).rows[0].server_version_num)/10000)
     const snapshot = (await c.query('SELECT pg_export_snapshot() AS snapshot')).rows[0].snapshot
     const tabelas = (await c.query("SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY tablename")).rows
+    const papeis = (await c.query("SELECT DISTINCT r.rolname FROM pg_policy p JOIN pg_class t ON t.oid=p.polrelid JOIN pg_roles r ON r.oid=ANY(p.polroles) WHERE t.relnamespace='public'::regnamespace ORDER BY r.rolname")).rows.map(r=>r.rolname)
     const contagens = {}
     for (const {tablename} of tabelas) contagens[tablename] = (await c.query(`SELECT COUNT(*)::text AS total FROM public.${identificador(tablename)}`)).rows[0].total
     for (const tabela of ['cortes','producao','itens_corte','historico_admin']) {
       if (!(tabela in contagens)) throw new Error(`Tabela esperada não encontrada: ${tabela}.`)
     }
     const configFerramenta = container ? {...config,host:'127.0.0.1',port:5432} : config
-    await ferramentaPg('pg_dump',['--format=custom','--schema=public','--no-owner','--no-acl',`--snapshot=${snapshot}`],configFerramenta,{major,arquivoSaida:parcial,container})
+    await ferramentaPg('pg_dump',['--format=custom','--schema=public','--no-owner','--no-acl','--lock-wait-timeout=30s',`--snapshot=${snapshot}`],configFerramenta,{major,arquivoSaida:parcial,container})
     const cabecalho = Buffer.alloc(5), fd = fs.openSync(parcial,'r')
     try { fs.readSync(fd,cabecalho,0,5,0) } finally { fs.closeSync(fd) }
     if (cabecalho.toString() !== 'PGDMP') throw new Error('O arquivo gerado não é um backup PostgreSQL válido.')
     await c.query('COMMIT')
     fs.renameSync(parcial,arquivo)
     const manifesto = {versao:1, criadoEm:new Date().toISOString(), escopo:'public', postgresMajor:major,
-      origem:config.fingerprint, arquivo:nome, sha256:await hashArquivo(arquivo), tabelas:contagens, verificadoEm:null}
+      origem:config.fingerprint, arquivo:nome, sha256:await hashArquivo(arquivo), tabelas:contagens, papeis, verificadoEm:null}
     gravarJson(arquivo+'.json',manifesto)
     return {arquivo,manifesto}
   } catch(e) {
@@ -136,6 +146,7 @@ async function validarBackup(arquivo) {
   if (manifesto.versao !== 1 || manifesto.escopo !== 'public' || manifesto.arquivo !== path.basename(arquivo)
     || !Number.isInteger(manifesto.postgresMajor) || manifesto.postgresMajor < 12 || manifesto.postgresMajor > 30
     || !manifesto.tabelas || typeof manifesto.tabelas !== 'object' || Array.isArray(manifesto.tabelas)
+    || (manifesto.papeis !== undefined && (!Array.isArray(manifesto.papeis) || !manifesto.papeis.every(p=>typeof p === 'string' && p.length > 0 && Buffer.byteLength(p,'utf8') <= 63 && !p.includes('\0'))))
     || !Object.entries(manifesto.tabelas).every(([nome,total])=>nome && typeof total === 'string' && /^\d+$/.test(total))) {
     throw new Error('Manifesto de backup inválido.')
   }
@@ -159,11 +170,15 @@ async function verificarBackup(arquivo, {conferir} = {}) {
       try { await executar('docker',['exec',nome,'pg_isready','-h','127.0.0.1','-U','backup_check','-d','backup_check']); break }
       catch { if (tentativa >= 30) throw new Error('O PostgreSQL de recuperação não ficou pronto.'); await new Promise(r=>setTimeout(r,1000)) }
     }
-    await ferramentaPg('pg_restore',['--exit-on-error','--single-transaction','--clean','--if-exists','--no-owner','--no-acl',
+    const papeisSql = prepararPapeisSql(backup.manifesto.papeis)
+    if (papeisSql) await ferramentaPg('psql',['-X','--set=ON_ERROR_STOP=1','--command',papeisSql],config,{container:nome})
+    await ferramentaPg('pg_restore',['--exit-on-error','--single-transaction','--schema=public','--no-owner','--no-acl',
       '--dbname=backup_check','/backup/'+path.basename(backup.arquivo)],config,{container:nome})
+    const consultas = Object.keys(backup.manifesto.tabelas).map(tabela=>`SELECT ${literal(tabela)} AS nome, COUNT(*)::text AS total FROM public.${identificador(tabela)}`)
+    const contagensSql = `SELECT json_object_agg(nome,total)::text FROM (${consultas.join(' UNION ALL ')}) contagens`
+    const contagens = JSON.parse(await ferramentaPg('psql',['-X','-A','-t','--set=ON_ERROR_STOP=1','--command',contagensSql],config,{container:nome}))
     for (const [tabela,total] of Object.entries(backup.manifesto.tabelas)) {
-      const atual = await ferramentaPg('psql',['-X','-A','-t','--set=ON_ERROR_STOP=1','--command',`SELECT COUNT(*) FROM public.${identificador(tabela)}`],config,{container:nome})
-      if (atual.trim() !== total) throw new Error(`Recuperação divergente na tabela ${tabela}.`)
+      if (contagens[tabela] !== total) throw new Error(`Recuperação divergente na tabela ${tabela}.`)
     }
     if (conferir) await conferir(config,nome)
     backup.manifesto.verificadoEm = new Date().toISOString()
@@ -196,9 +211,11 @@ async function restaurarBackup({arquivo,urlDestino,urlEmUso,confirmacao} = {}) {
     if (objetos.rows[0].total !== 0) throw new Error('O schema public do destino contém objetos. A recuperação foi bloqueada; escolha um banco vazio.')
     const major = Math.floor(Number((await c.query('SHOW server_version_num')).rows[0].server_version_num)/10000)
     if (major < backup.manifesto.postgresMajor) throw new Error('O destino precisa usar PostgreSQL da mesma versão principal ou mais recente que o backup.')
+    const papeisSql = prepararPapeisSql(backup.manifesto.papeis)
+    if (papeisSql) await c.query(papeisSql)
   } finally { await c.end() }
   // Evita concorrência com a aplicação: o destino é novo e só deve ser usado após a conferência.
-  await ferramentaPg('pg_restore',['--exit-on-error','--single-transaction','--clean','--if-exists','--no-owner','--no-acl',
+  await ferramentaPg('pg_restore',['--exit-on-error','--single-transaction','--schema=public','--no-owner','--no-acl',
     `--dbname=${config.database}`],config,{major:backup.manifesto.postgresMajor,arquivoEntrada:backup.arquivo})
   const conferido = await cliente(config)
   try {
