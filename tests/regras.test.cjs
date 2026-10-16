@@ -117,6 +117,14 @@ async function consultar(sql, valores = [], desfazer = []) {
     banco.gravacoes++
     return { rows: [registro] }
   }
+  if (/^UPDATE cortes SET produto/.test(query)) {
+    const corte = cortesCadastrados().find(c => c.numero === Number(valores[1]))
+    const anterior = structuredClone(corte)
+    desfazer.push(() => Object.assign(corte, anterior))
+    corte.produto = valores[0]
+    banco.gravacoes++
+    return { rows: [structuredClone(corte)] }
+  }
   if (/^UPDATE cortes SET itens_finalizados/.test(query)) {
     const anterior = banco.corte.itens_finalizados
     desfazer.push(() => { banco.corte.itens_finalizados = anterior })
@@ -573,4 +581,61 @@ test('histórico pagina sem duplicar registros e valida os filtros', async () =>
   for (const filtro of ['numero=-1','numero=abc','antes=-1','antes=abc','antes=9999999999999999999']) {
     assert.equal((await fetch(url + '/historico-admin?' + filtro)).status, 400)
   }
+})
+
+test('corrigir produto preserva mesa, produção e PIs e registra nome anterior e novo', async () => {
+  banco.corte = {numero:843, produto:'LISO INFRIOR', mesa:'MESA 1', itens_finalizados:1}
+  banco.producao = [{...producao, id:10, status:'FINALIZADO'}]
+  banco.itens_corte = [{...item, id:20}]
+  const resposta = await enviar('/cortes/843/produto', {
+    produto:'  liso inferior  ', produto_anterior:'LISO INFRIOR', mesa:'MESA 2', numero:999
+  }, 'PUT')
+  assert.equal(resposta.status, 200)
+  assert.equal(resposta.dados.corte.produto, 'LISO INFERIOR')
+  assert.equal(banco.corte.numero, 843)
+  assert.equal(banco.corte.mesa, 'MESA 1')
+  assert.equal(banco.corte.itens_finalizados, 1)
+  assert.equal(banco.producao[0].status, 'FINALIZADO')
+  assert.equal(banco.itens_corte[0].metragem_usada, 12.5)
+  assert.equal(banco.historico[0].acao, 'EDICAO_PRODUTO')
+  assert.equal(banco.historico[0].antes.produto, 'LISO INFRIOR')
+  assert.equal(banco.historico[0].depois.produto, 'LISO INFERIOR')
+  assert.equal(banco.historico[0].motivo, 'Correção para conferência')
+})
+
+test('produto exige nome válido, responsável, motivo e referência do nome anterior', async () => {
+  banco.corte.produto = 'MANTA'
+  for (const dados of [
+    {produto:''}, {produto:'  '}, {produto:null}, {produto:'A'.repeat(201)},
+    {produto:'EDREDOM', responsavel:''}, {produto:'EDREDOM', motivo:''},
+    {produto:'EDREDOM', produto_anterior:null}
+  ]) {
+    assert.equal((await enviar('/cortes/843/produto', {produto_anterior:'MANTA', ...dados}, 'PUT')).status, 400)
+  }
+  assert.equal(banco.gravacoes, 0)
+})
+
+test('duas correções simultâneas não sobrescrevem o produto silenciosamente', async () => {
+  banco.corte.produto = 'MANTA'
+  const respostas = await Promise.all(['MANTA FLORAL','MANTA LISA'].map(produto =>
+    enviar('/cortes/843/produto', {produto, produto_anterior:'MANTA'}, 'PUT')))
+  assert.deepEqual(respostas.map(r => r.status).sort(), [200,409])
+  assert.equal(banco.historico.length, 1)
+  assert.equal(banco.historico[0].depois.produto, banco.corte.produto)
+})
+
+test('falha de auditoria desfaz a correção do produto; corte inexistente retorna 404', async () => {
+  banco.corte.produto = 'MANTA'
+  banco.falharHistorico = true
+  assert.equal((await enviar('/cortes/843/produto', {produto:'MANTA LISA',produto_anterior:'MANTA'}, 'PUT')).status, 500)
+  assert.equal(banco.corte.produto, 'MANTA')
+  assert.equal(banco.historico.length, 0)
+  assert.equal((await enviar('/cortes/999/produto', {produto:'MANTA LISA',produto_anterior:'MANTA'}, 'PUT')).status, 404)
+})
+
+test('salvar o mesmo produto não cria histórico de correção', async () => {
+  banco.corte.produto = 'MANTA'
+  assert.equal((await enviar('/cortes/843/produto', {produto:' manta ',produto_anterior:'MANTA'}, 'PUT')).status, 200)
+  assert.equal(banco.historico.length, 0)
+  assert.equal(banco.gravacoes, 0)
 })

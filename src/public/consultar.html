@@ -132,12 +132,21 @@
             </p>
           </div>
 
-          <div class="consulta-total-badge">
-            <strong id="totalConsulta">0</strong>
-            <span>cortes encontrados</span>
+          <div class="consulta-resultados-acoes">
+            <div class="consulta-total-badge">
+              <strong id="totalConsulta">0</strong>
+              <span>cortes encontrados</span>
+            </div>
+            <button type="button" id="exportarExcel" class="btn-exportar-excel" disabled aria-describedby="ajudaExportacao">
+              📥 Exportar Excel
+            </button>
           </div>
 
         </div>
+
+        <p id="ajudaExportacao" class="consulta-exportacao-ajuda">
+          Exporte os resultados da última busca, com todos os cortes encontrados e seus detalhes, mesmo os que ainda não aparecem na lista.
+        </p>
 
         <div class="table-wrap tabela-consulta">
           <table>

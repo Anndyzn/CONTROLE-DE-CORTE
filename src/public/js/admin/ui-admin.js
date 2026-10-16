@@ -100,6 +100,7 @@ export function preencherResumoCorteAdmin(
 
 
   if (produto) {
+    produto.dataset.nomeOriginal = dados.corte?.produto ?? ""
     produto.textContent =
       String(
         dados.corte?.produto ?? "-"
@@ -130,4 +131,6 @@ export function preencherResumoCorteAdmin(
       </span>
     `
   }
+
+  document.dispatchEvent(new Event("corte-admin-carregado"))
 }

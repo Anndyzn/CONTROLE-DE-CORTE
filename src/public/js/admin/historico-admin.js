@@ -1,6 +1,7 @@
 import { apiGet } from "../core/api.js"
 
 const acoes = {
+  EDICAO_PRODUTO: "Nome do produto corrigido",
   EDICAO_PRODUCAO: "Produção corrigida", REABERTURA_PRODUCAO: "Corte reaberto",
   EXCLUSAO_PRODUCAO: "Lançamento excluído", EDICAO_PI: "PI corrigido", EXCLUSAO_PI: "PI excluído",
   REABERTURA_PIS: "PIs reabertos", EXCLUSAO_CORTE: "Corte excluído"

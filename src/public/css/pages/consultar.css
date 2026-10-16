@@ -225,6 +225,22 @@
   margin: 0 0 6px;
 }
 
+.consulta-resultados-acoes {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.btn-exportar-excel { min-width: 170px; margin: 0; }
+.consulta-exportacao-ajuda { color: var(--text-soft); font-size: 12px; margin: 0 0 14px; }
+
+@media (max-width: 700px) {
+  .consulta-resultados-acoes { width: 100%; }
+  .consulta-resultados-acoes .btn-exportar-excel { width: 100%; min-width: 0; }
+}
+
 
 .consulta-resultados-header
 .section-help {

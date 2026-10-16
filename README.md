@@ -45,6 +45,7 @@ Sistema web interno que permite:
 - Para o Render aguardar os testes, selecione **Settings → Auto-Deploy → After CI Checks Pass** depois de confirmar uma execução verde no GitHub. **On Commit** publica sem esperar esses testes.
 
 ### Rascunhos e histórico administrativo
+- No resumo do corte no Admin, **Corrigir produto** permite ajustar somente o nome, sem alterar mesa, número, produção ou PIs. Exige responsável e motivo e registra nome anterior e novo no histórico. Uma correção baseada em nome desatualizado é recusada.
 - Os campos do cadastro do corte, da produção e dos PIs são salvos automaticamente neste navegador, separados por corte.
 - Ao voltar, use **Restaurar** ou **Descartar** no aviso de rascunho. Restaurar preenche os campos; o envio continua manual.
 - Após um envio confirmado, somente o rascunho daquele formulário é removido. Falhas de conexão mantêm o rascunho.
@@ -79,6 +80,7 @@ Sistema web interno que permite:
 - 📦 Quantidade de peças produzidas
 
 ### 📈 Consultas e dashboard
+- **Exportar Excel** baixa um arquivo `.xlsx` com três abas: **Cortes** (resumo e totais), **Produção** e **PIs**. Exporta todos os resultados da última busca, além dos 20 inicialmente visíveis. Os mesmos filtros são aplicados no servidor; datas consideram a última produção de cada corte, como na consulta. As abas de detalhes incluem o histórico completo dos cortes encontrados. O relatório é somente leitura e preserva números, datas e acentos.
 - 📊 Dashboard automático do corte
 - 📋 Lista de cortes em andamento
 - 🔎 Consulta de cortes finalizados

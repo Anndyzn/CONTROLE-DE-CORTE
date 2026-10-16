@@ -162,6 +162,9 @@
               Confira os dados antes de realizar uma correção.
             </p>
           </div>
+          <button type="button" id="editarProdutoAdmin" class="btn-admin-secundario" aria-expanded="false" aria-controls="formProdutoAdmin">
+            ✏️ Corrigir produto
+          </button>
         </div>
 
 
@@ -204,6 +207,17 @@
 
         </div>
 
+        <form id="formProdutoAdmin" class="admin-produto-form" hidden>
+          <div class="form-group">
+            <label for="novoProdutoAdmin">Nome do produto</label>
+            <input id="novoProdutoAdmin" type="text" maxlength="200" required aria-describedby="ajudaProdutoAdmin">
+            <small id="ajudaProdutoAdmin">A correção pedirá responsável e motivo e ficará no histórico.</small>
+          </div>
+          <div class="admin-produto-acoes">
+            <button type="button" id="cancelarProdutoAdmin" class="btn-admin-secundario">Cancelar</button>
+            <button type="submit" id="salvarProdutoAdmin">Salvar produto</button>
+          </div>
+        </form>
       </section>
 
       <section class="section-card admin-acoes">

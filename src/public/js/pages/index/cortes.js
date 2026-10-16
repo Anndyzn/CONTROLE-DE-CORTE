@@ -419,9 +419,7 @@ export async function carregarCortesEmAndamento({
         linha.innerHTML = `
           <td>${corte.numero}</td>
 
-          <td>
-            ${maiusculo(corte.produto)}
-          </td>
+          <td></td>
 
           <td>
             ${maiusculo(corte.mesa)}
@@ -447,6 +445,7 @@ export async function carregarCortesEmAndamento({
           </td>
         `
 
+      linha.children[1].textContent = maiusculo(corte.produto)
       linha.style.cursor = "pointer"
 
       if (

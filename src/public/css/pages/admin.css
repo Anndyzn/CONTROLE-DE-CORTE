@@ -333,6 +333,28 @@
   padding: 20px;
 }
 
+.admin-corte-selecionado .admin-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.admin-produto-form {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.admin-produto-form input { text-transform: uppercase; }
+.admin-produto-form small { color: var(--text-soft); }
+.admin-produto-acoes { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+
+@media (max-width: 700px) {
+  .admin-produto-acoes button { width: 100%; }
+}
+
 .admin-corte-grid {
   display: grid;
 

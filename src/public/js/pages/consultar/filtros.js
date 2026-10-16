@@ -20,6 +20,7 @@ import {
 import {
   carregarDashboardCorte
 } from "./dashboard.js"
+import { inicializarExportacao } from "./exportar.js"
 
 
 const QUANTIDADE_POR_PAGINA =
@@ -36,6 +37,10 @@ let quantidadeResultadosVisiveis =
 
 let consultaComProduto =
   false
+
+let parametrosConsultaAplicada = null
+let sequenciaConsulta = 0
+let atualizarExportacao = () => {}
 
 
 // ========================================
@@ -210,11 +215,7 @@ function criarLinhaResultado(item) {
       ${item.numero}
     </td>
 
-    <td>
-      ${maiusculo(
-        item.produto ?? "-"
-      )}
-    </td>
+    <td></td>
 
     <td>
       ${maiusculo(
@@ -241,6 +242,7 @@ function criarLinhaResultado(item) {
     </td>
   `
 
+  linha.children[1].textContent = maiusculo(item.produto ?? "-")
 
   linha.addEventListener(
     "click",
@@ -403,6 +405,9 @@ function carregarMaisResultadosConsulta() {
 // ========================================
 
 export async function carregarResultadosConsulta() {
+  const sequencia = ++sequenciaConsulta
+  parametrosConsultaAplicada = null
+  atualizarExportacao()
   const botaoBuscar =
     document.getElementById(
       "buscarFiltros"
@@ -522,6 +527,10 @@ export async function carregarResultadosConsulta() {
         `/consultar-cortes?${params.toString()}`
       )
 
+    if (sequencia !== sequenciaConsulta) return
+    parametrosConsultaAplicada = resultados.length ? params.toString() : null
+    atualizarExportacao()
+
     const totalConsulta =
       document.getElementById(
         "totalConsulta"
@@ -551,6 +560,9 @@ export async function carregarResultadosConsulta() {
     renderizarResultadosConsulta()
 
   } catch (erro) {
+    if (sequencia !== sequenciaConsulta) return
+    parametrosConsultaAplicada = null
+    atualizarExportacao()
     console.error(
       "Erro ao consultar cortes:",
       erro
@@ -598,7 +610,7 @@ export async function carregarResultadosConsulta() {
     )
 
   } finally {
-    definirCarregamento(
+    if (sequencia === sequenciaConsulta) definirCarregamento(
       botaoBuscar,
       false,
       "Buscar"
@@ -674,6 +686,7 @@ function configurarBuscaComEnter() {
 // ========================================
 
 export function inicializarFiltros() {
+  atualizarExportacao = inicializarExportacao(() => parametrosConsultaAplicada)
   const botaoBuscarFiltros =
     document.getElementById(
       "buscarFiltros"

@@ -7,6 +7,43 @@ import { registrarAlteracaoAdmin, validarJustificativa } from "../services/histo
 
 const router = Router()
 
+router.put("/cortes/:numero/produto", async (req, res) => {
+  const { numero } = req.params
+  const { produto, produto_anterior } = req.body ?? {}
+  if (!numeroCorteValido(numero)) return res.status(400).json({ erro: "Informe um número de corte válido." })
+  if (typeof produto !== "string" || !produto.trim() || produto.trim().length > 200) {
+    return res.status(400).json({ erro: "Informe o nome do produto (1 a 200 caracteres)." })
+  }
+  if (typeof produto_anterior !== "string") {
+    return res.status(400).json({ erro: "Busque o corte novamente antes de corrigir o produto." })
+  }
+
+  try {
+    const justificativa = validarJustificativa(req.body)
+    const corte = await executarNoCorte(Number(numero), async client => {
+      const anterior = (await client.query("SELECT * FROM cortes WHERE numero = $1", [numero])).rows[0]
+      if (anterior.produto !== produto_anterior) {
+        throw new ErroRegra(409, "O produto deste corte foi alterado. Busque o corte novamente antes de corrigir.")
+      }
+      const nome = produto.trim().toUpperCase()
+      if (nome === anterior.produto) return anterior
+      const resultado = await client.query(
+        "UPDATE cortes SET produto = $1 WHERE numero = $2 RETURNING *", [nome, numero]
+      )
+      await registrarAlteracaoAdmin(client, {
+        ...justificativa, numero: Number(numero), acao: "EDICAO_PRODUTO",
+        antes: anterior, depois: resultado.rows[0]
+      })
+      return resultado.rows[0]
+    })
+    res.json({ mensagem: "Nome do produto atualizado com sucesso.", corte })
+  } catch (erro) {
+    if (erro instanceof ErroRegra) return res.status(erro.status).json({ erro: erro.message })
+    console.error("Erro ao corrigir produto:", erro)
+    res.status(500).json({ erro: "Não foi possível corrigir o nome do produto." })
+  }
+})
+
 router.post("/cortes", async (req, res) => {
   const { numero, produto, mesa } = req.body ?? {}
 

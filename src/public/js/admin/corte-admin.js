@@ -1,4 +1,5 @@
 import { solicitarJustificativa } from "./justificativa.js"
+import { inicializarProdutoAdmin } from "./produto-admin.js"
 import {
   apiGet,
   apiDelete
@@ -297,6 +298,7 @@ async function excluirCorteAdmin() {
 // ========================================
 
 export function inicializarCorteAdmin() {
+  inicializarProdutoAdmin()
   const botaoBuscar =
     document.getElementById(
       "buscarCorteAdmin"
