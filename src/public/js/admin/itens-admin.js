@@ -1,4 +1,5 @@
 import { solicitarJustificativa } from "./justificativa.js"
+import { confirmarAcao } from "../core/confirmacao.js"
 import {
   apiGet,
   apiPost,
@@ -471,7 +472,7 @@ async function excluirItemAdmin(item) {
 
 
   const confirmar =
-    confirm(
+    await confirmarAcao(
       `Excluir este PI?\n\n` +
 
       `Corte: ${numeroCorte}\n` +
@@ -498,7 +499,8 @@ async function excluirItemAdmin(item) {
         item.quantidade_pecas ?? "-"
       }\n\n` +
 
-      `Esta ação removerá o PI do corte.`
+      `Esta ação removerá o PI do corte.`,
+      {titulo: "Excluir PI", confirmar: "Excluir PI", perigosa: true}
     )
 
 
@@ -583,9 +585,10 @@ async function reabrirItensCorte() {
 
 
   const confirmar =
-    confirm(
+    await confirmarAcao(
       "Tem certeza que deseja reabrir os PIs deste corte?\n\n" +
-      "Depois disso será possível editar e adicionar novos itens."
+      "Depois disso será possível editar e adicionar novos itens.",
+      {titulo: "Reabrir PIs", confirmar: "Reabrir PIs"}
     )
 
 

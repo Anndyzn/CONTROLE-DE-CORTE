@@ -1,5 +1,6 @@
 import { solicitarJustificativa } from "./justificativa.js"
 import { inicializarProdutoAdmin } from "./produto-admin.js"
+import { confirmarAcao } from "../core/confirmacao.js"
 import {
   apiGet,
   apiDelete
@@ -213,7 +214,7 @@ async function excluirCorteAdmin() {
   // ========================================
 
   const confirmar =
-    confirm(
+    await confirmarAcao(
       `ATENÇÃO!\n\n` +
 
       `Você está prestes a apagar o corte ${numeroCorte}.\n\n` +
@@ -222,7 +223,8 @@ async function excluirCorteAdmin() {
       `• Todos os lançamentos de produção\n` +
       `• Todos os PIs do corte\n\n` +
 
-      `Deseja continuar?`
+      `Deseja continuar?`,
+      {titulo: "Apagar corte completo", confirmar: "Continuar exclusão", perigosa: true}
     )
 
 

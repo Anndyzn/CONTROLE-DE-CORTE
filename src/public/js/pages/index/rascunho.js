@@ -2,6 +2,7 @@ import { Rascunhos } from "../../utils/rascunhos.js"
 import { mostrarToast } from "../../core/ui.js"
 import { apiGet } from "../../core/api.js"
 import { atualizarControleMesas } from "./mesas.js"
+import { confirmarAcao } from "../../core/confirmacao.js"
 
 const campos = {
   novo: ["produtoNovo", "mesaNova"],
@@ -162,10 +163,12 @@ export function inicializarRascunhos(buscarCorte) {
     }
   }
   elemento("restaurarRascunho")?.addEventListener("click", restaurarRascunho)
-  elemento("descartarRascunho")?.addEventListener("click", () => {
-    if (!confirm("Descartar o rascunho selecionado? Os dados já enviados ao sistema serão mantidos.")) return
+  elemento("descartarRascunho")?.addEventListener("click", async () => {
+    const numero = elemento("rascunhoSelecionado").value
+    if (!await confirmarAcao("Descartar o rascunho selecionado? Os dados já enviados ao sistema serão mantidos.",
+      {titulo: "Descartar rascunho", confirmar: "Descartar", perigosa: true})) return
     try {
-      armazenamento().excluir(elemento("rascunhoSelecionado").value)
+      armazenamento().excluir(numero)
       atualizarAvisoRascunho()
     } catch { falhaArmazenamento() }
   })

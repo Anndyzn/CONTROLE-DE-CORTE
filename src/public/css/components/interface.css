@@ -1,0 +1,412 @@
+/* Leitura, formulários e resumos compartilhados pelas três telas. */
+:root {
+  --text-muted: #627389;
+}
+
+.form-group label,
+label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.section-card h2 {
+  font-size: 19px;
+  letter-spacing: -0.02em;
+  line-height: 1.4;
+}
+
+.section-help,
+.small-help,
+.consulta-filtros .section-help,
+.consulta-resultados-header .section-help,
+.admin-action-info span,
+.admin-edicao-header p,
+.itens-finalizados-aviso small {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-soft);
+}
+
+input,
+select,
+textarea {
+  font-size: 15px;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #627389;
+}
+
+/* Uma faixa de dados, sem uma caixa para cada informação. */
+.page-index .corte-selecionado-bar,
+.page-admin .admin-corte-grid {
+  grid-template-columns: 90px minmax(0, 1fr) auto auto;
+  gap: 18px 26px;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.page-index .corte-selecionado-bar {
+  grid-template-columns: 90px minmax(0, 1fr) auto auto auto;
+}
+
+.page-index .corte-principal,
+.page-index .corte-produto,
+.page-index .corte-dado,
+.page-index .corte-status,
+.page-admin .admin-corte-item {
+  min-width: 0;
+  min-height: 0;
+  gap: 6px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.page-index .corte-label,
+.page-admin .admin-corte-item > span {
+  color: var(--text-soft);
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.page-index .corte-produto strong,
+.page-admin .admin-corte-produto strong {
+  font-size: 20px;
+  line-height: 1.4;
+  white-space: normal;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+}
+
+.page-index .corte-numero,
+.page-admin #adminCorteNumero {
+  font-size: 30px !important;
+  line-height: 1.2;
+}
+
+.page-index .corte-status #status {
+  justify-content: flex-start;
+}
+
+/* Os IDs e os campos continuam os mesmos; os grupos só organizam a leitura. */
+.page-index .producao-grid {
+  display: block;
+}
+
+.form-section {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.form-section legend {
+  float: none;
+  width: 100%;
+  padding: 0 0 12px;
+  color: var(--primary-deep);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.form-section + .form-section {
+  margin-top: 22px;
+}
+
+.form-section + .form-section legend {
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.form-section-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 16px 20px;
+}
+
+.form-section-grid-tres {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.page-index .producao-bloqueada .producao-grid {
+  opacity: 1;
+}
+
+.page-index .producao-aviso {
+  text-align: left;
+  border-style: solid;
+  background: #f5f8fc;
+}
+
+.btn-time-now {
+  font-size: 12px;
+}
+
+/* Confirmações e justificativas usam o mesmo acabamento. */
+.confirmacao-dialog,
+.justificativa-dialog {
+  width: min(520px, calc(100vw - 28px));
+  max-height: calc(100dvh - 32px);
+  padding: 26px;
+  color: var(--text);
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 20px 70px rgb(16 35 63 / 0.24);
+  overflow-y: auto;
+}
+
+.confirmacao-dialog::backdrop,
+.justificativa-dialog::backdrop {
+  background: rgb(16 35 63 / 0.5);
+  backdrop-filter: blur(3px);
+}
+
+.confirmacao-dialog h2,
+.justificativa-dialog h2 {
+  font-size: 21px;
+  line-height: 1.35;
+  margin: 0 0 12px;
+}
+
+.confirmacao-dialog p,
+.justificativa-dialog p {
+  margin: 0 0 22px;
+  color: var(--text-soft);
+  font-size: 14px;
+  line-height: 1.65;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.confirmacao-acoes,
+.justificativa-dialog .button-row {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 22px 0 0;
+}
+
+.confirmacao-cancelar {
+  color: var(--text-soft);
+  background: #f8fafc;
+  border: 1px solid var(--border-strong);
+  box-shadow: none;
+}
+
+.confirmacao-cancelar:hover {
+  background: #eef3f9;
+  filter: none;
+  box-shadow: none;
+}
+
+.confirmacao-perigosa {
+  background: var(--danger);
+  box-shadow: none;
+}
+
+.confirmacao-perigosa:hover {
+  background: var(--danger-hover);
+  box-shadow: none;
+}
+
+@media (max-width: 1000px) {
+  .page-index .corte-selecionado-bar,
+  .page-admin .admin-corte-grid {
+    grid-template-columns: 90px minmax(0, 1fr) auto;
+    gap: 18px 22px;
+  }
+
+  .page-index .corte-produto,
+  .page-admin .admin-corte-produto {
+    grid-column: 2 / -1;
+  }
+}
+
+@media (max-width: 700px) {
+  .form-section-grid,
+  .form-section-grid-tres {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  input,
+  select,
+  textarea,
+  .consulta-filtros input,
+  .consulta-filtros select {
+    font-size: 16px;
+  }
+
+  .page-index .corte-selecionado-bar,
+  .page-admin .admin-corte-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .page-index .corte-produto,
+  .page-admin .admin-corte-produto {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .page-index .corte-principal {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .page-index .corte-dado {
+    grid-row: 3;
+  }
+
+  .page-index .corte-status,
+  .page-admin .admin-corte-item:last-child {
+    grid-column: 2;
+    grid-row: 1;
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .page-index .corte-status #status {
+    justify-content: flex-end;
+  }
+
+  .confirmacao-dialog,
+  .justificativa-dialog {
+    padding: 22px 18px;
+  }
+
+  .confirmacao-acoes {
+    flex-direction: column-reverse;
+  }
+
+  .confirmacao-acoes button {
+    width: 100%;
+  }
+
+  /* Os mesmos registros e botões da tabela são reorganizados como blocos. */
+  .table-wrap.tabela-responsiva-wrap {
+    max-height: none;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  table.tabela-responsiva {
+    display: block;
+    width: 100%;
+    min-width: 0 !important;
+    background: transparent;
+  }
+
+  .tabela-responsiva thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .tabela-responsiva tbody {
+    display: grid;
+    gap: 12px;
+  }
+
+  .tabela-responsiva tbody tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 16px;
+    padding: 16px;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+
+  .tabela-responsiva tbody tr.consulta-linha-selecionada,
+  .tabela-responsiva tbody tr.corte-linha-selecionada {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+  }
+
+  .tabela-responsiva tbody tr td {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    position: static !important;
+    width: auto !important;
+    min-width: 0;
+    padding: 0 !important;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+    background: transparent !important;
+    border: 0;
+    box-shadow: none !important;
+  }
+
+  .tabela-responsiva td[data-label]::before {
+    content: attr(data-label);
+    color: var(--text-soft);
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .tabela-responsiva td:first-child {
+    grid-column: 1 / -1;
+    font-weight: 700;
+  }
+
+  .tabela-responsiva td[data-label="Produto"],
+  .tabela-responsiva td[data-label="Operador"],
+  .tabela-responsiva td[data-label="Tecido"],
+  .tabela-responsiva td.tabela-acoes,
+  .tabela-responsiva td[colspan] {
+    grid-column: 1 / -1;
+  }
+
+  .tabela-responsiva td.tabela-acoes {
+    padding-top: 12px !important;
+    border-top: 1px solid var(--border);
+  }
+
+  .tabela-responsiva .acoes-item {
+    width: 100%;
+    gap: 10px;
+  }
+
+  .tabela-responsiva .tabela-acoes button {
+    width: auto;
+    min-width: 0;
+    min-height: 42px;
+    flex: 1;
+  }
+
+  .tabela-responsiva .status-badge {
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    text-align: left;
+    font-size: 12px;
+  }
+}

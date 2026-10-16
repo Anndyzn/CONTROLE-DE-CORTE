@@ -3,6 +3,7 @@ import {
   carregarResultadosConsulta,
   obterCorteConsultaAtual
 } from "./filtros.js"
+import { inicializarTabelasResponsivas } from "../../core/tabelas.js"
 
 import {
   carregarHistoricoConsulta,
@@ -204,6 +205,7 @@ function inicializarRealtimeConsulta() {
 
 
 async function iniciarPaginaConsulta() {
+  inicializarTabelasResponsivas()
   console.log(
     "🚀 Inicializando consulta de cortes"
   )

@@ -1,4 +1,5 @@
 import { solicitarJustificativa } from "./justificativa.js"
+import { confirmarAcao } from "../core/confirmacao.js"
 import {
   apiGet,
   apiPut,
@@ -492,7 +493,7 @@ async function excluirProducao(
 
 
   const confirmar =
-    confirm(
+    await confirmarAcao(
       `Excluir este lançamento?\n\n` +
 
       `Corte: ${numeroCorte}\n` +
@@ -521,7 +522,8 @@ async function excluirProducao(
         item.folha_parou ?? "-"
       }\n\n` +
 
-      `Esta ação excluirá o lançamento da produção.`
+      `Esta ação excluirá o lançamento da produção.`,
+      {titulo: "Excluir lançamento", confirmar: "Excluir lançamento", perigosa: true}
     )
 
 

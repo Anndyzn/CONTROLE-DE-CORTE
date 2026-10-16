@@ -288,6 +288,9 @@
       </div>
 
       <div class="producao-grid">
+        <fieldset class="form-section">
+          <legend>Turno e operador</legend>
+          <div class="form-section-grid form-section-grid-tres">
         <div class="form-group">
           <label for="data">Data</label>
           <input type="date" id="data">
@@ -322,6 +325,12 @@
           >
         </div>
 
+          </div>
+        </fieldset>
+
+        <fieldset class="form-section">
+          <legend>Horários</legend>
+          <div class="form-section-grid">
         <div class="form-group form-group-time">
           <label for="horaInicio">Hora início</label>
 
@@ -356,6 +365,12 @@
           </div>
         </div>
 
+          </div>
+        </fieldset>
+
+        <fieldset class="form-section">
+          <legend>Folhas e situação</legend>
+          <div class="form-section-grid form-section-grid-tres">
         <div class="form-group">
           <label for="folhaInicio">Folha início</label>
           <input type="number" id="folhaInicio" readonly>
@@ -378,6 +393,8 @@
             Ao finalizar o corte, os campos para informar os PIs cortados serão liberados.
           </span>
         </div>
+          </div>
+        </fieldset>
       </div>
 
       <div class="producao-actions">
@@ -419,7 +436,9 @@
       <!-- Formulário aparece somente enquanto os PIs podem ser alterados -->
       <div id="formItensCorte">
 
-        <div class="form-grid">
+        <fieldset class="form-section">
+          <legend>Produto e material</legend>
+          <div class="form-section-grid form-section-grid-tres">
         <div class="form-group">
           <label for="modeloItem">Produto Cortado</label>
           <input type="text" id="modeloItem" placeholder="Digite o Produto Cortado">
@@ -460,6 +479,12 @@
           <input type="text" id="tecidoOutro" placeholder="Digite o tecido" style="display:none; margin-top: 8px;">
         </div>
 
+          </div>
+        </fieldset>
+
+        <fieldset class="form-section">
+          <legend>Consumo e quantidade</legend>
+          <div class="form-section-grid form-section-grid-tres">
         <div class="form-group">
           <label for="metragemItem">Metragem usada</label>
           <input type="number" step="0.01" id="metragemItem" placeholder="Ex: 25">
@@ -486,6 +511,7 @@
           <input type="number" id="quantidadeItem" placeholder="Ex: 40">
         </div>
       </div>
+        </fieldset>
 
           <input
             type="hidden"

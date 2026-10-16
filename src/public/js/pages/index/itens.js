@@ -10,6 +10,7 @@ import {
 } from "../../core/ui.js"
 import { validarValoresItem } from "../../utils/validations.js"
 import { solicitarJustificativa } from "../../admin/justificativa.js"
+import { confirmarAcao } from "../../core/confirmacao.js"
 import { definirBaseItemRascunho, limparRascunhoGrupo, versaoRascunho } from "./rascunho.js"
 
 import {
@@ -200,8 +201,9 @@ function configurarExclusao(
   botaoExcluir.addEventListener(
     "click",
     async () => {
-      const confirmar = confirm(
-        "Deseja excluir este item do corte?"
+      const confirmar = await confirmarAcao(
+        "Deseja excluir este item do corte?",
+        {titulo: "Excluir PI", confirmar: "Excluir PI", perigosa: true}
       )
 
       if (!confirmar) return
@@ -430,9 +432,10 @@ export async function finalizarItensCorte() {
   }
 
 
-  const confirmar = confirm(
+  const confirmar = await confirmarAcao(
     "Confirmar itens do corte?\n\n" +
-    "Depois de registrar, não será possível adicionar ou alterar itens."
+    "Depois de registrar, não será possível adicionar ou alterar itens.",
+    {titulo: "Confirmar PIs", confirmar: "Confirmar PIs"}
   )
 
   if (!confirmar) return

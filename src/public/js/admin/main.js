@@ -14,9 +14,11 @@ import {
   esconderDetalhesAdmin
 } from "./ui-admin.js"
 import { inicializarHistoricoAdmin } from "./historico-admin.js"
+import { inicializarTabelasResponsivas } from "../core/tabelas.js"
 
 
 function iniciarAdmin() {
+  inicializarTabelasResponsivas()
   console.log(
     "🚀 Inicializando painel administrativo"
   )

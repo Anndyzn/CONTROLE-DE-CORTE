@@ -25,9 +25,11 @@ import {
 } from "./historico.js"
 import { inicializarResumoFinalizados } from "./finalizados.js"
 import { inicializarRascunhos } from "./rascunho.js"
+import { inicializarTabelasResponsivas } from "../../core/tabelas.js"
 
 
 async function iniciarPagina() {
+  inicializarTabelasResponsivas()
   console.log(
     "🚀 Inicializando Controle de Corte"
   )

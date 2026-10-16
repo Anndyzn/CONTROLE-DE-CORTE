@@ -1,7 +1,7 @@
 const {test, beforeEach} = require('node:test')
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
-let modulo, store, elementos, mensagens, consulta, sequencia = 0
+let modulo, store, elementos, mensagens, consulta, confirmar, sequencia = 0
 
 function elemento(tag = 'input') {
   return {tag, value:'', textContent:'', hidden:false, disabled:false, style:{}, children:[], eventos:{},
@@ -29,10 +29,11 @@ beforeEach(async () => {
   globalThis.window = {addEventListener(){}}
   mensagens = []
   consulta = async () => ({itens_finalizados:0})
-  globalThis.__depsRascunho = {Rascunhos, mostrarToast:(...args) => mensagens.push(args), apiGet:(...args) => consulta(...args), atualizarControleMesas:() => {}}
+  confirmar = async () => false
+  globalThis.__depsRascunho = {Rascunhos, mostrarToast:(...args) => mensagens.push(args), apiGet:(...args) => consulta(...args), atualizarControleMesas:() => {}, confirmarAcao:(...args) => confirmar(...args)}
   const codigo = fs.readFileSync('src/public/js/pages/index/rascunho.js','utf8')
     .replace(/^import .*$/gm, '')
-  modulo = await import(`data:text/javascript;base64,${Buffer.from('const {Rascunhos,mostrarToast,apiGet,atualizarControleMesas} = globalThis.__depsRascunho;\n' + codigo).toString('base64')}#${++sequencia}`)
+  modulo = await import(`data:text/javascript;base64,${Buffer.from('const {Rascunhos,mostrarToast,apiGet,atualizarControleMesas,confirmarAcao} = globalThis.__depsRascunho;\n' + codigo).toString('base64')}#${++sequencia}`)
 })
 
 test('digitar salva automaticamente, e restaurar recupera o corte certo sem enviar dados', async () => {
@@ -144,4 +145,21 @@ test('uma correção da última folha no Admin impede restaurar valores antigos 
   assert.equal(elementos.folhaParouInput.value, '')
   assert.match(mensagens.at(-1)[0], /última folha foi corrigida/)
   assert.ok(store.ler()['843'])
+})
+
+test('cancelar o descarte mantém o rascunho; confirmar descarta somente o que estava selecionado', async () => {
+  store.salvar('843', true, 'novo', {produtoNovo:'MANTA'}, null)
+  store.salvar('844', true, 'novo', {produtoNovo:'CORTINA'}, null)
+  modulo.inicializarRascunhos(async () => null)
+  elementos.rascunhoSelecionado.value = '843'
+  await elementos.descartarRascunho.eventos.click[0]()
+  assert.ok(store.ler()['843'])
+  let resolver
+  confirmar = () => new Promise(resolve => {resolver = resolve})
+  const descarte = elementos.descartarRascunho.eventos.click[0]()
+  elementos.rascunhoSelecionado.value = '844'
+  resolver(true)
+  await descarte
+  assert.equal(store.ler()['843'], undefined)
+  assert.ok(store.ler()['844'])
 })
