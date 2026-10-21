@@ -29,16 +29,18 @@ import {
 // CARREGAR ITENS DO CORTE
 // ========================================
 
-export async function carregarItensCorte(numeroCorte) {
+export async function carregarItensCorte(numeroCorte, {aindaAtual = () => true} = {}) {
   try {
     const finalizacao =
       await apiGet(`/cortes/${numeroCorte}/finalizacao-itens`)
+    if (!aindaAtual()) return 0
 
     const itensFinalizados =
       finalizacao.itens_finalizados === 1
 
     const itens =
       await apiGet(`/itens-corte/${numeroCorte}`)
+    if (!aindaAtual()) return 0
 
     const tabela =
       document.getElementById("listaItensCorte")

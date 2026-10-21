@@ -4,6 +4,7 @@ import { numeroCorteValido } from "../utils/validacoes"
 import { ErroRegra, executarNoCorte } from "../services/corte-bloqueado"
 import { cadastrarCorteNaMesa, ErroMesaOcupada, MESAS, normalizarMesa } from "../services/mesa-disponivel"
 import { registrarAlteracaoAdmin, validarJustificativa } from "../services/historico-admin"
+import { periodoResumo } from "../utils/periodo-resumo"
 
 const router = Router()
 
@@ -233,11 +234,25 @@ router.get("/cortes-em-andamento", async (req, res) => {
         c.produto,
         c.mesa,
         COALESCE(p.folha_parou, 0) AS folha_parou,
-        COALESCE(p.status, 'EM PRODUÇÃO') AS status
+        COALESCE(p.status, 'EM PRODUÇÃO') AS status,
+        CASE WHEN p.id IS NULL THEN NULL ELSE json_build_object(
+          'id', p.id,
+          'data', TO_CHAR(p.data, 'YYYY-MM-DD'),
+          'turno', p.turno,
+          'operador', p.operador,
+          'folha_inicio', p.folha_inicio,
+          'folha_parou', p.folha_parou,
+          'dias_sem_lancamento', $1::date - p.data::date
+        ) END AS ultima_producao
       FROM cortes c
 
       LEFT JOIN LATERAL (
         SELECT
+          p2.id,
+          p2.data,
+          p2.turno,
+          p2.operador,
+          p2.folha_inicio,
           p2.folha_parou,
           p2.status
         FROM producao p2
@@ -251,7 +266,8 @@ router.get("/cortes-em-andamento", async (req, res) => {
         OR p.status IS NULL
 
       ORDER BY c.numero DESC
-      `
+      `,
+      [periodoResumo().hoje]
     )
 
     res.json(resultado.rows)

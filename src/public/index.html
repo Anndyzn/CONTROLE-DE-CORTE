@@ -61,31 +61,34 @@
     </aside>
 
     <section class="section-card mesas-painel" aria-labelledby="tituloPainelMesas">
-      <h2 id="tituloPainelMesas">Ocupação das mesas</h2>
-      <p class="section-help">Veja onde há um corte em andamento e quais mesas estão livres.</p>
+      <div class="mesas-painel-cabecalho">
+        <div>
+          <h2 id="tituloPainelMesas">Ocupação das mesas</h2>
+          <p class="section-help">Veja a última produção e abra um corte ou prepare um novo na mesa livre.</p>
+        </div>
+        <div class="mesas-painel-acoes">
+          <time id="ultimaAtualizacaoMesas" class="mesas-atualizacao" hidden></time>
+          <button type="button" id="atualizarCortesEmAndamento" class="btn-atualizar-cortes">Atualizar</button>
+        </div>
+      </div>
       <p id="estadoPainelMesas" class="mesas-estado" role="status">Consultando ocupação das mesas...</p>
       <div id="painelMesas" class="mesas-grid"></div>
     </section>
 
     <div class="cortes-visao-rapida">
-      <section class="section-card topo-andamento">
-        <div class="section-title-row">
-          <div>
-            <h2>Cortes em andamento</h2>
-
-            <p class="section-help">
-              Acompanhe os cortes ainda abertos.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            id="atualizarCortesEmAndamento"
-            class="btn-atualizar-cortes"
-          >
-            Atualizar
-          </button>
-        </div>
+      <details class="section-card topo-andamento lista-andamento">
+        <summary class="andamento-resumo">
+          <h2>
+            Cortes em andamento
+            <span class="section-help">Lista completa dos cortes ainda abertos.</span>
+          </h2>
+          <span class="andamento-controle">
+            <span id="totalCortesEmAndamento" class="andamento-total">—</span>
+            <span class="andamento-abrir">Ver lista</span>
+            <span class="andamento-fechar">Ocultar lista</span>
+            <span class="andamento-seta" aria-hidden="true">⌄</span>
+          </span>
+        </summary>
 
         <div class="table-wrap">
           <table>
@@ -102,7 +105,7 @@
             <tbody id="cortesEmAndamento"></tbody>
           </table>
         </div>
-      </section>
+      </details>
 
       <section class="section-card finalizados-recentes-card" aria-labelledby="tituloFinalizadosRecentes">
         <div class="finalizados-cabecalho">
@@ -198,6 +201,7 @@
           >
             Cadastrar corte
           </button>
+          <button type="button" id="cancelarNovoCorte" class="btn-secondary">Cancelar cadastro</button>
         </div>
       </div>
     </section>
@@ -205,6 +209,7 @@
     <section
       class="section-card corte-selecionado-card"
       id="corteSelecionado"
+      hidden
     >
       <div class="section-title-row">
         <div>
@@ -259,7 +264,7 @@
       </div>
     </section>
 
-    <section class="section-card producao-card">
+    <section class="section-card producao-card" id="secaoProducao" hidden>
       <div class="section-title-row">
         <div>
           <h2>
@@ -552,7 +557,7 @@
       </div>
     </section>
 
-    <section class="section-card historico-card">
+    <section class="section-card historico-card" id="secaoHistorico" hidden>
 
       <div class="historico-header">
         <div>

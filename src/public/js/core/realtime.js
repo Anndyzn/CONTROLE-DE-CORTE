@@ -15,6 +15,12 @@ import {
 
 let canalRealtime = null
 
+function numeroCorteSelecionado() {
+  if (document.getElementById("corteSelecionado")?.hidden) return null
+  const numero = document.getElementById("numeroCorteSelecionado")?.textContent?.trim()
+  return numero && numero !== "--" ? numero : null
+}
+
 
 function atualizarStatusSincronizacao(
   texto,
@@ -105,15 +111,12 @@ export function inicializarRealtime() {
 
         // Se existe um corte aberto,
         // atualiza também suas informações.
-        const numeroCorteAtual =
-          document.getElementById(
-            "numeroCorte"
-          )?.value
+        const numeroCorteAtual = numeroCorteSelecionado()
 
 
         if (numeroCorteAtual) {
           await buscarCorte(
-            numeroCorteAtual
+            numeroCorteAtual, {rolar:false}
           )
         }
       }
@@ -142,15 +145,12 @@ export function inicializarRealtime() {
         await carregarCortesEmAndamento()
 
 
-        const numeroCorteAtual =
-          document.getElementById(
-            "numeroCorte"
-          )?.value
+        const numeroCorteAtual = numeroCorteSelecionado()
 
 
         if (numeroCorteAtual) {
           await buscarCorte(
-            numeroCorteAtual
+            numeroCorteAtual, {rolar:false}
           )
         }
       }
@@ -176,15 +176,12 @@ export function inicializarRealtime() {
         )
 
 
-        const numeroCorteAtual =
-          document.getElementById(
-            "numeroCorte"
-          )?.value
+        const numeroCorteAtual = numeroCorteSelecionado()
 
 
         if (numeroCorteAtual) {
           await carregarItensCorte(
-            numeroCorteAtual
+            numeroCorteAtual, {aindaAtual: () => numeroCorteSelecionado() === numeroCorteAtual}
           )
         }
       }

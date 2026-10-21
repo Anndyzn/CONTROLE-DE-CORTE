@@ -23,7 +23,8 @@ import {
   habilitarProducao,
   desabilitarProducao,
   habilitarItens,
-  desabilitarItens
+  desabilitarItens,
+  mostrarAreaCorte
 } from "./ui-corte.js"
 
 import {
@@ -38,6 +39,9 @@ import {
 
 const blocoItensCorte =
   document.getElementById("blocoItensCorte")
+let buscaCorteAtual = 0
+let consultaAndamentoAtual = 0
+let gerandoNovoCorte = false
 
 function definirCorteSelecionadoAtivo(ativo) {
   const botaoLimpar =
@@ -101,6 +105,8 @@ function limparFormularioProducaoVisual() {
 
 
 export function limparCorteSelecionado() {
+  buscaCorteAtual++
+  mostrarAreaCorte(false)
   selecionarContextoRascunho(null)
   document.getElementById("numeroCorte").value = ""
   document.getElementById("produto").textContent = "--"
@@ -186,10 +192,12 @@ export async function carregarFinalizacaoItens(numeroCorte) {
 }
 
 
-export async function buscarCorte(numeroCorte) {
+export async function buscarCorte(numeroCorte, {rolar = true} = {}) {
+  const busca = ++buscaCorteAtual
+  const aindaAtual = () => busca === buscaCorteAtual
   blocoItensCorte.style.display = "none"
 
-  document.getElementById("statusProducao").value = ""
+  if (rolar) document.getElementById("statusProducao").value = ""
 
   if (!numeroCorte) {
     mostrarToast(
@@ -200,11 +208,14 @@ export async function buscarCorte(numeroCorte) {
 
     return
   }
+  if (rolar) mostrarAreaCorte(false)
 
   try {
 
     const dados =
       await apiGet(`/cortes/${numeroCorte}/resumo`)
+    if (!aindaAtual()) return
+    if (rolar) document.getElementById("numeroCorte").value = numeroCorte
 
     if (document.getElementById("numeroCorteSelecionado").textContent.trim() !== String(numeroCorte)) {
       limparFormularioProducaoVisual()
@@ -239,13 +250,16 @@ export async function buscarCorte(numeroCorte) {
 
     renderizarStatus(statusAtual)
 
-    await carregarHistorico(numeroCorte)
+    await carregarHistorico(numeroCorte, {aindaAtual})
+    if (!aindaAtual()) return
 
     const quantidadeItens =
-      await carregarItensCorte(numeroCorte)
+      await carregarItensCorte(numeroCorte, {aindaAtual})
+    if (!aindaAtual()) return
 
     const itensJaFinalizados =
       await carregarFinalizacaoItens(numeroCorte)
+    if (!aindaAtual()) return
 
     const producaoFinalizada =
       statusAtual === "FINALIZADO"
@@ -271,7 +285,9 @@ export async function buscarCorte(numeroCorte) {
       blocoItensCorte.style.display = "none"
     }
 
-    setTimeout(() => {
+    mostrarAreaCorte(true)
+    if (rolar) setTimeout(() => {
+      if (!aindaAtual()) return
 
       if (producaoFinalizada) {
 
@@ -307,6 +323,7 @@ export async function buscarCorte(numeroCorte) {
     return dados
 
   } catch (erro) {
+    if (!aindaAtual()) return
 
     // Se não encontrou o corte, trata como novo
     if (
@@ -314,6 +331,11 @@ export async function buscarCorte(numeroCorte) {
         .toLowerCase()
         .includes("não encontrado")
     ) {
+      if (!rolar) {
+        limparCorteSelecionado()
+        mostrarToast("O corte selecionado não está mais disponível.", "atencao", "Corte removido")
+        return
+      }
       prepararNovoCorte(numeroCorte)
       return { novo: true }
     }
@@ -330,6 +352,8 @@ export async function buscarCorte(numeroCorte) {
 
 
 export function prepararNovoCorte(numeroCorte) {
+  buscaCorteAtual++
+  mostrarAreaCorte(false)
   selecionarContextoRascunho({ numero: String(numeroCorte), novo: true })
   document.getElementById("numeroCorteSelecionado").textContent = numeroCorte
   limparFormularioProducaoVisual()
@@ -363,6 +387,7 @@ export async function carregarCortesEmAndamento({
   mostrarCarregamento = false,
   avisarErro = false
 } = {}) {
+  const consulta = ++consultaAndamentoAtual
   const tabela =
     document.getElementById("cortesEmAndamento")
 
@@ -383,8 +408,11 @@ export async function carregarCortesEmAndamento({
 
     const cortes =
       await apiGet("/cortes-em-andamento")
+    if (consulta !== consultaAndamentoAtual) return
 
     atualizarOcupacaoMesas(cortes)
+    const total = document.getElementById("totalCortesEmAndamento")
+    if (total) total.textContent = `${cortes.length} ${cortes.length === 1 ? "corte" : "cortes"}`
 
     tabela.innerHTML = ""
 
@@ -522,6 +550,7 @@ export async function carregarCortesEmAndamento({
     }
 
   } catch (erro) {
+    if (consulta !== consultaAndamentoAtual) return
     informarFalhaOcupacaoMesas()
     console.error(
       "Erro ao carregar cortes em andamento:",
@@ -546,7 +575,7 @@ export async function carregarCortesEmAndamento({
       )
     }
   } finally {
-    carregarResumoFinalizados()
+    if (consulta === consultaAndamentoAtual) carregarResumoFinalizados()
   }
 }
 
@@ -557,6 +586,28 @@ export async function gerarProximoNumero() {
     await apiGet("/cortes/proximo-numero")
 
   return dados.proximo_numero
+}
+
+export async function iniciarNovoCorte(mesa = "") {
+  if (gerandoNovoCorte) return false
+  gerandoNovoCorte = true
+  const busca = ++buscaCorteAtual
+  try {
+    if (mesa) await verificarDisponibilidadeMesa(mesa)
+    if (busca !== buscaCorteAtual) return false
+    const proximoNumero = await gerarProximoNumero()
+    if (busca !== buscaCorteAtual) return false
+    document.getElementById("numeroCorte").value = proximoNumero
+    document.getElementById("produtoNovo").value = ""
+    document.getElementById("mesaNova").value = mesa
+    prepararNovoCorte(proximoNumero)
+    mostrarToast(`Novo corte ${proximoNumero} preparado para cadastro.`, "info", "Novo corte")
+    document.getElementById("novoCorte")?.scrollIntoView({behavior:"smooth",block:"start"})
+    document.getElementById("produtoNovo").focus()
+    return true
+  } finally {
+    gerandoNovoCorte = false
+  }
 }
 
 
@@ -578,7 +629,12 @@ export async function cadastrarCorte({
 }
 
 export function inicializarCortes() {
-  inicializarControleMesas()
+  mostrarAreaCorte(false)
+  inicializarControleMesas({
+    abrirCorte: buscarCorte,
+    novoCorte: iniciarNovoCorte,
+    aoErro: erro => mostrarToast(erro.message || "Não foi possível realizar esta ação.", "atencao", "Ação não concluída")
+  })
   const botaoBuscar =
     document.getElementById("buscarCorte")
 
@@ -656,6 +712,7 @@ export function inicializarCortes() {
       "click",
       limparCorteSelecionado
     )
+  document.getElementById("cancelarNovoCorte")?.addEventListener("click", limparCorteSelecionado)
 
   botaoAtualizarCortes
     ?.addEventListener(
@@ -697,32 +754,7 @@ export function inicializarCortes() {
           "Novo corte"
         )
 
-        const proximoNumero =
-          await gerarProximoNumero()
-
-        document.getElementById(
-          "numeroCorte"
-        ).value = proximoNumero
-
-        document.getElementById(
-          "produtoNovo"
-        ).value = ""
-
-        document.getElementById(
-          "mesaNova"
-        ).value = ""
-
-        prepararNovoCorte(proximoNumero)
-
-        mostrarToast(
-          `Novo corte ${proximoNumero} preparado para cadastro.`,
-          "info",
-          "Novo corte"
-        )
-
-        document.getElementById(
-          "produtoNovo"
-        ).focus()
+        await iniciarNovoCorte()
 
       } catch (erro) {
         console.error(

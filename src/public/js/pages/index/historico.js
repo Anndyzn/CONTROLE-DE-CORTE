@@ -7,10 +7,11 @@ import {
   apiGet
 } from "../../core/api.js"
 
-export async function carregarHistorico(numeroCorte) {
+export async function carregarHistorico(numeroCorte, {aindaAtual = () => true} = {}) {
   try {
     const historico =
       await apiGet(`/producao/${numeroCorte}`)
+    if (!aindaAtual()) return
 
     const tabelaHistorico =
       document.getElementById("historicoCorte")

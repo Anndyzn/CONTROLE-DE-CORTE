@@ -1,3 +1,10 @@
+export function mostrarAreaCorte(ativo) {
+  for (const id of ["corteSelecionado", "secaoProducao", "secaoHistorico"]) {
+    const secao = document.getElementById(id)
+    if (secao) secao.hidden = !ativo
+  }
+}
+
 export function renderizarStatus(status) {
   const statusEl = document.getElementById("status")
 

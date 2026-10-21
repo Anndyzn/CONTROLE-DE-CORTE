@@ -81,6 +81,10 @@ async function consultar(sql, valores = [], desfazer = []) {
     return { rows: producoesDoCorte(valores[0]).slice(0, 2) }
   }
   if (/SELECT COUNT\(\*\)/.test(query)) return { rows: [{ total: banco.itens_corte.filter(item => item.numero_corte === Number(valores[0])).length }] }
+  if (query.includes('AS ultima_producao')) {
+    banco.consultaOcupacao = {query,valores}
+    return {rows:banco.ocupacao}
+  }
   if (/TO_CHAR\(p.data/.test(query)) {
     banco.periodo = valores
     return { rows: banco.resumo }
@@ -174,7 +178,7 @@ before(async () => {
 beforeEach(() => {
   banco = {
     corte: { numero: 843, itens_finalizados: 0 },
-    producao: [], itens_corte: [], outrosCortes: [], resumo: [], historico: [], falharHistorico:false,
+    producao: [], itens_corte: [], outrosCortes: [], resumo: [], ocupacao: [], historico: [], falharHistorico:false,
     gravacoes: 0, consultas: 0, filas: new Map()
   }
 })
@@ -638,4 +642,22 @@ test('salvar o mesmo produto não cria histórico de correção', async () => {
   assert.equal((await enviar('/cortes/843/produto', {produto:' manta ',produto_anterior:'MANTA'}, 'PUT')).status, 200)
   assert.equal(banco.historico.length, 0)
   assert.equal(banco.gravacoes, 0)
+})
+
+test('ocupação traz a última produção em uma consulta e preserva os campos usados na reserva de mesas', async () => {
+  const hoje = periodoResumo().hoje
+  banco.ocupacao = [
+    {numero:922,produto:'VEU GOTA',mesa:'MESA 1',folha_parou:50,status:'EM PRODUÇÃO',
+      ultima_producao:{id:41,data:hoje,turno:'1º TURNO',operador:'MATHEUS',folha_inicio:0,folha_parou:50,dias_sem_lancamento:0}},
+    {numero:919,produto:'VEU SIMPLES',mesa:'MESA 2',folha_parou:0,status:'EM PRODUÇÃO',ultima_producao:null}
+  ]
+  const resposta = await fetch(url+'/cortes-em-andamento')
+  assert.equal(resposta.status,200)
+  assert.deepEqual(await resposta.json(),banco.ocupacao)
+  assert.equal(banco.consultas,1)
+  assert.equal(banco.gravacoes,0)
+  assert.deepEqual(banco.consultaOcupacao.valores,[hoje])
+  assert.match(banco.consultaOcupacao.query,/ORDER BY p2.id DESC LIMIT 1/)
+  assert.match(banco.consultaOcupacao.query,/CASE WHEN p.id IS NULL THEN NULL/)
+  assert.match(banco.consultaOcupacao.query,/\$1::date - p.data::date/)
 })
