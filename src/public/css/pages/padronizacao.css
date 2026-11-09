@@ -1,0 +1,19 @@
+.page-admin .padronizacao-painel { margin: 0 0 20px; }
+.padronizacao-painel > summary { cursor: pointer; color: var(--text); font-size: 18px; }
+.padronizacao-painel > summary span { display: block; margin-top: 6px; font-size: 13px; font-weight: 400; color: var(--text-soft); }
+.padronizacao-painel fieldset { min-width: 0; padding: 0; border: 0; margin: 16px 0; }
+.padronizacao-filtro, .padronizacao-destino { display: grid; grid-template-columns: minmax(160px, 1fr) minmax(180px, 2fr) auto; align-items: end; gap: 14px; }
+.padronizacao-destino { grid-template-columns: minmax(0, 1fr) auto; margin-top: 16px; }
+.padronizacao-painel .form-group { margin: 0; }
+.padronizacao-lista { max-height: 360px; overflow: auto; }
+.padronizacao-painel td { white-space: pre-wrap; overflow-wrap: anywhere; }
+.padronizacao-painel input[type="checkbox"] { width: 22px; height: 22px; min-height: 0; margin: 0; padding: 0; cursor: pointer; }
+.padronizacao-painel td button { min-width: 90px; height: 36px; font-size: 12px; }
+.padronizacao-previa { border-top: 1px solid var(--border); padding-top: 16px; }
+.padronizacao-previa[hidden] { display: none; }
+.padronizacao-previa > button { margin-top: 16px; }
+.padronizacao-painel :disabled { cursor: default; }
+@media (max-width: 700px) {
+  .padronizacao-filtro, .padronizacao-destino { grid-template-columns: minmax(0, 1fr); }
+  .padronizacao-painel button { width: 100%; }
+}

@@ -17,6 +17,7 @@
     rel="stylesheet"
     href="css/style.css"
   >
+  <link rel="stylesheet" href="css/pages/padronizacao.css">
 </head>
 
 
@@ -684,6 +685,41 @@
       </section>
 
     </div>
+
+  <details id="painelPadronizacao" class="section-card padronizacao-painel">
+    <summary><strong>Padronizar nomes</strong><span>Corrija variações de escrita em vários cortes ou PIs de uma vez.</span></summary>
+    <p class="section-help">Selecione somente nomes que representam o mesmo produto. A alteração inclui registros antigos e finalizados e será registrada no histórico com responsável e motivo.</p>
+    <form id="filtroPadronizacao">
+      <fieldset id="camposFiltroPadronizacao" class="padronizacao-filtro">
+        <div class="form-group"><label for="tipoPadronizacao">O que corrigir</label><select id="tipoPadronizacao"><option value="modelos">Modelos dos PIs</option><option value="cortes">Nomes dos cortes</option></select></div>
+        <div class="form-group"><label for="buscaPadronizacao">Encontrar nomes</label><input id="buscaPadronizacao" maxlength="200" placeholder="Ex.: CONJUNTO"></div>
+        <button type="submit">Listar nomes</button>
+      </fieldset>
+    </form>
+    <p id="estadoPadronizacao" class="section-help" role="status" aria-live="polite">Abra este painel para consultar os nomes existentes.</p>
+    <form id="formPadronizacao">
+      <fieldset id="camposPadronizacao" class="padronizacao-campos" disabled>
+        <div class="table-wrap padronizacao-lista"><table>
+          <thead><tr><th>Selecionar</th><th>Nome existente</th><th>Registros</th><th>Cortes</th><th>Ação</th></tr></thead>
+          <tbody id="nomesPadronizacao"></tbody>
+        </table></div>
+        <div class="padronizacao-destino">
+          <div class="form-group"><label for="destinoPadronizacao">Nome padronizado que ficará nos registros</label><input id="destinoPadronizacao" maxlength="200" required placeholder="Ex.: CONJUNTO FEMININO"></div>
+          <button type="submit">Conferir alterações</button>
+        </div>
+        <p id="selecaoPadronizacao" class="small-help">Nenhum nome selecionado.</p>
+      </fieldset>
+    </form>
+    <section id="previaPadronizacao" class="padronizacao-previa" hidden aria-labelledby="tituloPreviaPadronizacao">
+      <h3 id="tituloPreviaPadronizacao">Confira antes de aplicar</h3>
+      <p id="resumoPadronizacao"></p>
+      <div class="table-wrap padronizacao-lista"><table>
+        <thead><tr><th>Corte</th><th>Registro</th><th>Nome anterior</th><th>Nome padronizado</th></tr></thead>
+        <tbody id="registrosPadronizacao"></tbody>
+      </table></div>
+      <button id="aplicarPadronizacao" type="button" disabled>Confirmar padronização</button>
+    </section>
+  </details>
 
   <section class="section-card historico-admin-painel" aria-labelledby="tituloHistoricoAdmin">
     <h2 id="tituloHistoricoAdmin">Histórico de alterações</h2>

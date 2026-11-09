@@ -1,6 +1,7 @@
 import { apiGet } from "../core/api.js"
 
 const acoes = {
+  PADRONIZACAO_PRODUTO: "Nome do corte padronizado", PADRONIZACAO_MODELO: "Modelo do PI padronizado",
   EDICAO_PRODUTO: "Nome do produto corrigido",
   EDICAO_PRODUCAO: "Produção corrigida", REABERTURA_PRODUCAO: "Corte reaberto",
   EXCLUSAO_PRODUCAO: "Lançamento excluído", EDICAO_PI: "PI corrigido", EXCLUSAO_PI: "PI excluído",
@@ -65,6 +66,15 @@ export function renderizarRegistroAdmin(registro) {
       detalhes.append(grupo)
     }
   } else detalhes.append(dadosRegistro(registro.antes, registro.depois))
+  if (registro.depois?.correspondencias_sankhya?.length) {
+    const grupo = document.createElement("details")
+    grupo.append(texto("summary", "Correspondências Sankhya copiadas"))
+    for (const regra of registro.depois.correspondencias_sankhya) {
+      grupo.append(texto("p", `${regra.modelo} · ${regra.tecido} · ${regra.cor}`))
+      for (const destino of regra.destinos) grupo.append(texto("p", `${destino.codigo_produto} — ${destino.produto} · ${destino.controle}`))
+    }
+    detalhes.append(grupo)
+  }
   card.append(detalhes)
   return card
 }

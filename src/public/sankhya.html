@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preparar OPs — Controle de Corte</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/pages/sankhya.css">
+</head>
+<body class="page-consultar page-sankhya">
+  <main class="container">
+    <header class="app-header app-header-modern">
+      <div class="header-main">
+        <div class="logo-box"><img src="img/logo.png" alt="Logo Dimepor" class="app-logo"></div>
+        <div class="header-text"><span class="system-tag">Dimepor</span><h1>Preparar OPs</h1><p>Correspondências e conferência para o Sankhya</p></div>
+      </div>
+      <nav class="header-actions" aria-label="Navegação"><a href="index.html" class="header-btn header-btn-secondary">Início</a></nav>
+    </header>
+
+    <aside class="sankhya-aviso">
+      <strong>Apoio ao lançamento manual</strong>
+      <p>Cadastre as correspondências, confira as OPs previstas e baixe o guia em Excel para lançar no Sankhya. A criação, o apontamento e a confirmação continuam sendo feitos no ERP.</p>
+    </aside>
+
+    <section class="section-card">
+      <h2>Escolher corte</h2>
+      <p class="section-help">Disponível após finalizar a produção e confirmar os PIs. A lista inclui até 50 cortes recentes e pode conter cortes já lançados manualmente no ERP.</p>
+      <form id="formBuscarSankhya">
+        <fieldset id="camposBuscaSankhya" class="sankhya-busca">
+          <div class="form-group"><label for="numeroSankhya">Número do corte</label><input id="numeroSankhya" type="number" min="1" max="2147483647" step="1" required placeholder="Digite o número"></div>
+          <button type="submit">Conferir corte</button>
+          <div class="form-group"><label for="recentesSankhya">Ou escolha um corte recente</label><select id="recentesSankhya"><option value="">Carregando cortes...</option></select></div>
+        </fieldset>
+      </form>
+      <p id="estadoSankhya" class="section-help" role="status" aria-live="polite">Escolha um corte para começar.</p>
+    </section>
+
+    <section id="conferenciaSankhya" class="section-card" hidden>
+      <h2 id="tituloConferenciaSankhya">Conferência</h2>
+      <p id="resumoConferenciaSankhya" class="section-help"></p>
+      <div class="button-row"><button id="exportarGuiaSankhya" type="button" disabled>📥 Baixar guia em Excel</button></div>
+      <p class="small-help">Complete e salve as correspondências de todos os itens para baixar. O Excel é um guia para digitação e conferência, sem importação automática. Confira as OPs já existentes antes de lançar.</p>
+      <p class="section-help">Cada produto de destino recebe a quantidade de peças do item de origem. Confira essa correspondência para conjuntos e produtos compostos.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Item de origem</th><th>Produto Sankhya</th><th>Controle (cor)</th><th>Quantidade</th><th>Conferência</th></tr></thead>
+        <tbody id="linhasConferenciaSankhya"></tbody>
+      </table></div>
+      <p class="sankhya-consumo">A metragem permanece no item original, como referência do consumo total. O consumo por OP será tratado no Sankhya, usando a composição e o ajuste real do colaborador.</p>
+    </section>
+
+    <section id="editorSankhya" class="section-card" hidden>
+      <h2>Correspondência dos itens</h2>
+      <p class="section-help">Informe os códigos e controles exatamente como cadastrados no ERP. Nesta etapa, os dados são informados manualmente e ainda não são validados pela API do Sankhya.</p>
+      <form id="formCorrespondenciaSankhya">
+        <fieldset id="camposCorrespondenciaSankhya" class="sankhya-editor">
+          <div class="form-group"><label for="itemSankhya">Item do corte</label><select id="itemSankhya" required></select></div>
+          <p id="origemSankhya" class="sankhya-origem"></p>
+          <div id="destinosSankhya"></div>
+          <div class="button-row"><button id="adicionarDestinoSankhya" type="button" class="btn-secondary">+ Adicionar produto de destino</button><button type="submit">Salvar correspondência</button></div>
+          <p class="small-help">A correspondência vale para outros cortes com o mesmo modelo, tecido e cor. Um conjunto pode ter vários produtos de destino, como blazer e vestido.</p>
+        </fieldset>
+      </form>
+    </section>
+  </main>
+  <div id="toastContainer" class="toast-container"></div>
+  <script type="module" src="js/pages/sankhya/main.js"></script>
+</body>
+</html>

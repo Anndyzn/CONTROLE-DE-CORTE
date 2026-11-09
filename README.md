@@ -37,6 +37,19 @@ Sistema web interno que permite:
 
 ## ⚙️ Funcionalidades
 
+### Padronização de nomes
+- No Admin, **Padronizar nomes** permite selecionar grafias existentes dos nomes dos cortes ou modelos dos PIs e conferir os registros antes de aplicar.
+- Exige responsável e motivo, audita cada alteração e recusa prévia desatualizada. Modelos preservam seus vínculos Sankhya por cópia de correspondências, com bloqueio em caso de conflito.
+- Produto do novo corte e modelo dos PIs oferecem até cinco sugestões dos nomes existentes, permitindo digitação livre.
+- Funcionamento e limites: [Padronização de nomes](docs/padronizacao-nomes.md).
+
+### Preparação para o Sankhya
+- Na Home, **Sankhya** abre a conferência dos itens de cortes finalizados com PIs confirmados.
+- Cadastre correspondências por modelo, tecido e cor, com um ou vários produtos e controles do ERP.
+- A tela apresenta as OPs previstas e mantém o consumo total no item de origem. **Baixar guia em Excel** gera uma linha por OP e uma aba de consumo por item, para apoiar o lançamento manual no ERP. Exige correspondências completas e salvas.
+- Os códigos são informados manualmente. O guia não importa dados nem cria OPs no Sankhya; apontamento, consumo real e confirmação continuam no ERP.
+- Funcionamento e próximos passos: [Integração Sankhya](docs/integracao-sankhya.md).
+
 ### Backup e testes no GitHub
 - Backup local do schema `public`, com SHA-256 e conferência por recuperação em PostgreSQL isolado.
 - Rotina diária no Windows, às 8h de Brasília, dependente do computador e do Docker Desktop disponíveis.

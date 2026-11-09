@@ -10,6 +10,7 @@
     "start": "node dist/server.js",
     "test": "npm run build && node --test",
     "test:backup": "node --test tests/integracao-backup.cjs",
+    "test:padronizacao": "npm run build && node --test tests/integracao-padronizacao.cjs",
     "backup:create": "node scripts/backup.cjs create",
     "backup:verify": "node scripts/backup.cjs verify",
     "backup:daily": "node scripts/backup.cjs daily",

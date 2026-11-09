@@ -15,6 +15,7 @@ import {
 } from "./ui-admin.js"
 import { inicializarHistoricoAdmin } from "./historico-admin.js"
 import { inicializarTabelasResponsivas } from "../core/tabelas.js"
+import { inicializarPadronizacao } from "./padronizacao.js"
 
 
 function iniciarAdmin() {
@@ -31,6 +32,7 @@ function iniciarAdmin() {
 
   inicializarItensAdmin()
   inicializarHistoricoAdmin()
+  inicializarPadronizacao()
 
   console.log(
     "✅ Painel administrativo inicializado"

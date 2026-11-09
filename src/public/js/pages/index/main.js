@@ -26,6 +26,7 @@ import {
 import { inicializarResumoFinalizados } from "./finalizados.js"
 import { inicializarRascunhos } from "./rascunho.js"
 import { inicializarTabelasResponsivas } from "../../core/tabelas.js"
+import { inicializarSugestoesNomes } from "./nomes.js"
 
 
 async function iniciarPagina() {
@@ -63,6 +64,7 @@ desabilitarProducao("SEM_CORTE")
 
   inicializarHistoricoUI()
   inicializarRascunhos(buscarCorte)
+  inicializarSugestoesNomes()
 
 
   // ========================================
