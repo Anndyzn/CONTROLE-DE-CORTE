@@ -1,3 +1,5 @@
+import { limparErroCampo } from "../../core/erros-campos.js"
+
 export function mostrarAreaCorte(ativo) {
   for (const id of ["corteSelecionado", "secaoProducao", "secaoHistorico"]) {
     const secao = document.getElementById(id)
@@ -31,6 +33,7 @@ export function limparTabelaItens() {
 }
 
 export function limparCamposItens() {
+  for(const id of ["modeloItem","corItem","corOutra","tecidoItem","tecidoOutro","metragemItem","sobraItem","perdaItem","metrosFaltantesItem","quantidadeItem"])limparErroCampo(id)
   document.getElementById("modeloItem").value = ""
   document.getElementById("corItem").value = ""
   document.getElementById("corOutra").value = ""
@@ -48,6 +51,7 @@ export function limparCamposItens() {
 }
 
 export function habilitarProducao() {
+  for(const id of ["data","turno","operador","operadorOutro","horaInicio","horaFim","folhaParouInput","statusProducao"])limparErroCampo(id)
 
   const campoData =
     document.getElementById("data")
@@ -199,6 +203,7 @@ export function desabilitarProducao(
 }
 
 export function habilitarItens() {
+  const outro=document.getElementById("salvarOutroItemCorte");if(outro)outro.disabled=false
   const botaoSalvar =
     document.getElementById("salvarItemCorte")
 
@@ -230,6 +235,7 @@ export function habilitarItens() {
 }
 
 export function desabilitarItens() {
+  const outro=document.getElementById("salvarOutroItemCorte");if(outro)outro.disabled=true
   const botaoSalvar =
     document.getElementById("salvarItemCorte")
 

@@ -94,7 +94,7 @@ export async function carregarConferenciaSankhya(numero: number, {exigirFinaliza
       throw new ErroRegra(409, "Finalize a produção e confirme os PIs antes de preparar as OPs.")
     }
     const itens = await client.query("SELECT id, modelo, cor, tecido, quantidade_pecas, metragem_usada FROM itens_corte WHERE numero_corte = $1 ORDER BY id", [numero])
-    if (!itens.rows.length) throw new ErroRegra(409, "Este corte não possui itens para conferir.")
+    if (!itens.rows.length && exigirFinalizacao) throw new ErroRegra(409, "Este corte não possui itens para conferir.")
     const regras = await client.query<CorrespondenciaOP>(
       "SELECT modelo, tecido, cor, destinos, versao FROM sankhya_correspondencias WHERE modelo = ANY($1::text[])",
       [[...new Set(itens.rows.map(item => normalizarNome(item.modelo)))]]
@@ -102,7 +102,7 @@ export async function carregarConferenciaSankhya(numero: number, {exigirFinaliza
     const conferencia = montarConferencia(itens.rows, regras.rows)
     await client.query("COMMIT")
     const total = conferencia.reduce((total, item) => total + item.ordens.length, 0)
-    const completa = conferencia.every(item => item.pendencias.length === 0)
+    const completa = conferencia.length > 0 && conferencia.every(item => item.pendencias.length === 0)
     return {corte, itens: conferencia, total_ops: total, completa,
       guia_disponivel: finalizado && completa && total > 0, envio_disponivel: false}
   } catch (erro) { await client.query("ROLLBACK"); throw erro }

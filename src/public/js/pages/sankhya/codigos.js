@@ -13,6 +13,19 @@ export async function mostrarCodigosCorte(dados,catalogo,copiar){
   if(seq!==sequencia)return
   const opcoes=nomes.status==="fulfilled"?nomes.value.nomes?.[0]?.opcoes??[]:[]
   lista.replaceChildren()
+  if(!dados.itens.length){
+    lista.append(texto("p","Este corte ainda não tem PIs registrados. Você já pode consultar ou editar os produtos vinculados ao nome abaixo; os lançamentos por cor aparecerão quando os PIs forem registrados."))
+    if(!opcoes.length)lista.append(texto("p",nomes.status==="rejected"?"Não foi possível consultar os vínculos. Atualize a página para tentar novamente.":"Nenhum produto vinculado a este nome. Use ‘Consultar / editar vínculos deste nome’ para cadastrar."))
+    const codigos=[...new Set(opcoes.flatMap(o=>o.codigos))]
+    for(const codigo of codigos){
+      const produto=catalogo.produtos.find(p=>p.codigo_produto===codigo)
+      if(!produto)continue
+      const linha=texto("div","");linha.className="sankhya-possibilidade"
+      const botao=texto("button",`Copiar código ${codigo}`);botao.type="button";botao.addEventListener("click",()=>copiar(String(codigo)))
+      linha.append(texto("span",`${codigo} — ${produto.produto}`),botao);lista.append(linha)
+    }
+    return
+  }
   for(const item of dados.itens){
     const card=texto("article","");card.className="sankhya-codigo-item";lista.append(card)
     const estado=estados.status==="fulfilled"?estados.value.itens?.find(i=>i.id===item.id):null
@@ -25,19 +38,26 @@ export async function mostrarCodigosCorte(dados,catalogo,copiar){
     let codigos=estado?.codigos??(validos?destinos.map(d=>d.codigo_produto):opcoes.length===1?opcoes[0].codigos:[])
     codigos=[...new Set(codigos)]
     let lancados=estado?.lancados??[],versao=estado?.versao??0,ocupado=false
+    let mensagemSalvamento=versao>0?"Salvo":"",falhaSalvamento=false
     const disponiveis=[...opcoes]
     for(const codigo of codigos)if(!disponiveis.some(o=>o.codigos.includes(codigo)))disponiveis.push({codigos:[codigo],rotulo:`${codigo} — ${catalogo.produtos.find(p=>p.codigo_produto===codigo)?.produto??"Fora do catálogo"}`})
     async function salvar(novos,marcados){
       if(ocupado || !estado)return
-      ocupado=true;renderizar()
+      ocupado=true;mensagemSalvamento="Salvando…";falhaSalvamento=false;renderizar()
       try{
         const r=await apiPut(`/sankhya/itens/${item.id}/lancamento`,{codigos:novos,lancados:marcados,versao,assinatura:estado.assinatura})
         codigos=novos;lancados=marcados;versao=r.versao;estado.revisar=false
-      }catch(e){mostrarToast(e.message,"erro")}
+        mensagemSalvamento="Salvo"
+        window.dispatchEvent(new Event("sankhya-marcacao-salva"))
+      }catch(e){mensagemSalvamento=`Não foi salvo. ${e.message} A seleção anterior foi mantida.`;falhaSalvamento=true}
       finally{ocupado=false;if(seq===sequencia)renderizar()}
     }
     function renderizar(){
+      card.setAttribute("aria-busy",String(ocupado))
       card.replaceChildren(texto("h3",`${item.modelo} · ${item.cor}`))
+      if(mensagemSalvamento){
+        const feedback=texto("p",mensagemSalvamento);feedback.className=falhaSalvamento?"salvamento-feedback salvamento-erro":"salvamento-feedback";feedback.setAttribute("role","status");card.append(feedback)
+      }
       if(!estado)card.append(texto("p","Não foi possível consultar as marcações. Consulte o corte novamente; os códigos continuam disponíveis para copiar."))
       if(estado?.revisar)card.append(texto("p","O PI foi corrigido. Confira os produtos e marque novamente o que foi lançado."))
       if(disponiveis.length>1){

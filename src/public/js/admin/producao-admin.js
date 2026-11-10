@@ -10,6 +10,7 @@ import {
   mostrarToast
 } from "../core/ui.js"
 import { validarFolhas } from "../utils/validations.js"
+import { limparErroCampo, validarObrigatoriosCampos, marcarErroCampo } from "../core/erros-campos.js"
 
 import {
   formatarData,
@@ -27,6 +28,7 @@ import {
 // ========================================
 
 function abrirEdicaoProducao(item) {
+  for(const id of ["editarData","editarTurno","editarOperador","editarFolhaInicio","editarFolhaParou","editarStatus"])limparErroCampo(id)
   document.getElementById(
     "producaoEditandoId"
   ).value =
@@ -287,6 +289,7 @@ export async function carregarHistoricoAdmin(
 // ========================================
 
 async function salvarEdicaoProducao() {
+  for(const id of ["editarData","editarTurno","editarOperador","editarFolhaInicio","editarFolhaParou","editarStatus"])limparErroCampo(id)
   const id =
     document.getElementById(
       "producaoEditandoId"
@@ -356,6 +359,7 @@ async function salvarEdicaoProducao() {
     folhaParou === "" ||
     !status
   ) {
+    validarObrigatoriosCampos({editarData:"a data",editarTurno:"o turno",editarOperador:"o operador",editarFolhaInicio:"a folha inicial",editarFolhaParou:"a folha final",editarStatus:"o status"})
     mostrarToast(
       "Preencha os campos obrigatórios.",
       "atencao",
@@ -368,6 +372,7 @@ async function salvarEdicaoProducao() {
 
   const erroFolhas = validarFolhas(folhaInicio, folhaParou)
   if (erroFolhas) {
+    marcarErroCampo("editarFolhaParou",erroFolhas)
     mostrarToast(
       erroFolhas,
       "atencao",

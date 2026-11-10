@@ -3,6 +3,7 @@ import { mostrarToast } from "../../core/ui.js"
 import { confirmarAcao } from "../../core/confirmacao.js"
 const el = id => document.getElementById(id)
 let catalogo, nomes = [], atual = null, opcoes = [], alterado = false, ocupado = false, sequencia = 0, sequenciaOpcoes = 0
+let nomeDesejado = new URLSearchParams(window.location?.search??"").get("vincular")
 function opcao(valor, nome) { const o = document.createElement("option"); o.value = valor; o.textContent = nome; return o }
 function renderizar() {
   el("listaPossibilidadesSankhya").replaceChildren()
@@ -27,6 +28,11 @@ async function carregarLista() {
     el("nomeOrigemSankhya").replaceChildren(opcao("", "Selecione uma nomenclatura"))
     nomes.forEach((n,i) => el("nomeOrigemSankhya").append(opcao(String(i), `${n.nome} · ${n.cortes} corte(s) · ${n.opcoes.length} opção(ões)`)))
     atual = null; opcoes = []; alterado = false; renderizar()
+    if(nomeDesejado){
+      const indice=nomes.findIndex(n=>n.nome===nomeDesejado)
+      if(indice>=0){atual=nomes[indice];opcoes=structuredClone(atual.opcoes);el("nomeOrigemSankhya").value=String(indice);renderizar()}
+      nomeDesejado=null
+    }
     el("estadoNomesSankhya").textContent = dados.tem_mais ? "Há mais nomes. Refine a busca." : `${nomes.length} nomenclatura(s). Escolha um nome para definir os produtos possíveis.`
   } catch (erro) { if (seq === sequencia) el("estadoNomesSankhya").textContent = erro.message }
 }
@@ -98,4 +104,5 @@ export function inicializarNomenclaturasSankhya(obterCatalogo, aoSalvar = () => 
     finally { ocupado = false; renderizar() }
   })
   window.addEventListener("beforeunload", evento => { if (alterado || ocupado) { evento.preventDefault(); evento.returnValue = "" } })
+  if(nomeDesejado&&nomeDesejado.length<=200){el("buscarNomeSankhya").value=nomeDesejado;painel.open=true}
 }

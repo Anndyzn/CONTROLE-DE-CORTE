@@ -1,4 +1,4 @@
-import { createHash } from "crypto"
+import { createHash, randomUUID } from "crypto"
 import { PoolClient } from "pg"
 import dbPg from "../database-pg"
 import { ErroRegra } from "./corte-bloqueado"
@@ -105,12 +105,13 @@ export async function aplicarPadronizacao(dados: unknown) {
         VALUES ($1, $2, $3, $4::jsonb)`, [regra.modelo, regra.tecido, regra.cor, JSON.stringify(regra.destinos)])
     }
     await client.query(`UPDATE ${config.tabela} SET ${config.campo} = $1 WHERE ${config.campo} = ANY($2::text[])`, [pedido.destino, pedido.origens])
+    const operacaoId = randomUUID()
     for (const [indice, antes] of previa.originais.entries()) {
       const depois: Record<string, unknown> = {...antes, [config.campo]: pedido.destino}
       if (indice === 0 && previa.novas.length) depois.correspondencias_sankhya = previa.novas
       await registrarAlteracaoAdmin(client, {...justificativa,
         numero: antes.numero_corte ?? antes.numero, registroId: antes[config.identificador],
-        acao: config.acao, antes, depois})
+        acao: config.acao, antes, depois, operacaoId})
     }
     await client.query("COMMIT")
     return {total: previa.registros.length, correspondencias: previa.novas.length}

@@ -70,6 +70,29 @@ test('padronização real no PostgreSQL preserva dados, recusa prévia antiga e 
       const dados=await(await fetch(`http://127.0.0.1:${servidor.address().port}/admin/nomenclaturas?tipo=modelos&busca=veu`)).json()
       assert.deepEqual(dados.nomes,[{nome:'VÉU GOTA',registros:1,cortes:1}])
     }finally{await new Promise(resolve=>servidor.close(resolve))}
+    // Conferência do marco inicial em banco descartável, sem usar dados da empresa.
+    await pool.query(`CREATE TABLE producao(id SERIAL PRIMARY KEY,numero_corte INTEGER,status TEXT);
+      INSERT INTO cortes VALUES(923,'ANTIGO FINALIZADO','MESA 2',1),(924,'ABERTO AGORA','MESA 3',0);
+      INSERT INTO producao(numero_corte,status) VALUES(923,'FINALIZADO'),(924,'EM PRODUÇÃO')`)
+    const {prepararNomesSankhya}=require('../dist/services/sankhya-nomes')
+    const {prepararLancamentosSankhya}=require('../dist/routes/sankhya-lancamentos.routes')
+    const {prepararAcompanhamentoSankhya,default:acompanhamento}=require('../dist/routes/sankhya-acompanhamento.routes')
+    await prepararNomesSankhya();await prepararLancamentosSankhya();await prepararAcompanhamentoSankhya()
+    const acompanhados=async()=>(await pool.query('SELECT numero FROM sankhya_acompanhamento ORDER BY numero')).rows.map(r=>r.numero)
+    assert.deepEqual(await acompanhados(),[922,924])
+    await pool.query("INSERT INTO producao(numero_corte,status) VALUES(922,'FINALIZADO')")
+    await prepararAcompanhamentoSankhya();assert.deepEqual(await acompanhados(),[922,924])
+    await pool.query("INSERT INTO cortes VALUES(925,'NOVO','MESA 2',0)");assert.deepEqual(await acompanhados(),[922,924,925])
+    await pool.query('DELETE FROM cortes WHERE numero=925');assert.deepEqual(await acompanhados(),[922,924])
+    await pool.query("INSERT INTO cortes VALUES(925,'NOVO REUTILIZADO','MESA 2',0)");assert.deepEqual(await acompanhados(),[922,924,925])
+    app.use(acompanhamento)
+    const novoServidor=await new Promise(resolve=>{const s=app.listen(0,'127.0.0.1',()=>resolve(s))})
+    try{
+      const resposta=await fetch(`http://127.0.0.1:${novoServidor.address().port}/sankhya/acompanhamento`)
+      assert.equal(resposta.status,200)
+      const dados=await resposta.json();assert.deepEqual(dados.cortes.map(c=>c.numero).sort(),[922,924,925])
+      assert.ok(!dados.cortes.some(c=>c.numero===923))
+    }finally{await new Promise(resolve=>novoServidor.close(resolve))}
   }finally{
     if(pool)await pool.end()
     if(criado)await executar('docker',['rm','--force',nome])

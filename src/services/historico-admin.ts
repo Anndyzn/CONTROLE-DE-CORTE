@@ -36,6 +36,7 @@ export async function prepararHistoricoAdmin() {
         depois JSONB
       )
     `)
+    await client.query("ALTER TABLE historico_admin ADD COLUMN IF NOT EXISTS operacao_id UUID")
     await client.query("CREATE INDEX IF NOT EXISTS historico_admin_corte_id ON historico_admin (numero_corte, id DESC)")
     // A consulta é feita pelo servidor; não há acesso direto pelo cliente Supabase.
     await client.query("ALTER TABLE historico_admin ENABLE ROW LEVEL SECURITY")
@@ -50,12 +51,12 @@ export async function prepararHistoricoAdmin() {
 
 export async function registrarAlteracaoAdmin(
   client: PoolClient,
-  dados: Justificativa & { numero: number; acao: string; registroId?: number | string; antes: unknown; depois: unknown }
+  dados: Justificativa & { numero: number; acao: string; registroId?: number | string; antes: unknown; depois: unknown; operacaoId?: string }
 ) {
   await client.query(
-    `INSERT INTO historico_admin (numero_corte, acao, registro_id, responsavel, motivo, antes, depois)
-     VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7::jsonb)`,
+    `INSERT INTO historico_admin (numero_corte, acao, registro_id, responsavel, motivo, antes, depois, operacao_id)
+     VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7::jsonb, $8::uuid)`,
     [dados.numero, dados.acao, dados.registroId ?? null, dados.responsavel, dados.motivo,
-      JSON.stringify(dados.antes), JSON.stringify(dados.depois)]
+      JSON.stringify(dados.antes), JSON.stringify(dados.depois), dados.operacaoId??null]
   )
 }

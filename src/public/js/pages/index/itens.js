@@ -9,6 +9,7 @@ import {
   mostrarToast
 } from "../../core/ui.js"
 import { validarValoresItem } from "../../utils/validations.js"
+import { limparErroCampo, marcarErroCampo, validarObrigatoriosCampos, marcarErrosNumericos } from "../../core/erros-campos.js"
 import { solicitarJustificativa } from "../../admin/justificativa.js"
 import { confirmarAcao } from "../../core/confirmacao.js"
 import { atualizarVinculosPIs } from "./vinculos.js"
@@ -24,6 +25,7 @@ import {
   limparCamposItens,
   desabilitarItens
 } from "./ui-corte.js"
+let salvandoItem=false
 
 
 // ========================================
@@ -236,7 +238,9 @@ function configurarExclusao(
 // SALVAR / ATUALIZAR ITEM
 // ========================================
 
-export async function salvarItemCorte() {
+export async function salvarItemCorte({continuar=false}={}) {
+  if(salvandoItem)return
+  for(const id of ["modeloItem","corItem","corOutra","tecidoItem","tecidoOutro","metragemItem","sobraItem","perdaItem","metrosFaltantesItem","quantidadeItem"])limparErroCampo(id)
   const numeroCorte =
     document.getElementById("numeroCorte").value
 
@@ -299,6 +303,9 @@ export async function salvarItemCorte() {
     !tecido ||
     !quantidade
   ) {
+    const corCampo=document.getElementById("corItem").value==="OUTRA"?"corOutra":"corItem"
+    const tecidoCampo=document.getElementById("tecidoItem").value==="OUTRA"?"tecidoOutro":"tecidoItem"
+    validarObrigatoriosCampos({modeloItem:"o modelo",[corCampo]:"a cor",[tecidoCampo]:"o tecido",quantidadeItem:"a quantidade de peças"})
     mostrarToast(
       "Preencha modelo, cor, tecido e quantidade de peças.",
       "atencao",
@@ -309,6 +316,7 @@ export async function salvarItemCorte() {
   }
 
   if (metragem === "") {
+    marcarErroCampo("metragemItem","Informe a metragem usada. Se for aproveitamento, digite 0.")
     mostrarToast(
       "Informe a metragem usada. Se for aproveitamento, digite 0.",
       "atencao",
@@ -324,6 +332,7 @@ export async function salvarItemCorte() {
     faltantes: metrosFaltantes || 0, quantidade
   })
   if (erroValores) {
+    marcarErrosNumericos({metragemItem:metragem,sobraItem:sobra||0,perdaItem:perda||0,metrosFaltantesItem:metrosFaltantes||0,quantidadeItem:quantidade})
     mostrarToast(erroValores, "atencao", "Valores inválidos")
     return
   }
@@ -332,6 +341,11 @@ export async function salvarItemCorte() {
     document.getElementById(
       "itemEditandoId"
     ).value
+  if(continuar&&itemEditandoId){mostrarToast("Salve a correção antes de adicionar outro PI.","atencao");return}
+  const campos=["modeloItem","corItem","corOutra","tecidoItem","tecidoOutro","metragemItem","sobraItem","perdaItem","metrosFaltantesItem","quantidadeItem"]
+  const originais=Object.fromEntries(campos.map(id=>[id,document.getElementById(id).value]))
+  const botoes=["salvarItemCorte","salvarOutroItemCorte","finalizarItensCorte"].map(id=>document.getElementById(id)).filter(Boolean)
+  const bloqueios=botoes.map(b=>b.disabled)
 
 
   const dadosItem = {
@@ -349,6 +363,8 @@ export async function salvarItemCorte() {
 
 
   const versao = versaoRascunho("item", numeroCorte)
+  salvandoItem=true
+  botoes.forEach(b=>b.disabled=true)
   try {
     if (itemEditandoId) {
       const justificativa = await solicitarJustificativa({titulo:"Corrigir PI", descricao:`Corte ${numeroCorte}: informe o motivo da correção deste PI.`})
@@ -366,10 +382,14 @@ export async function salvarItemCorte() {
 
 
     limparRascunhoGrupo("item", numeroCorte, versao)
+    if(String(document.getElementById("numeroCorte").value)!==String(numeroCorte))return
+    if(campos.some(id=>document.getElementById(id).value!==originais[id])){
+      mostrarToast("PI salvo. Os campos que você alterou durante o envio foram mantidos.","sucesso");await carregarItensCorte(numeroCorte);return
+    }
     mostrarToast(
       itemEditandoId
         ? "O item do corte foi atualizado."
-        : "Item salvo. Adicione outro PI ou registre os itens do corte.",
+        : continuar ? "PI salvo. Selecione a cor do próximo PI." : "Item salvo. Adicione outro PI ou registre os itens do corte.",
       "sucesso",
       itemEditandoId
         ? "Item atualizado"
@@ -387,6 +407,13 @@ export async function salvarItemCorte() {
     ).textContent = "Salvar item do corte"
 
     limparCamposItens()
+    if(continuar){
+      document.getElementById("modeloItem").value=originais.modeloItem
+      document.getElementById("tecidoItem").value=originais.tecidoItem
+      document.getElementById("tecidoOutro").value=originais.tecidoOutro
+      document.getElementById("tecidoOutro").style.display=originais.tecidoItem==="OUTRA"?"block":"none"
+      document.getElementById("corItem").focus()
+    }
 
     await carregarItensCorte(numeroCorte)
 
@@ -402,6 +429,9 @@ export async function salvarItemCorte() {
       "erro",
       "Erro"
     )
+  } finally {
+    salvandoItem=false
+    if(String(document.getElementById("numeroCorte").value)===String(numeroCorte)&&document.getElementById("formItensCorte")?.style.display!=="none")botoes.forEach((b,i)=>b.disabled=bloqueios[i])
   }
 }
 
@@ -494,6 +524,7 @@ export function inicializarItens() {
     "click",
     salvarItemCorte
   )
+  document.getElementById("salvarOutroItemCorte")?.addEventListener("click",()=>salvarItemCorte({continuar:true}))
 
   botaoFinalizar.addEventListener(
     "click",
@@ -504,6 +535,8 @@ export function inicializarItens() {
   selectCor.addEventListener(
     "change",
     () => {
+      limparErroCampo(inputCorOutra)
+      limparErroCampo(selectCor)
       inputCorOutra.style.display =
         selectCor.value === "OUTRA"
           ? "block"
@@ -515,6 +548,8 @@ export function inicializarItens() {
   selectTecido.addEventListener(
     "change",
     () => {
+      limparErroCampo(inputTecidoOutro)
+      limparErroCampo(selectTecido)
       inputTecidoOutro.style.display =
         selectTecido.value === "OUTRA"
           ? "block"

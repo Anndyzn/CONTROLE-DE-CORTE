@@ -21,7 +21,7 @@ beforeEach(async t=>{
   ].map(id=>[id,elemento()]))
   elementos.numeroCorteSelecionado.textContent='--'
   globalThis.document={getElementById:id=>elementos[id],querySelectorAll:()=>[],createElement:elemento}
-  const codigoUi=fs.readFileSync('src/public/js/pages/index/ui-corte.js','utf8')
+  const codigoUi='const limparErroCampo=()=>{};\n'+fs.readFileSync('src/public/js/pages/index/ui-corte.js','utf8').replace(/^import .*$/gm,'')
   const ui=await import(`data:text/javascript;base64,${Buffer.from(codigoUi).toString('base64')}`)
   t.mock.method(globalThis,'setTimeout',fn=>{fn();return 1})
   consultar=async url=>url.endsWith('/proximo-numero')?{proximo_numero:923}:url.endsWith('/finalizacao-itens')?{itens_finalizados:0}:url==='/cortes-em-andamento'?[]:resumo()
@@ -52,7 +52,8 @@ test('Home inicia com formulários ocultos; abrir um cartão seleciona o corte e
   assert.equal(elementos.numeroCorte.value,922)
   assert.equal(elementos.numeroCorteSelecionado.textContent,922)
   assert.equal(elementos.folhaInicio.value,50)
-  assert.equal(elementos.corteSelecionado.rolou,true)
+  assert.equal(elementos.secaoProducao.rolou,true)
+  assert.equal(elementos.turno.focado,true)
   modulo.limparCorteSelecionado()
   for(const id of ['corteSelecionado','secaoProducao','secaoHistorico']) assert.equal(elementos[id].hidden,true)
   assert.equal(elementos.blocoItensCorte.style.display,'none')

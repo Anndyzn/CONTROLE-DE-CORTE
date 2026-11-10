@@ -1,3 +1,5 @@
+const motivos = ["Correção de nomenclatura", "Padronização de nomes", "Erro de digitação", "Quantidade ou metragem incorreta", "Data, horário ou operador incorreto", "Finalizado por engano", "Registro duplicado", "Lançamento no corte errado"]
+
 export function solicitarJustificativa({ titulo, descricao, numeroConfirmacao = "" }) {
   let dialog = document.getElementById("justificativaAdmin")
   if (!dialog) {
@@ -16,8 +18,12 @@ export function solicitarJustificativa({ titulo, descricao, numeroConfirmacao = 
           <small>Informe seu nome. Ele ficará registrado com a alteração.</small>
         </div>
         <div class="form-group">
-          <label for="motivoAdmin">Motivo da alteração</label>
-          <textarea id="motivoAdmin" rows="3" minlength="3" maxlength="1000" required placeholder="Explique por que esta ação é necessária."></textarea>
+          <label for="tipoMotivoAdmin">Motivo da alteração</label>
+          <select id="tipoMotivoAdmin" required><option value="">Selecione o motivo</option>${motivos.map(m => `<option value="${m}">${m}</option>`).join("")}<option value="OUTRO">Outro — descrever</option></select>
+        </div>
+        <div id="grupoOutroMotivoAdmin" class="form-group" hidden>
+          <label for="motivoAdmin">O que aconteceu?</label>
+          <textarea id="motivoAdmin" rows="3" minlength="3" maxlength="1000" disabled placeholder="Descreva o motivo da alteração."></textarea>
         </div>
         <div id="grupoNumeroConfirmacaoAdmin" class="form-group" hidden>
           <label for="numeroConfirmacaoAdmin">Digite o número do corte para confirmar a exclusão</label>
@@ -34,6 +40,7 @@ export function solicitarJustificativa({ titulo, descricao, numeroConfirmacao = 
   if (dialog.open) return Promise.resolve(null)
   const responsavel = document.getElementById("responsavelAdmin")
   const motivo = document.getElementById("motivoAdmin")
+  const tipoMotivo = document.getElementById("tipoMotivoAdmin")
   const numero = document.getElementById("numeroConfirmacaoAdmin")
   form.reset()
   try { responsavel.value = localStorage.getItem("controle-corte:responsavel-admin") || "" } catch {}
@@ -42,10 +49,20 @@ export function solicitarJustificativa({ titulo, descricao, numeroConfirmacao = 
   document.getElementById("grupoNumeroConfirmacaoAdmin").hidden = !numeroConfirmacao
   numero.required = Boolean(numeroConfirmacao)
   numero.disabled = !numeroConfirmacao
-  for (const campo of [responsavel, motivo, numero]) {
+  for (const campo of [responsavel, motivo, tipoMotivo, numero]) {
     campo.setCustomValidity("")
     campo.oninput = () => campo.setCustomValidity("")
   }
+  function atualizarMotivo() {
+    const outro = tipoMotivo.value === "OUTRO"
+    document.getElementById("grupoOutroMotivoAdmin").hidden = !outro
+    motivo.disabled = !outro
+    motivo.required = outro
+    motivo.setCustomValidity("")
+    tipoMotivo.setCustomValidity("")
+  }
+  tipoMotivo.onchange = atualizarMotivo
+  atualizarMotivo()
 
   return new Promise(resolve => {
     let resultado = null
@@ -54,19 +71,21 @@ export function solicitarJustificativa({ titulo, descricao, numeroConfirmacao = 
       responsavel.value = responsavel.value.trim()
       motivo.value = motivo.value.trim()
       responsavel.setCustomValidity(responsavel.value.length < 2 || responsavel.value.length > 100 ? "Informe seu nome (2 a 100 caracteres)." : "")
-      motivo.setCustomValidity(motivo.value.length < 3 || motivo.value.length > 1000 ? "Descreva o motivo (3 a 1000 caracteres)." : "")
+      const outro = tipoMotivo.value === "OUTRO"
+      tipoMotivo.setCustomValidity(!outro && !motivos.includes(tipoMotivo.value) ? "Selecione o motivo da alteração." : "")
+      motivo.setCustomValidity(outro && (motivo.value.length < 3 || motivo.value.length > 1000) ? "Descreva o motivo (3 a 1000 caracteres)." : "")
       numero.setCustomValidity("")
       if (numeroConfirmacao && numero.value.trim() !== String(numeroConfirmacao)) {
         numero.setCustomValidity("Digite o número do corte que será excluído.")
       }
       if (!form.reportValidity()) return
-      resultado = { responsavel: responsavel.value, motivo: motivo.value }
+      resultado = { responsavel: responsavel.value, motivo: outro ? motivo.value : tipoMotivo.value }
       try { localStorage.setItem("controle-corte:responsavel-admin", resultado.responsavel) } catch {}
       dialog.close()
     }
     dialog.onclose = () => resolve(resultado)
     document.getElementById("cancelarJustificativaAdmin").onclick = () => dialog.close()
     dialog.showModal()
-    ;(responsavel.value ? motivo : responsavel).focus()
+    ;(responsavel.value ? tipoMotivo : responsavel).focus()
   })
 }

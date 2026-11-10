@@ -25,7 +25,7 @@ async function consulta(sql,valores=[]){
   if(q.startsWith('UPDATE itens_corte')){for(const i of banco.itens)if(valores[1].includes(i.modelo))i.modelo=valores[0];return {rows:[]}}
   if(q.startsWith('INSERT INTO historico_admin')){
     if(falharAuditoria)throw new Error('Histórico indisponível')
-    banco.historico.push({numero:valores[0],acao:valores[1],id:valores[2],responsavel:valores[3],motivo:valores[4],antes:JSON.parse(valores[5]),depois:JSON.parse(valores[6])});return {rows:[]}
+    banco.historico.push({numero:valores[0],acao:valores[1],id:valores[2],responsavel:valores[3],motivo:valores[4],antes:JSON.parse(valores[5]),depois:JSON.parse(valores[6]),operacao_id:valores[7]});return {rows:[]}
   }
   throw new Error('Consulta não simulada: '+q)
 }
@@ -81,6 +81,8 @@ test('aplica somente modelo, copia correspondência e audita cada item na mesma 
   assert.equal(banco.historico[0].antes.modelo,'CONJUNTO FEMINIA')
   assert.equal(banco.historico[0].depois.modelo,'CONJUNTO FEMININO')
   assert.equal(banco.historico[0].depois.correspondencias_sankhya.length,1)
+  assert.match(banco.historico[0].operacao_id,/^[a-f0-9-]{36}$/)
+  assert.equal(banco.historico[0].operacao_id,banco.historico[1].operacao_id)
   assert.ok(consultas.some(c=>c.q==='LOCK TABLE cortes, itens_corte, sankhya_correspondencias IN EXCLUSIVE MODE'))
   assert.equal(consultas.at(-1).q,'COMMIT');assert.equal(liberar,2)
 })

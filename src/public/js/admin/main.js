@@ -16,9 +16,13 @@ import {
 import { inicializarHistoricoAdmin } from "./historico-admin.js"
 import { inicializarTabelasResponsivas } from "../core/tabelas.js"
 import { inicializarPadronizacao } from "./padronizacao.js"
+import { inicializarAbasAdmin } from "./abas.js"
+import { inicializarAcompanhamentoSankhya } from "../core/acompanhamento-sankhya.js"
 
 
 function iniciarAdmin() {
+  inicializarAbasAdmin()
+  inicializarAcompanhamentoSankhya()
   inicializarTabelasResponsivas()
   console.log(
     "🚀 Inicializando painel administrativo"

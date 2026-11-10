@@ -43,7 +43,32 @@ Sistema web interno que permite:
 - Produto do novo corte e modelo dos PIs oferecem até cinco sugestões dos nomes existentes, permitindo digitação livre.
 - Funcionamento e limites: [Padronização de nomes](docs/padronizacao-nomes.md).
 
+### Histórico no Admin
+
+Na Home, abrir um corte em produção leva ao lançamento e ao próximo campo vazio;
+cortes finalizados continuam abrindo os PIs. Formulários de produção e PIs mostram
+erros junto aos campos, com foco no primeiro problema. No Sankhya, cada PI informa
+Salvando / Salvo ou a falha, restaurando a seleção anterior quando a gravação é recusada.
+
+O histórico no Admin apresenta campos **Antes / Depois**, nomes anteriores e novos,
+responsável, motivo e data. Permite filtrar por corte, tipo, período e texto (incluindo
+nomenclaturas antigas), com paginação para consultar todo o histórico registrado.
+Padronizações feitas juntas aparecem agrupadas, destacando os nomes antigos e o nome
+que deve ser usado. Os detalhes preservam cada corte e PI afetado. Grupos continuam
+sendo reunidos ao carregar páginas anteriores, indicando a quantidade já exibida.
+
 ### Códigos Sankhya
+
+**Salvar e adicionar outro PI** mantém modelo e tecido, limpa cor e valores e foca a
+próxima cor. Falhas preservam os dados; cliques duplos não duplicam o envio. Se a pessoa
+alterar os campos durante o envio, eles não são apagados depois de salvar.
+
+No Sankhya, **Próximo pendente** consulta a fila atualizada e abre outro corte finalizado
+que ainda precisa de lançamento, começando pelo mais antigo. Não marca lançamentos e
+aguarda uma gravação em andamento antes de permitir a navegação.
+
+- **Pendentes / Lançados / Todos** acompanham os cortes abertos na primeira ativação e os novos. A fila abre os códigos diretamente, sem formulário de busca. Links antigos para um corte específico continuam funcionando.
+- No Admin, **Correções / Nomenclaturas / Histórico** ficam em abas; Nomenclaturas mostra os nomes acompanhados que ainda precisam de produto Sankhya, com atalho para vincular.
 
 - Em **Produtos possíveis por nome do corte**, liste as nomenclaturas existentes e salve alternativas do catálogo Sankhya. Depois escolha a alternativa no PI para preencher os códigos e descrições do ERP; controles e vínculo efetivo são conferidos antes de salvar. A tela Consultar e os registros históricos permanecem como estão.
 - Em **PIs cortados**, cada item mostra seus produtos vinculados e um atalho para conferir/cadastrar a correspondência em outra aba. A associação usa modelo do PI, tecido e cor; o nome do corte é apenas uma identificação.

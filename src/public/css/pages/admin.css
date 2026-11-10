@@ -788,6 +788,30 @@
 .historico-admin-dados { display: grid; grid-template-columns: minmax(100px, 1fr) minmax(0, 3fr); gap: 8px; margin: 12px 0; font-size: 13px; border-top: 1px solid var(--border); padding-top: 12px; }
 .historico-admin-dados dt { color: var(--text-soft); }
 .historico-admin-dados dd { margin: 0; white-space: pre-wrap; }
+.historico-admin-dados { display: block; }
+.historico-admin-mudanca { display: grid; grid-template-columns: minmax(100px, 1fr) minmax(0, 2fr) minmax(0, 2fr); gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.historico-admin-mudanca dd { padding: 10px; border-radius: 6px; background: var(--surface); }
+.historico-admin-mudanca dd:last-child { background: var(--primary-soft); }
+.historico-admin-coluna { display: block; color: var(--text-soft); font-size: 12px; margin-bottom: 5px; }
+.historico-admin-mudanca strong { font-weight: 600; }
+.historico-admin-registro pre { max-height: 360px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; padding: 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); }
+.historico-admin-filtro { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); }
+.historico-admin-filtro .form-group { min-width: 0; }
+.historico-admin-grupo { border-left: 4px solid var(--primary); }
+.historico-admin-grupo h3 { margin: 0 0 8px; font-size: 17px; }
+.historico-admin-grupo > details > .historico-admin-registro { margin-top: 12px; }
+.historico-admin-nome-aviso { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; margin: 0; padding: 0; }
+.historico-admin-nome-aviso p { margin: 4px 0 12px; }
+.historico-admin-nome-aviso strong { color: var(--primary-deep); font-size: 15px; white-space: pre-wrap; }
+.historico-admin-nome-antigo { color: var(--text-soft); font-size: 14px; }
+.historico-admin-grupo { padding: 12px 16px; }
+.historico-admin-grupo > p { margin: 6px 0; font-size: 12px; }
+.historico-admin-grupo > details > div > .historico-admin-registro { margin-top: 12px; }
+@media (max-width: 700px) {
+  .historico-admin-filtro { grid-template-columns: minmax(0,1fr); }
+  .historico-admin-mudanca { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+  .historico-admin-mudanca dt { grid-column: 1 / -1; font-weight: 600; }
+}
 @media (max-width: 700px) {
   .historico-admin-filtro button { width: 100%; }
   .historico-admin-dados { grid-template-columns: minmax(0, 1fr); gap: 5px; }

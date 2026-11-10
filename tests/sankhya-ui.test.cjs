@@ -13,21 +13,22 @@ class E {
 }
 beforeEach(async()=>{
  els={};chamadas=[];mostrados=[]
- for(const id of ['formBuscarSankhya','camposBuscaSankhya','numeroSankhya','recentesSankhya','estadoSankhya','copiaManualSankhya','textoCopiaSankhya'])els[id]=new E()
- els.numeroSankhya.value='932'
+ for(const id of ['estadoSankhya','copiaManualSankhya','textoCopiaSankhya'])els[id]=new E()
  globalThis.document={getElementById:id=>els[id],createElement:()=>new E()}
  globalThis.window={location:{search:''}}
  obter=async u=>u==='/sankhya/cortes'?[{numero:932,produto:'EDREDON'}]:u==='/sankhya/catalogo'?{produtos:[]}:{corte:{numero:932,produto:'EDREDON'},itens:[]}
  globalThis.__simples={apiGet:u=>{chamadas.push(u);return obter(u)},mostrarToast(){},inicializarNomenclaturasSankhya(){},mostrarCodigosCorte:async(d,c,fn)=>{mostrados.push(d);copiar=fn},limparCodigosCorte(){}}
- const codigo=fs.readFileSync('src/public/js/pages/sankhya/main.js','utf8').replace(/^import .*$/gm,'')
- await import(`data:text/javascript;base64,${Buffer.from('const {apiGet,mostrarToast,inicializarNomenclaturasSankhya,mostrarCodigosCorte,limparCodigosCorte}=globalThis.__simples;\n'+codigo).toString('base64')}#${++moduloSeq}`)
- await new Promise(r=>setImmediate(r))
+ await importarTela()
 })
-const buscar=()=>els.formBuscarSankhya.eventos.submit({preventDefault(){}})
+async function importarTela(){
+ const codigo=fs.readFileSync('src/public/js/pages/sankhya/main.js','utf8').replace(/^import .*$/gm,'')
+ await import(`data:text/javascript;base64,${Buffer.from('const {apiGet,mostrarToast,inicializarNomenclaturasSankhya,mostrarCodigosCorte,limparCodigosCorte}=globalThis.__simples;const inicializarAcompanhamentoSankhya=()=>{};const inicializarProximoPendente=()=>{};\n'+codigo).toString('base64')}#${++moduloSeq}`)
+ await new Promise(r=>setImmediate(r))
+}
+const buscar=()=>{window.location.search='?corte=932';return importarTela()}
 test('consulta e exibe produtos sem exigir editor, confirmação ou Excel',async()=>{
  await buscar()
  assert.equal(mostrados[0].corte.numero,932)
- assert.equal(els.camposBuscaSankhya.disabled,false)
  assert.match(els.estadoSankhya.textContent,/Corte 932/)
  assert.ok(chamadas.every(u=>!u.includes('/excel')))
 })
@@ -41,5 +42,9 @@ test('copia apenas código e oferece seleção manual se clipboard falhar',async
 test('falha limpa resultado e permite nova consulta, sem gravações',async()=>{
  obter=async()=>{throw Error('Corte não encontrado')}
  await buscar();assert.match(els.estadoSankhya.textContent,/não encontrado/)
- assert.equal(els.camposBuscaSankhya.disabled,false);assert.equal(mostrados.length,0)
+ assert.equal(mostrados.length,0)
+})
+test('tela sem corte não consulta lista antiga nem depende de formulário de busca',()=>{
+ assert.deepEqual(chamadas,[])
+ assert.equal(mostrados.length,0)
 })

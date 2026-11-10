@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Preparar OPs — Controle de Corte</title>
+  <title>Códigos Sankhya — Controle de Corte</title>
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/pages/sankhya.css">
@@ -13,7 +13,7 @@
     <header class="app-header app-header-modern">
       <div class="header-main">
         <div class="logo-box"><img src="img/logo.png" alt="Logo Dimepor" class="app-logo"></div>
-        <div class="header-text"><span class="system-tag">Dimepor</span><h1>Preparar OPs</h1><p>Correspondências e conferência para o Sankhya</p></div>
+        <div class="header-text"><span class="system-tag">Dimepor</span><h1>Códigos Sankhya</h1><p>Produtos vinculados para lançar no ERP</p></div>
       </div>
       
     </header>
@@ -26,33 +26,30 @@
 
     <aside class="sankhya-aviso">
       <strong>Apoio ao lançamento manual</strong>
-      <p>Vincule os produtos → confira → copie para o Sankhya ou baixe o Excel. O lançamento continua manual no ERP.</p>
+      <p>Abra o corte e copie os códigos dos produtos. O lançamento continua manual no Sankhya.</p>
     </aside>
 
     <div id="copiaManualSankhya" class="section-card" hidden><label for="textoCopiaSankhya">Selecione e copie com Ctrl+C</label><textarea id="textoCopiaSankhya" readonly rows="4"></textarea></div>
 
 
     <section class="section-card">
-      <h2>Consultar c?digos para o Sankhya</h2>
-      <p class="section-help">Busque pelo número ou escolha um corte recente.</p>
-      <form id="formBuscarSankhya">
-        <fieldset id="camposBuscaSankhya" class="sankhya-busca">
-          <div class="form-group"><label for="numeroSankhya">Número do corte</label><input id="numeroSankhya" type="number" min="1" max="2147483647" step="1" required placeholder="Digite o número"></div>
-          <button type="submit">Conferir corte</button>
-          <div class="form-group"><label for="recentesSankhya">Ou escolha um corte recente</label><select id="recentesSankhya"><option value="">Carregando cortes...</option></select></div>
-        </fieldset>
-      </form>
-      <p id="estadoSankhya" class="section-help" role="status" aria-live="polite">Escolha um corte para começar.</p>
+      <div class="sankhya-pendencias-topo"><h2>Acompanhar lançamentos</h2><button id="atualizarAcompanhamentoSankhya" type="button" class="btn-secondary">Atualizar</button></div>
+      <p class="small-help">Somente os cortes abertos no início do acompanhamento e os novos. Cortes antigos finalizados ficam fora desta fila.</p>
+      <div class="acompanhamento-filtros" role="group" aria-label="Filtrar lançamentos"><button id="pendentesSankhya" type="button" aria-pressed="true">Pendentes</button><button id="lancadosSankhya" type="button" aria-pressed="false">Lançados</button><button id="todosSankhya" type="button" aria-pressed="false">Todos</button></div>
+      <p id="estadoAcompanhamentoSankhya" class="small-help" role="status">Carregando acompanhamento...</p>
+      <div id="listaAcompanhamentoSankhya" class="acompanhamento-lista"></div>
     </section>
+    <p id="estadoSankhya" class="section-help" role="status" aria-live="polite" hidden></p>
 
     <section id="codigosCorteSankhya" class="section-card" hidden>
-      <h2>Produtos no Sankhya</h2>
-      <p class="small-help">Os produtos vinculados aparecem automaticamente. O bot?o copia somente o c?digo; o lan?amento continua manual no ERP.</p>
+      <div class="sankhya-produtos-topo"><h2>Produtos no Sankhya</h2><div class="sankhya-produtos-acoes"><a id="editarVinculosCorteSankhya" class="link-button" hidden>Editar vínculos</a><button id="proximoPendenteSankhya" type="button">Próximo pendente →</button></div></div>
+      <p id="estadoProximoPendenteSankhya" class="small-help" role="status"></p>
+      <p class="small-help">Os produtos vinculados aparecem automaticamente. O botão copia somente o código; o lançamento continua manual no ERP.</p>
       <div id="listaCodigosCorteSankhya"></div>
       <p class="small-help">Marque “Lançado no Sankhya” depois de lançar cada produto no ERP. A marcação fica salva neste controle e pode ser desmarcada; não é uma confirmação automática do Sankhya.</p>
     </section>
     <details id="painelNomesSankhya" class="section-card">
-      <summary><strong>1. Produtos possíveis por nome do corte</strong></summary>
+      <summary><strong>Consultar e editar vínculos</strong></summary>
       <p class="section-help">Escolha um nome já usado no controle e cadastre o que pode sair dele no Sankhya. Exemplo: EDREDON LISO INFERIOR → 6086 — PI CORTE EDREDON INF. Isso não altera os nomes na tela Consultar.</p>
       <div class="sankhya-busca"><div class="form-group"><label for="buscarNomeSankhya">Buscar nomenclatura</label><input id="buscarNomeSankhya" type="search" maxlength="200" placeholder="Ex.: EDREDON"></div><button id="filtrarNomesSankhya" type="button" class="btn-secondary">Buscar nomes</button><div class="form-group"><label for="nomeOrigemSankhya">Nomes dos cortes já criados</label><select id="nomeOrigemSankhya"><option value="">Abra para carregar</option></select></div></div>
       <p id="estadoNomesSankhya" class="small-help" role="status">Abra este painel para carregar a lista.</p>

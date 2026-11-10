@@ -306,16 +306,18 @@ export async function buscarCorte(numeroCorte, {rolar = true} = {}) {
       } else {
 
         // Corte em produção:
-        // leva para o resumo do corte
+        // leva direto ao lançamento, preservando campos já preenchidos.
         const destino =
           document.getElementById(
-            "corteSelecionado"
+            "secaoProducao"
           )
 
         destino?.scrollIntoView({
           behavior: "smooth",
           block: "start"
         })
+        const campo=["data","turno","operador","operadorOutro","horaInicio","horaFim","folhaParouInput","statusProducao"].map(id=>document.getElementById(id)).find(c=>c&&!c.disabled&&c.style.display!=="none"&&!c.value)
+        campo?.focus({preventScroll:true})
 
       }
 
@@ -468,7 +470,7 @@ export async function carregarCortesEmAndamento({
               type="button"
               class="btn-abrir-corte"
             >
-              Abrir
+              Abrir corte
             </button>
           </td>
         `

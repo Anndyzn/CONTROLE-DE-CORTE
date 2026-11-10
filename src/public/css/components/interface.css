@@ -2,6 +2,12 @@
 :root {
   --text-muted: #627389;
 }
+.erro-campo { display: block; margin-top: 5px; color: var(--danger); font-size: 13px; line-height: 1.45; }
+input[aria-invalid="true"],select[aria-invalid="true"],textarea[aria-invalid="true"] { border-color: var(--danger); box-shadow: 0 0 0 1px var(--danger); }
+.salvamento-feedback { margin: 4px 0 10px; color: #147447; font-size: 12px; }
+.salvamento-feedback.salvamento-erro { color: var(--danger); }
+.pi-acoes { padding-top: 18px; border-top: 1px solid var(--border); align-items: center; gap: 12px; }
+.pi-acoes #finalizarItensCorte { margin-left: auto; background: var(--surface); color: var(--primary-deep); border: 1px solid var(--border-strong); box-shadow: none; }
 
 /* Os mesmos destinos, na mesma ordem, em todas as telas. */
 .page-index .app-header-modern,
@@ -30,6 +36,16 @@
   font-weight: 600;
 }
 .system-nav a:hover { background: var(--primary-soft); color: var(--primary-deep); }
+.admin-abas, .acompanhamento-filtros { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.admin-abas button, .acompanhamento-filtros button { padding: 9px 14px; color: var(--primary-deep); background: var(--surface); border: 1px solid var(--border); box-shadow: none; font-size: 13px; }
+.admin-abas [aria-selected="true"], .acompanhamento-filtros [aria-pressed="true"] { background: var(--primary-deep); color: white; }
+[role="tabpanel"][hidden] { display: none !important; }
+.acompanhamento-lista { display: grid; gap: 6px; max-height: 340px; overflow: auto; }
+.acompanhamento-linha { display: flex; gap: 12px; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); text-decoration: none; font-size: 13px; }
+.acompanhamento-linha:hover { background: var(--primary-soft); border-color: var(--primary); }
+.acompanhamento-linha span { color: var(--text-soft); font-size: 12px; }
+.sankhya-pendencias-topo { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+@media(max-width:700px){.acompanhamento-linha{align-items:flex-start;flex-direction:column;gap:5px}.admin-abas button{flex:1}}
 .system-nav a[aria-current="page"] { background: var(--primary-deep); color: #fff; }
 .system-nav a:focus-visible,
 button:focus-visible,

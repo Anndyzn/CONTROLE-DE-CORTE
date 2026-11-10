@@ -74,6 +74,13 @@ test('conjunto gera uma OP por produto com quantidade integral; metragem permane
   assert.ok(resultado[0].ordens.every(o=>!('metragem_usada' in o)))
   assert.deepEqual(itens,original)
 })
+test('vínculos podem ser consultados antes dos PIs; guia continua bloqueado sem itens',async()=>{
+  itens=[];corte.status='EM PRODUÇÃO';corte.itens_finalizados=0
+  const r=await fetch(base+'/sankhya/cortes/922/vinculos')
+  assert.equal(r.status,200)
+  const d=await r.json();assert.deepEqual(d.itens,[]);assert.equal(d.completa,false);assert.equal(d.guia_disponivel,false)
+  assert.equal((await fetch(base+'/sankhya/cortes/922/excel')).status,409)
+})
 test('reutiliza grafias normalizadas, mas exige correspondência exata de tecido e cor',()=>{
   const r=validarCorrespondencia({...regra(),modelo:' conjunto   feminino '})
   const linhas=[itens[0],{...itens[0],id:2,cor:'VERDE CLARO'},{...itens[0],id:3,tecido:'CETIM'}]

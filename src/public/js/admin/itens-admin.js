@@ -11,6 +11,7 @@ import {
   mostrarToast
 } from "../core/ui.js"
 import { validarValoresItem } from "../utils/validations.js"
+import { limparErroCampo, validarObrigatoriosCampos, marcarErrosNumericos } from "../core/erros-campos.js"
 
 import {
   formatarNumero,
@@ -24,6 +25,7 @@ import {
 // ========================================
 
 function abrirEdicaoItemAdmin(item) {
+  for(const id of ["editarItemModeloAdmin","editarItemCorAdmin","editarItemTecidoAdmin","editarItemMetragemAdmin","editarItemSobraAdmin","editarItemPerdaAdmin","editarItemFaltantesAdmin","editarItemQuantidadeAdmin"])limparErroCampo(id)
 
   document.getElementById(
     "itemAdminEditandoId"
@@ -274,6 +276,7 @@ export async function carregarItensAdmin(
 // ========================================
 
 async function salvarEdicaoItemAdmin() {
+  for(const id of ["editarItemModeloAdmin","editarItemCorAdmin","editarItemTecidoAdmin","editarItemMetragemAdmin","editarItemSobraAdmin","editarItemPerdaAdmin","editarItemFaltantesAdmin","editarItemQuantidadeAdmin"])limparErroCampo(id)
 
   const id =
     document.getElementById(
@@ -347,6 +350,7 @@ async function salvarEdicaoItemAdmin() {
     metragem === "" ||
     quantidade === ""
   ) {
+    validarObrigatoriosCampos({editarItemModeloAdmin:"o modelo",editarItemCorAdmin:"a cor",editarItemTecidoAdmin:"o tecido",editarItemMetragemAdmin:"a metragem",editarItemQuantidadeAdmin:"a quantidade de peças"})
 
     mostrarToast(
       "Preencha os campos obrigatórios.",
@@ -363,6 +367,7 @@ async function salvarEdicaoItemAdmin() {
     faltantes: faltantes || 0, quantidade
   })
   if (erroValores) {
+    marcarErrosNumericos({editarItemMetragemAdmin:metragem,editarItemSobraAdmin:sobra||0,editarItemPerdaAdmin:perda||0,editarItemFaltantesAdmin:faltantes||0,editarItemQuantidadeAdmin:quantidade})
 
     mostrarToast(
       erroValores,

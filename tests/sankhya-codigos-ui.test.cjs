@@ -7,6 +7,7 @@ class E {
  append(...itens){this.children.push(...itens)}
  replaceChildren(...itens){this.children=itens}
  addEventListener(n,f){this.eventos[n]=f}
+ setAttribute(k,v){this[k]=v}
 }
 const catalogo={produtos:[{codigo_produto:6086,produto:'EDREDON'},{codigo_produto:6073,produto:'BLAZER'},{codigo_produto:6069,produto:'VESTIDO'}]}
 const dados=()=>({corte:{numero:932,produto:'CONJUNTO'},itens:[{id:1,modelo:'CONJUNTO',cor:'BRANCO',tecido:'OXFORD',quantidade_pecas:100,metragem_usada:200}]})
@@ -14,6 +15,7 @@ beforeEach(async()=>{
  els={codigosCorteSankhya:new E(),listaCodigosCorteSankhya:new E()};copias=[];envios=[];mensagens=[]
  estado={id:1,origem:['CONJUNTO','BRANCO','OXFORD','100','200'],assinatura:'a'.repeat(64),versao:0,codigos:null,lancados:[]}
  globalThis.document={getElementById:id=>els[id],createElement:()=>new E()}
+ globalThis.window={dispatchEvent(){}}
  obter=async u=>u.includes('/lancamentos')?{itens:[structuredClone(estado)]}:{nomes:[{opcoes:[{codigos:[6073],rotulo:'BLAZER'},{codigos:[6069],rotulo:'VESTIDO'}]}]}
  gravar=async b=>{estado={...estado,...b,versao:b.versao+1};return {versao:estado.versao}}
  globalThis.__codigosDeps={apiGet:u=>obter(u),apiPut:(u,b)=>{envios.push({u,b});return gravar(b)},mostrarToast:m=>mensagens.push(m)}
@@ -32,6 +34,25 @@ test('seleciona dois produtos na mesma cor e preserva a seleção ao reabrir',as
  await mostrar();assert.equal(linhas().length,2)
  assert.equal(campo().children[1].children[0].checked,true);assert.equal(campo().children[2].children[0].checked,true)
 })
+test('feedback identifica salvamento em andamento e confirma somente após resposta do servidor',async()=>{
+ await mostrar();let resolver
+ gravar=()=>new Promise(r=>resolver=r)
+ const salvando=marcarProduto(0)
+ assert.equal(card().children.find(c=>c.className==='salvamento-feedback').textContent,'Salvando…')
+ assert.equal(campo().disabled,true)
+ resolver({versao:1});await salvando
+ assert.equal(card().children.find(c=>c.className==='salvamento-feedback').textContent,'Salvo')
+ assert.equal(campo().disabled,false)
+})
+test('corte sem PIs mostra vínculos por nome e copia código sem permitir confirmação de lançamento',async()=>{
+ const d=dados();d.itens=[]
+ await modulo.mostrarCodigosCorte(d,catalogo,t=>copias.push(t))
+ const linhas=els.listaCodigosCorteSankhya.children.filter(e=>e.className==='sankhya-possibilidade')
+ assert.equal(linhas.length,2)
+ linhas[0].children[1].eventos.click();assert.deepEqual(copias,['6073'])
+ assert.equal(linhas[0].children.length,2)
+ assert.equal(envios.length,0)
+})
 test('lançado é por produto e persiste; copiar não marca; é possível desmarcar',async()=>{
  estado.codigos=[6073,6069];await mostrar()
  linhas()[0].children[1].eventos.click();assert.equal(envios.length,0)
@@ -43,7 +64,8 @@ test('lançado é por produto e persiste; copiar não marca; é possível desmar
 })
 test('falha de gravação reverte a seleção e falha de leitura não apresenta confirmação falsa',async()=>{
  await mostrar();gravar=async()=>{throw Error('Conflito: recarregue')}
- await marcarProduto(0);assert.equal(linhas().length,0);assert.match(mensagens.at(-1),/Conflito/)
+ await marcarProduto(0);assert.equal(linhas().length,0)
+ assert.match(card().children.find(c=>c.className==='salvamento-feedback salvamento-erro').textContent,/Conflito/)
  obter=async u=>{if(u.includes('/lancamentos'))throw Error('Falha');return {nomes:[{opcoes:[{codigos:[6086],rotulo:'EDREDON'}]}]}}
  await mostrar();assert.equal(linhas()[0].children[2].children[0].disabled,true)
 })

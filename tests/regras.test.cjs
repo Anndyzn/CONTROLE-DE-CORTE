@@ -31,7 +31,7 @@ async function consultar(sql, valores = [], desfazer = []) {
     desfazer.push(() => { banco.historico = banco.historico.filter(r => r !== registro) })
     return {rows:[]}
   }
-  if (query.startsWith('SELECT * FROM historico_admin')) {
+  if (/^SELECT \*(?:, criado_em::text AS instante_operacao)? FROM historico_admin/.test(query)) {
     return {rows:banco.historico.filter(r => (valores[0] === null || r.numero_corte === valores[0])
       && (valores[1] === null || r.id < Number(valores[1]))).sort((a,b) => b.id-a.id).slice(0,51)}
   }

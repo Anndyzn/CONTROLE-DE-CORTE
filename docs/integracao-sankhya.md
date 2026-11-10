@@ -2,6 +2,35 @@
 
 ## Interface atual simplificada
 
+### Fila de acompanhamento
+
+**Pendentes / Lançados / Todos** mostram somente cortes em acompanhamento. Na primeira
+ativação, o servidor inclui os cortes cujo último lançamento ainda não está finalizado
+(incluindo cortes sem produção). Cortes já finalizados não são incluídos, mesmo que ainda
+não tenham produtos vinculados. O marco é persistente: reiniciar o sistema não o recalcula.
+Um gatilho inclui automaticamente novos cortes, inclusive se um número excluído for
+reutilizado. Cortes acompanhados permanecem na fila depois de finalizados.
+
+A fila informa o progresso dos produtos marcados manualmente. Um corte só aparece como
+lançado quando está finalizado, com PIs confirmados, produtos definidos e todos marcados.
+Correções no PI invalidam a confirmação anterior. O formulário de busca foi removido:
+abra os produtos pelo corte na fila. Links diretos `sankhya.html?corte=NUMERO` continuam
+funcionando, inclusive para cortes antigos, sem incluí-los na fila automaticamente.
+
+No Admin, a aba **Nomenclaturas** mostra nomes sem vínculo do mesmo conjunto acompanhado,
+com atalho para a manutenção no Sankhya. Abas **Correções / Nomenclaturas / Histórico**
+organizam os painéis sem apagar campos quando a pessoa troca de aba. São organização
+visual, sem autenticação adicional.
+
+`public.sankhya_acompanhamento` e `public.sankhya_acompanhamento_inicio` guardam o marco
+e os cortes incluídos, com RLS. O backup completo de public inclui tabelas, função e gatilho.
+Excluir um corte remove seu acompanhamento em cascata. A ativação usa transação e
+bloqueio na tabela de cortes para não perder novas criações durante a instalação.
+
+`GET /sankhya/acompanhamento` retorna a fila e os nomes sem vínculo. O teste descartável
+`npm.cmd run test:padronizacao` também verifica o marco, reinicialização, inclusão automática,
+exclusão e reutilização de números em PostgreSQL isolado.
+
 Cada cor permite marcar vários produtos. As escolhas ficam salvas por PI.
 Ao lado de cada código há **Lançado no Sankhya**, marcado manualmente após o lançamento
 no ERP. Copiar o código não marca o lançamento. É possível desmarcar; um produto marcado

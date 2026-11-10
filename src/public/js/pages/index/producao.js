@@ -1,5 +1,6 @@
 import { apiPost } from "../../core/api.js"
 import { validarFolhas } from "../../utils/validations.js"
+import { marcarErroCampo, limparErroCampo } from "../../core/erros-campos.js"
 import { salvarRascunhoGrupo, limparRascunhoGrupo, versaoRascunho, atualizarBaseProducaoRascunho } from "./rascunho.js"
 
 import {
@@ -40,6 +41,7 @@ function obterCampo(id) {
 
 
 function limparCampoInvalido(campo) {
+  limparErroCampo(campo)
   campo
     ?.closest(".form-group")
     ?.classList
@@ -59,7 +61,9 @@ function limparErrosValidacaoProducao() {
 function marcarCamposObrigatorios(ids) {
   limparErrosValidacaoProducao()
 
+  const mensagens={data:"Informe a data da produção.",turno:"Selecione o turno.",operador:"Selecione o operador.",operadorOutro:"Informe o nome do operador.",horaInicio:"Informe o horário inicial.",horaFim:"Informe o horário final.",folhaParouInput:"Informe a folha final.",statusProducao:"Selecione o status da produção."}
   ids.forEach((id) => {
+    marcarErroCampo(id,mensagens[id]??"Preencha este campo.",{focar:false})
     obterCampo(id)
       ?.closest(".form-group")
       ?.classList
@@ -246,6 +250,7 @@ export async function salvarProducao() {
   const erroFolhas = validarFolhas(folhaInicio, folhaParou)
   if (erroFolhas) {
     marcarCamposObrigatorios(["folhaParouInput"])
+    marcarErroCampo("folhaParouInput",erroFolhas)
     mostrarToast(erroFolhas, "atencao", "Folhas inválidas")
     return
   }

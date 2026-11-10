@@ -86,6 +86,12 @@
          BUSCAR CORTE
          ======================================== -->
 
+    <div class="admin-abas" role="tablist" aria-label="Painel administrativo">
+      <button id="abaCorrecoesAdmin" type="button" role="tab" aria-controls="painelCorrecoesAdmin" aria-selected="true">Correções</button>
+      <button id="abaNomesAdmin" type="button" role="tab" aria-controls="painelNomesAdmin" aria-selected="false" tabindex="-1">Nomenclaturas</button>
+      <button id="abaHistoricoAdmin" type="button" role="tab" aria-controls="painelHistoricoAdmin" aria-selected="false" tabindex="-1">Histórico</button>
+    </div>
+    <div id="painelCorrecoesAdmin" role="tabpanel" aria-labelledby="abaCorrecoesAdmin">
     <section class="section-card admin-busca">
 
       <div class="admin-section-header">
@@ -687,6 +693,9 @@
 
     </div>
 
+    </div>
+    <div id="painelNomesAdmin" role="tabpanel" aria-labelledby="abaNomesAdmin" hidden>
+      <section class="section-card"><h2>Nomes sem produto Sankhya</h2><p class="section-help">Cortes em acompanhamento, a partir dos que estavam em andamento na ativação.</p><div id="nomesSemVinculoSankhya" class="acompanhamento-lista">Carregando nomes...</div></section>
   <details id="painelPadronizacao" class="section-card padronizacao-painel">
     <summary><strong>Padronizar nomes</strong><span>Corrija variações de escrita em vários cortes ou PIs de uma vez.</span></summary>
     <p class="section-help">Selecione somente nomes que representam o mesmo produto. A alteração inclui registros antigos e finalizados e será registrada no histórico com responsável e motivo.</p>
@@ -722,20 +731,29 @@
     </section>
   </details>
 
+    </div>
+    <div id="painelHistoricoAdmin" role="tabpanel" aria-labelledby="abaHistoricoAdmin" hidden>
   <section class="section-card historico-admin-painel" aria-labelledby="tituloHistoricoAdmin">
     <h2 id="tituloHistoricoAdmin">Histórico de alterações</h2>
-    <p class="section-help">Reaberturas, correções e exclusões, com responsável informado e motivo. Disponível também para cortes excluídos.</p>
+    <p class="section-help">Nome antigo → nome definido. Abra os detalhes para ver quem alterou, o motivo e os cortes afetados.</p>
     <form id="formFiltroHistoricoAdmin" class="historico-admin-filtro">
       <div class="form-group">
         <label for="filtroHistoricoAdmin">Número do corte (opcional)</label>
         <input id="filtroHistoricoAdmin" type="number" min="1" step="1" placeholder="Todos os cortes">
       </div>
+      <div class="form-group"><label for="buscaHistoricoAdmin">Nome antigo, novo, responsável ou motivo</label><input id="buscaHistoricoAdmin" type="search" maxlength="200" placeholder="Ex.: EDREDON ou nome do responsável"></div>
+      <div class="form-group"><label for="tipoHistoricoAdmin">Tipo de alteração</label><select id="tipoHistoricoAdmin"><option value="">Todas as alterações</option><option value="NOMENCLATURAS">Nomes e nomenclaturas</option><option value="PADRONIZACAO_PRODUTO">Padronização de nomes dos cortes</option><option value="PADRONIZACAO_MODELO">Padronização de modelos dos PIs</option><option value="EDICAO_PRODUTO">Correção de nome do corte</option><option value="EDICAO_PRODUCAO">Correção de produção</option><option value="EDICAO_PI">Correção de PI</option><option value="REABERTURA_PRODUCAO">Reabertura de corte</option><option value="REABERTURA_PIS">Reabertura de PIs</option><option value="EXCLUSAO_PRODUCAO">Exclusão de lançamento</option><option value="EXCLUSAO_PI">Exclusão de PI</option><option value="EXCLUSAO_CORTE">Exclusão de corte</option></select></div>
+      <div class="form-group"><label for="inicioHistoricoAdmin">De</label><input id="inicioHistoricoAdmin" type="date"></div>
+      <div class="form-group"><label for="fimHistoricoAdmin">Até</label><input id="fimHistoricoAdmin" type="date"></div>
       <button type="submit">Atualizar histórico</button>
+      <button id="limparHistoricoAdmin" type="button" class="btn-secondary">Limpar filtros</button>
     </form>
     <p id="estadoHistoricoAdmin" role="status">Carregando histórico...</p>
+    <p class="small-help">Os grupos aparecem do mais recente ao mais antigo. “Carregar anteriores” completa grupos e mantém os filtros. O nome destacado é o definido naquela operação; confira se houve uma padronização posterior.</p>
     <div id="listaHistoricoAdmin" class="historico-admin-lista"></div>
     <button id="maisHistoricoAdmin" type="button" hidden>Carregar anteriores</button>
   </section>
+    </div>
   </div>
 
   <!-- ========================================
