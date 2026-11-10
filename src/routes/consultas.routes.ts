@@ -12,7 +12,9 @@ router.get("/cortes-pis-pendentes",async(_req,res)=>{
       (SELECT COUNT(*)::integer FROM itens_corte i WHERE i.numero_corte=c.numero) AS quantidade_pis
       FROM sankhya_acompanhamento a JOIN cortes c ON c.numero=a.numero
       JOIN LATERAL (SELECT status,data FROM producao WHERE numero_corte=c.numero ORDER BY id DESC LIMIT 1) p ON TRUE
-      WHERE p.status='FINALIZADO' AND COALESCE(c.itens_finalizados,0)<>1 ORDER BY c.numero DESC`)
+      WHERE p.status='FINALIZADO' AND COALESCE(c.itens_finalizados,0)<>1
+      AND NOT EXISTS (SELECT 1 FROM itens_corte i WHERE i.numero_corte=c.numero)
+      ORDER BY c.numero DESC`)
     res.setHeader("Cache-Control","no-store");res.json({cortes:r.rows})
   }catch(e){console.error("Falha ao consultar PIs pendentes:",e);res.status(500).json({erro:"Não foi possível consultar os PIs não confirmados."})}
 })

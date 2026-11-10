@@ -110,7 +110,7 @@ test('padronização real no PostgreSQL preserva dados, recusa prévia antiga e 
       assert.deepEqual(estado.codigos,[6073,6069]);assert.deepEqual(estado.lancados,[])
       assert.deepEqual((await pool.query('SELECT * FROM itens_corte WHERE id=$1',[novoPi.id])).rows[0],novoPi)
       const pendentes=await (await fetch(base+'/cortes-pis-pendentes')).json()
-      assert.deepEqual(pendentes.cortes.map(c=>c.numero).sort(),[926,927]);assert.equal(pendentes.cortes.find(c=>c.numero===926).quantidade_pis,1)
+      assert.deepEqual(pendentes.cortes.map(c=>c.numero).sort(),[927]);assert.equal(pendentes.cortes[0].quantidade_pis,0)
       assert.ok(!pendentes.cortes.some(c=>c.numero===923), 'Old unconfirmed cuts outside tracking stay out of the Home alert')
       assert.equal((await pool.query('SELECT itens_finalizados FROM cortes WHERE numero=923')).rows[0].itens_finalizados,0)
     }finally{await new Promise(resolve=>conferir.close(resolve))}

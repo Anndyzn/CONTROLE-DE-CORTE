@@ -13,11 +13,11 @@ export async function carregarPisPendentes(){
     const dados=await apiGet("/cortes-pis-pendentes")
     if(consulta!==ultimaConsultaPis)return
     painel.hidden=!dados.cortes.length;lista.replaceChildren()
-    estado.textContent=`${dados.cortes.length} corte(s) aguardando confirmação dos PIs`
+    estado.textContent=`${dados.cortes.length} corte(s) finalizado(s) sem PIs cadastrados`
     for(const c of dados.cortes){
       const b=document.createElement("button");b.type="button";b.className="pis-pendentes-corte"
       const nome=document.createElement("strong");nome.textContent=`${c.numero} · ${c.produto}`
-      const acao=document.createElement("span");acao.textContent=`${c.quantidade_pis} PI(s) · Continuar PIs →`
+      const acao=document.createElement("span");acao.textContent="Cadastrar PIs →"
       b.append(nome,acao)
       b.addEventListener("click",async()=>{document.getElementById("numeroCorte").value=c.numero;await abrirCorte?.(c.numero)})
       lista.append(b)
