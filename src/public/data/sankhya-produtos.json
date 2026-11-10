@@ -1,0 +1,707 @@
+{
+  "origem": "Lista fornecida pela equipe em 09/11/2026",
+  "produtos": [
+    {
+      "codigo_produto": 9,
+      "produto": "PI CORTE VESTIDO RENDA",
+      "controles": [
+        "AZUL",
+        "BEGE",
+        "BRANCO",
+        "ROSA",
+        "VERDE"
+      ]
+    },
+    {
+      "codigo_produto": 16,
+      "produto": "PI CORTE MANTA EDREDON PEROLA",
+      "controles": [
+        "ENCHIMENTO",
+        "INF",
+        "SUP"
+      ]
+    },
+    {
+      "codigo_produto": 17,
+      "produto": "PI CORTE RENDA DO VESTIDO CONJUNTO FEMININO",
+      "controles": []
+    },
+    {
+      "codigo_produto": 18,
+      "produto": "PI CORTE BLAZER OXFORD MONT SERRAT",
+      "controles": []
+    },
+    {
+      "codigo_produto": 19,
+      "produto": "PI CORTE BLAZER DETALHE MONT SERRAT",
+      "controles": [
+        "AZUL",
+        "OFF",
+        "ROSA"
+      ]
+    },
+    {
+      "codigo_produto": 22,
+      "produto": "PI CORTE VELUDO CORTINA PEQUENA",
+      "controles": [
+        "AZUL MARINHO",
+        "AZUL ROYAL",
+        "BEGE",
+        "BRANCA",
+        "PRETO",
+        "SOB ENCOMENDA",
+        "VERDE",
+        "VINHO"
+      ]
+    },
+    {
+      "codigo_produto": 23,
+      "produto": "PI CORTE BEMBER CORTINA",
+      "controles": [
+        "ESPECIAL",
+        "GRANDE",
+        "PEQUENA"
+      ]
+    },
+    {
+      "codigo_produto": 24,
+      "produto": "PI CORTE VOIL CORTINA",
+      "controles": [
+        "ESPECIAL",
+        "GRANDE",
+        "PEQUENA",
+        "PORTA"
+      ]
+    },
+    {
+      "codigo_produto": 25,
+      "produto": "PI CORTE CETIM CORTINA",
+      "controles": [
+        "ESPECIAL",
+        "GRANDE",
+        "PEQUENA"
+      ]
+    },
+    {
+      "codigo_produto": 26,
+      "produto": "PI CORTE CALÇA TERNO",
+      "controles": [
+        "AZUL MARINHO",
+        "BEGE",
+        "BRANCO",
+        "CINZA",
+        "PRETO"
+      ]
+    },
+    {
+      "codigo_produto": 27,
+      "produto": "PI CORTE ENTRETELA TERNO LUXO",
+      "controles": [
+        "BRANCA",
+        "CINZA"
+      ]
+    },
+    {
+      "codigo_produto": 28,
+      "produto": "PI CORTE OXFORD SAIA MANGA RENDADA",
+      "controles": [
+        "AZUL",
+        "BEGE",
+        "BRANCO",
+        "ROSA"
+      ]
+    },
+    {
+      "codigo_produto": 29,
+      "produto": "PI CORTE RENDA BLUSA MANGA RENDADA",
+      "controles": []
+    },
+    {
+      "codigo_produto": 30,
+      "produto": "PI CORTE CETIM COROA",
+      "controles": [
+        "A3",
+        "A4"
+      ]
+    },
+    {
+      "codigo_produto": 31,
+      "produto": "PI CORTE FAIXA PARA COROA",
+      "controles": []
+    },
+    {
+      "codigo_produto": 32,
+      "produto": "PI CORTE SACO PARA CINZA 0,74X0,29",
+      "controles": [
+        "AZUL MARINHO",
+        "AZUL ROYAL",
+        "BEGE",
+        "BRANCO",
+        "PRETO",
+        "VERDE",
+        "VINHO"
+      ]
+    },
+    {
+      "codigo_produto": 33,
+      "produto": "PI CORTE SACO PARA CINZA1,12X0,38",
+      "controles": [
+        "AZUL MARINHO",
+        "AZUL ROYAL",
+        "BEGE",
+        "BRANCO",
+        "PRETO",
+        "VERDE",
+        "VINHO"
+      ]
+    },
+    {
+      "codigo_produto": 34,
+      "produto": "PI CORTE SAIA PARA DESCENSOR",
+      "controles": []
+    },
+    {
+      "codigo_produto": 35,
+      "produto": "PI CORTE CAPA PARA CAVALETE",
+      "controles": [
+        "AZUL MARINHO",
+        "AZUL ROYAL",
+        "BEGE",
+        "BRANCO",
+        "PRETO",
+        "VERDE",
+        "VINHO"
+      ]
+    },
+    {
+      "codigo_produto": 36,
+      "produto": "PI CORTE SAIA DO CARRINHO ESQUIFE",
+      "controles": [
+        "AZUL MARINHO",
+        "AZUL ROYAL",
+        "BEGE",
+        "BRANCO",
+        "PRETO",
+        "VERDE",
+        "VINHO"
+      ]
+    },
+    {
+      "codigo_produto": 37,
+      "produto": "PI CORTE CAPA PARA URNA",
+      "controles": [
+        "AZUL MARINHO",
+        "AZUL ROYAL",
+        "BEGE",
+        "BRANCO",
+        "PRETO",
+        "VERDE",
+        "VINHO"
+      ]
+    },
+    {
+      "codigo_produto": 38,
+      "produto": "PI CORTE CAPA PARA FILTRO DE GALÃO",
+      "controles": [
+        "AZUL MARINHO",
+        "AZUL ROYAL",
+        "BEGE",
+        "BRANCO",
+        "PRETO",
+        "VERDE",
+        "VINHO"
+      ]
+    },
+    {
+      "codigo_produto": 39,
+      "produto": "PI CORTE CORTINA PARA PORTA",
+      "controles": [
+        "VERDE",
+        "VINHO",
+        "AZUL MARINHO",
+        "AZUL ROYAL",
+        "BEGE",
+        "BRANCO",
+        "PRETO"
+      ]
+    },
+    {
+      "codigo_produto": 40,
+      "produto": "PI CORTE VEU SIMPLES",
+      "controles": [
+        "0,40 X 0,60",
+        "0,50 X 0,40",
+        "0,50 x 0,60",
+        "0,60 X 0,80",
+        "0,60x0,30",
+        "2,00x0,60",
+        "2,00X0,68 SEXTAVADO",
+        "2,20x0,85",
+        "2,40x1,25",
+        "SOB ENCOMENDA",
+        "0,80x0,30",
+        "1,00x0,40",
+        "1,20 X 0,40",
+        "1,20x0,60",
+        "1,20x0,80",
+        "1,60x0,60"
+      ]
+    },
+    {
+      "codigo_produto": 41,
+      "produto": "PI CORTE VEU GOTA",
+      "controles": [
+        "0,60X0,40",
+        "2,00X0,60",
+        "2,00X0,68 SEXTAVADO",
+        "2,20X0,85",
+        "SOB ENCOMENDA"
+      ]
+    },
+    {
+      "codigo_produto": 177,
+      "produto": "PI CORTE VEU LILAS",
+      "controles": [
+        "2,00x0,60"
+      ]
+    },
+    {
+      "codigo_produto": 237,
+      "produto": "PI CORTE IMAGEM TRANSFER",
+      "controles": []
+    },
+    {
+      "codigo_produto": 409,
+      "produto": "PI CORTE SAIA CONJUNTO ELEGANCE",
+      "controles": [
+        "AZUL",
+        "BRANCO"
+      ]
+    },
+    {
+      "codigo_produto": 411,
+      "produto": "PI CORTE BLAZER CONJUNTO FEMININO ELEGANCE",
+      "controles": [
+        "AZUL",
+        "BRANCO"
+      ]
+    },
+    {
+      "codigo_produto": 414,
+      "produto": "PI CORTE BLUSA CONJUNTO ELEGANCE",
+      "controles": [
+        "BRANCA",
+        "MARINHO",
+        "PRETO",
+        "VINHO"
+      ]
+    },
+    {
+      "codigo_produto": 439,
+      "produto": "MANTA ACRILICA SUPERIOR (0,76 X 0,59)",
+      "controles": []
+    },
+    {
+      "codigo_produto": 454,
+      "produto": "PI CORTE MANTA PET",
+      "controles": [
+        "G (1,40 X 0,96)",
+        "P (0,51 X 0,96)"
+      ]
+    },
+    {
+      "codigo_produto": 509,
+      "produto": "PI CORTE BLAZER TERNO RISCA DE GIZ",
+      "controles": []
+    },
+    {
+      "codigo_produto": 510,
+      "produto": "PI CORTE CALÇA TERNO RISCA DE GIZ",
+      "controles": []
+    },
+    {
+      "codigo_produto": 512,
+      "produto": "PI CORTE ENTRETELA TERNO GIZ E MESCLA",
+      "controles": []
+    },
+    {
+      "codigo_produto": 515,
+      "produto": "PI CORTE BLAZER TERNO MESCLA",
+      "controles": []
+    },
+    {
+      "codigo_produto": 516,
+      "produto": "PI CORTE CALÇA TERNO MESCLA",
+      "controles": []
+    },
+    {
+      "codigo_produto": 579,
+      "produto": "PI CORTE QLT - VÉU SIMPLES - TULE",
+      "controles": []
+    },
+    {
+      "codigo_produto": 583,
+      "produto": "PI CORTE MANTA INTEIRA",
+      "controles": []
+    },
+    {
+      "codigo_produto": 614,
+      "produto": "PI CORTE CAPA PARA URNA ESPECIAL",
+      "controles": [
+        "BEGE",
+        "VERDE"
+      ]
+    },
+    {
+      "codigo_produto": 619,
+      "produto": "PI CORTE SACO PET PARA CINZA EM VELUDO P 0,10 X 0,15",
+      "controles": [
+        "BEGE",
+        "PRETO",
+        "VERDE"
+      ]
+    },
+    {
+      "codigo_produto": 620,
+      "produto": "PI CORTE SACO PET PARA CINZA EM VELUDO M 0,15 X 0,18",
+      "controles": [
+        "BEGE",
+        "PRETO",
+        "VERDE"
+      ]
+    },
+    {
+      "codigo_produto": 621,
+      "produto": "PI CORTE SACO PET PARA CINZA EM VELUDO G 0,30 X 0,26",
+      "controles": [
+        "BEGE",
+        "PRETO",
+        "VERDE"
+      ]
+    },
+    {
+      "codigo_produto": 6069,
+      "produto": "PI CORTE VESTIDO CONJUNTO FEMININO",
+      "controles": [
+        "AZUL",
+        "BEGE",
+        "BRANCO",
+        "ROSA",
+        "VERDE"
+      ]
+    },
+    {
+      "codigo_produto": 6070,
+      "produto": "PI CORTE APARADOR",
+      "controles": [
+        "AZUL MARINHO",
+        "AZUL ROYAL",
+        "BEGE",
+        "BRANCO",
+        "PRETO",
+        "VERDE",
+        "VINHO"
+      ]
+    },
+    {
+      "codigo_produto": 6071,
+      "produto": "PI CORTE BANDEIROLA",
+      "controles": [
+        "AZUL MARINHO",
+        "AZUL ROYAL",
+        "BEGE",
+        "BRANCA",
+        "PRETO",
+        "VERDE",
+        "VINHO"
+      ]
+    },
+    {
+      "codigo_produto": 6072,
+      "produto": "PI CORTE BATA INFANTIL",
+      "controles": [
+        "G",
+        "M",
+        "P"
+      ]
+    },
+    {
+      "codigo_produto": 6073,
+      "produto": "PI CORTE BLAZER CONJUNTO FEMININO",
+      "controles": [
+        "AZUL",
+        "BEGE",
+        "BRANCO",
+        "ROSA",
+        "SALMÃO",
+        "VERDE"
+      ]
+    },
+    {
+      "codigo_produto": 6074,
+      "produto": "PI CORTE BLAZER TERNO MASCULINO",
+      "controles": [
+        "AZUL MARINHO",
+        "BEGE",
+        "BRANCO",
+        "CINZA",
+        "PRETO"
+      ]
+    },
+    {
+      "codigo_produto": 6075,
+      "produto": "PI CORTE BLAZER TERNO LUXO",
+      "controles": [
+        "AZUL MARINHO",
+        "CINZA",
+        "PRETO"
+      ]
+    },
+    {
+      "codigo_produto": 6076,
+      "produto": "PI CORTE CALÇA MASCULINA CONJUNTO",
+      "controles": [
+        "AZUL",
+        "PRETO"
+      ]
+    },
+    {
+      "codigo_produto": 6077,
+      "produto": "PI CORTE CALÇA PLANO MASCULINA",
+      "controles": []
+    },
+    {
+      "codigo_produto": 6078,
+      "produto": "PI CORTE CAMISA",
+      "controles": [
+        "AZUL (IMPERIAL OU BABY BLUE)",
+        "BEGE (SAND OU CHINO)",
+        "BRANCO"
+      ]
+    },
+    {
+      "codigo_produto": 6079,
+      "produto": "PI CORTE CAPA ALMOFADA",
+      "controles": [
+        "AZUL MARINHO",
+        "AZUL ROYAL",
+        "BEGE",
+        "BRANCA",
+        "PRETO",
+        "VERDE",
+        "VINHO"
+      ]
+    },
+    {
+      "codigo_produto": 6080,
+      "produto": "PI CORTE CAPA CARRINHO",
+      "controles": []
+    },
+    {
+      "codigo_produto": 6081,
+      "produto": "PI CORTE CAPA MACA",
+      "controles": []
+    },
+    {
+      "codigo_produto": 6082,
+      "produto": "PI CORTE VELUDO CORTINA GRANDE",
+      "controles": [
+        "AZUL MARINHO",
+        "AZUL ROYAL",
+        "BEGE",
+        "BRANCA",
+        "PRETO",
+        "SOB ENCOMENDA",
+        "VERDE",
+        "VINHO"
+      ]
+    },
+    {
+      "codigo_produto": 6083,
+      "produto": "PI CORTE VELUDO CORTINA ESPECIAL",
+      "controles": [
+        "AZUL MARINHO",
+        "AZUL ROYAL",
+        "BEGE",
+        "BRANCA",
+        "PRETO",
+        "SOB ENCOMENDA",
+        "VERDE",
+        "VINHO"
+      ]
+    },
+    {
+      "codigo_produto": 6084,
+      "produto": "PI CORTE CRISANTEMO TNT",
+      "controles": [
+        "AMARELO",
+        "AZUL",
+        "BRANCO",
+        "ROSA",
+        "VERMELHO"
+      ]
+    },
+    {
+      "codigo_produto": 6085,
+      "produto": "PI CORTE EDREDON CAPITONE",
+      "controles": []
+    },
+    {
+      "codigo_produto": 6086,
+      "produto": "PI CORTE EDREDON INF",
+      "controles": []
+    },
+    {
+      "codigo_produto": 6087,
+      "produto": "PI CORTE EDREDON INF E SUP",
+      "controles": []
+    },
+    {
+      "codigo_produto": 6090,
+      "produto": "PI CORTE EDREDON PEROLA",
+      "controles": [
+        "INF",
+        "SUP"
+      ]
+    },
+    {
+      "codigo_produto": 6091,
+      "produto": "PI CORTE EDREDON SUP",
+      "controles": []
+    },
+    {
+      "codigo_produto": 6092,
+      "produto": "PI CORTE GRAVATA",
+      "controles": [
+        "AZUL",
+        "CINZA",
+        "PRETO"
+      ]
+    },
+    {
+      "codigo_produto": 6093,
+      "produto": "PI CORTE LENÇO VOIL",
+      "controles": []
+    },
+    {
+      "codigo_produto": 6094,
+      "produto": "PI CORTE LUVA COM PEROLA PAR",
+      "controles": []
+    },
+    {
+      "codigo_produto": 6095,
+      "produto": "PI CORTE OXFORD BLUSA MANGA RENDADA",
+      "controles": [
+        "AZUL",
+        "BEGE",
+        "BRANCO",
+        "ROSA"
+      ]
+    },
+    {
+      "codigo_produto": 6096,
+      "produto": "PI CORTE MANTA FLORAL INF",
+      "controles": []
+    },
+    {
+      "codigo_produto": 6097,
+      "produto": "PI CORTE MANTA FLORAL SUP",
+      "controles": []
+    },
+    {
+      "codigo_produto": 6098,
+      "produto": "PI CORTE MANTA IMAGEM",
+      "controles": []
+    },
+    {
+      "codigo_produto": 6099,
+      "produto": "PI CORTE MANTA PAPELÃO",
+      "controles": []
+    },
+    {
+      "codigo_produto": 6100,
+      "produto": "PI CORTE MANTA SUP",
+      "controles": []
+    },
+    {
+      "codigo_produto": 6101,
+      "produto": "PI CORTE MANTO ADULTO",
+      "controles": []
+    },
+    {
+      "codigo_produto": 6102,
+      "produto": "PI CORTE MANTO INFANTIL",
+      "controles": [
+        "G",
+        "M",
+        "P"
+      ]
+    },
+    {
+      "codigo_produto": 6103,
+      "produto": "PI CORTE MANTA SETEC",
+      "controles": [
+        "INF",
+        "SUP"
+      ]
+    },
+    {
+      "codigo_produto": 6105,
+      "produto": "PI CORTE SAIA MONT SERRAT",
+      "controles": []
+    },
+    {
+      "codigo_produto": 6106,
+      "produto": "PI CORTE SAIA PARA URNA",
+      "controles": [
+        "AZUL MARINHO",
+        "AZUL ROYAL",
+        "BEGE",
+        "BRANCA",
+        "OUTRAS OPÇÕES (SOB ENCOMENDA)",
+        "PRETO",
+        "VERDE",
+        "VINHO"
+      ]
+    },
+    {
+      "codigo_produto": 6107,
+      "produto": "PI CORTE VESTIDO PLANO CETIM",
+      "controles": []
+    }
+  ],
+  "grupos": [
+    {
+      "id": "conjunto-feminino",
+      "nome": "Conjunto feminino — blazer e vestido",
+      "codigos": [
+        6073,
+        6069
+      ]
+    },
+    {
+      "id": "terno-masculino",
+      "nome": "Terno masculino — blazer e calça",
+      "codigos": [
+        6074,
+        26
+      ]
+    },
+    {
+      "id": "terno-risca-giz",
+      "nome": "Terno risca de giz — blazer e calça",
+      "codigos": [
+        509,
+        510
+      ]
+    },
+    {
+      "id": "terno-mescla",
+      "nome": "Terno mescla — blazer e calça",
+      "codigos": [
+        515,
+        516
+      ]
+    }
+  ]
+}

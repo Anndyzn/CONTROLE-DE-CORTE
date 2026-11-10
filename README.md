@@ -43,11 +43,16 @@ Sistema web interno que permite:
 - Produto do novo corte e modelo dos PIs oferecem até cinco sugestões dos nomes existentes, permitindo digitação livre.
 - Funcionamento e limites: [Padronização de nomes](docs/padronizacao-nomes.md).
 
-### Preparação para o Sankhya
+### Códigos Sankhya
+
+- Em **Produtos possíveis por nome do corte**, liste as nomenclaturas existentes e salve alternativas do catálogo Sankhya. Depois escolha a alternativa no PI para preencher os códigos e descrições do ERP; controles e vínculo efetivo são conferidos antes de salvar. A tela Consultar e os registros históricos permanecem como estão.
+- Em **PIs cortados**, cada item mostra seus produtos vinculados e um atalho para conferir/cadastrar a correspondência em outra aba. A associação usa modelo do PI, tecido e cor; o nome do corte é apenas uma identificação.
+- Vínculos podem ser conferidos em itens antigos e novos, mesmo antes da confirmação dos PIs. Eles não indicam que uma OP já foi lançada no ERP.
 - Na Home, **Sankhya** abre a conferência dos itens de cortes finalizados com PIs confirmados.
 - Cadastre correspondências por modelo, tecido e cor, com um ou vários produtos e controles do ERP.
-- A tela apresenta as OPs previstas e mantém o consumo total no item de origem. **Baixar guia em Excel** gera uma linha por OP e uma aba de consumo por item, para apoiar o lançamento manual no ERP. Exige correspondências completas e salvas.
-- Os códigos são informados manualmente. O guia não importa dados nem cria OPs no Sankhya; apontamento, consumo real e confirmação continuam no ERP.
+- A tela atual mostra somente o produto e seu código para copiar. Uma opção cadastrada aparece automaticamente; conjuntos mostram seus componentes juntos. Excel e editor individual foram retirados da interface.
+- Escolha produtos e uma variação por produto no catálogo local fornecido pela equipe. Conjunto feminino e terno carregam seus dois componentes juntos; confira e salve. A lista não é sincronizada com o ERP.
+- O guia não importa dados nem cria OPs no Sankhya; apontamento, consumo real e confirmação continuam no ERP.
 - Funcionamento e próximos passos: [Integração Sankhya](docs/integracao-sankhya.md).
 
 ### Backup e testes no GitHub

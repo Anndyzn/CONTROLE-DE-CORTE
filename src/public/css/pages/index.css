@@ -1231,6 +1231,13 @@ td:first-child {
   .mesas-atualizacao { text-align: left; }
 }
 
+.pi-vinculo-sankhya { display: grid; gap: 6px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 12px; line-height: 1.5; white-space: normal; overflow-wrap: anywhere; }
+.pi-vinculo-sankhya a, .pi-vinculo-sankhya summary { color: var(--primary-deep); cursor: pointer; }
+.pi-vinculo-sankhya a:focus-visible, .pi-vinculo-sankhya summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+.pi-vinculo-sankhya ul { padding-left: 16px; margin: 6px 0; }
+.pi-vinculo-cadastrado { color: var(--success-text); }
+.pi-vinculo-pendente { color: var(--warning-text); }
+
 /* Visão rápida: cortes em andamento e finalizados */
 .cortes-visao-rapida {
   display: grid;
@@ -1417,3 +1424,8 @@ td:first-child {
     flex: 1;
   }
 }
+.nomes-sugestoes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.nomes-sugestoes:empty { display: none; }
+.nomes-sugestoes .nome-sugestao { max-width: 100%; margin: 0; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--primary-soft); color: var(--primary); font-size: 13px; text-align: left; overflow-wrap: anywhere; box-shadow: none; }
+.nomes-sugestoes .nome-sugestao:hover { border-color: var(--primary); }
+.nomes-sugestoes .nome-sugestao:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }

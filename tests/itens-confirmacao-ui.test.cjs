@@ -7,6 +7,7 @@ beforeEach(async()=>{
   const tabela={innerHTML:'',appendChild(){}}
   globalThis.document={getElementById:id=>id==='numeroCorte'?{value:'917'}:tabela,createElement:()=>({innerHTML:''})}
   globalThis.__itensDeps={
+    atualizarVinculosPIs(){},
     apiGet:async url=>url.endsWith('finalizacao-itens')?{itens_finalizados:1}:[{id:1,modelo:'PI',cor:'BRANCO',tecido:'VOIL',metragem_usada:12.5,quantidade_pecas:5}],
     apiPost:async url=>chamadas.push(url),apiPut(){},apiDelete(){},mostrarToast(){},validarValoresItem(){},solicitarJustificativa(){},
     confirmarAcao:async()=>confirma,definirBaseItemRascunho(){},limparRascunhoGrupo(){},versaoRascunho(){},

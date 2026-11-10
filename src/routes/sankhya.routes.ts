@@ -4,8 +4,12 @@ import { numeroCorteValido } from "../utils/validacoes"
 import { ErroRegra } from "../services/corte-bloqueado"
 import { carregarConferenciaSankhya, validarCorrespondencia } from "../services/sankhya-preparacao"
 import { gerarGuiaSankhyaExcel } from "../services/sankhya-excel"
+import { obterCatalogoSankhya } from "../services/sankhya-catalogo"
 
 const router = Router()
+router.get("/sankhya/catalogo", (_req, res) => {
+  try { res.json(obterCatalogoSankhya()) } catch (erro) { responderErro(res, erro) }
+})
 function responderErro(res: import("express").Response, erro: unknown) {
   if (erro instanceof ErroRegra) return res.status(erro.status).json({erro: erro.message})
   console.error("Falha na preparação Sankhya:", erro)
@@ -21,6 +25,13 @@ router.get("/sankhya/cortes", async (_req, res) => {
         AND EXISTS (SELECT 1 FROM itens_corte i WHERE i.numero_corte = c.numero)
       ORDER BY c.numero DESC LIMIT 50`)
     res.json(resultado.rows)
+  } catch (erro) { responderErro(res, erro) }
+})
+
+router.get("/sankhya/cortes/:numero/vinculos", async (req, res) => {
+  if (!numeroCorteValido(req.params.numero)) return res.status(400).json({erro: "Informe um número de corte válido."})
+  try {
+    res.json(await carregarConferenciaSankhya(Number(req.params.numero), {exigirFinalizacao: false}))
   } catch (erro) { responderErro(res, erro) }
 })
 

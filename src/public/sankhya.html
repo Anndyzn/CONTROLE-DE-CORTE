@@ -20,12 +20,15 @@
 
     <aside class="sankhya-aviso">
       <strong>Apoio ao lançamento manual</strong>
-      <p>Cadastre as correspondências, confira as OPs previstas e baixe o guia em Excel para lançar no Sankhya. A criação, o apontamento e a confirmação continuam sendo feitos no ERP.</p>
+      <p>Vincule os produtos → confira → copie para o Sankhya ou baixe o Excel. O lançamento continua manual no ERP.</p>
     </aside>
 
+    <div id="copiaManualSankhya" class="section-card" hidden><label for="textoCopiaSankhya">Selecione e copie com Ctrl+C</label><textarea id="textoCopiaSankhya" readonly rows="4"></textarea></div>
+
+
     <section class="section-card">
-      <h2>Escolher corte</h2>
-      <p class="section-help">Disponível após finalizar a produção e confirmar os PIs. A lista inclui até 50 cortes recentes e pode conter cortes já lançados manualmente no ERP.</p>
+      <h2>Consultar c?digos para o Sankhya</h2>
+      <p class="section-help">Busque pelo número ou escolha um corte recente.</p>
       <form id="formBuscarSankhya">
         <fieldset id="camposBuscaSankhya" class="sankhya-busca">
           <div class="form-group"><label for="numeroSankhya">Número do corte</label><input id="numeroSankhya" type="number" min="1" max="2147483647" step="1" required placeholder="Digite o número"></div>
@@ -36,32 +39,23 @@
       <p id="estadoSankhya" class="section-help" role="status" aria-live="polite">Escolha um corte para começar.</p>
     </section>
 
-    <section id="conferenciaSankhya" class="section-card" hidden>
-      <h2 id="tituloConferenciaSankhya">Conferência</h2>
-      <p id="resumoConferenciaSankhya" class="section-help"></p>
-      <div class="button-row"><button id="exportarGuiaSankhya" type="button" disabled>📥 Baixar guia em Excel</button></div>
-      <p class="small-help">Complete e salve as correspondências de todos os itens para baixar. O Excel é um guia para digitação e conferência, sem importação automática. Confira as OPs já existentes antes de lançar.</p>
-      <p class="section-help">Cada produto de destino recebe a quantidade de peças do item de origem. Confira essa correspondência para conjuntos e produtos compostos.</p>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Item de origem</th><th>Produto Sankhya</th><th>Controle (cor)</th><th>Quantidade</th><th>Conferência</th></tr></thead>
-        <tbody id="linhasConferenciaSankhya"></tbody>
-      </table></div>
-      <p class="sankhya-consumo">A metragem permanece no item original, como referência do consumo total. O consumo por OP será tratado no Sankhya, usando a composição e o ajuste real do colaborador.</p>
+    <section id="codigosCorteSankhya" class="section-card" hidden>
+      <h2>Produtos no Sankhya</h2>
+      <p class="small-help">Os produtos vinculados aparecem automaticamente. O bot?o copia somente o c?digo; o lan?amento continua manual no ERP.</p>
+      <div id="listaCodigosCorteSankhya"></div>
+      <p class="small-help">Marque “Lançado no Sankhya” depois de lançar cada produto no ERP. A marcação fica salva neste controle e pode ser desmarcada; não é uma confirmação automática do Sankhya.</p>
     </section>
+    <details id="painelNomesSankhya" class="section-card">
+      <summary><strong>1. Produtos possíveis por nome do corte</strong></summary>
+      <p class="section-help">Escolha um nome já usado no controle e cadastre o que pode sair dele no Sankhya. Exemplo: EDREDON LISO INFERIOR → 6086 — PI CORTE EDREDON INF. Isso não altera os nomes na tela Consultar.</p>
+      <div class="sankhya-busca"><div class="form-group"><label for="buscarNomeSankhya">Buscar nomenclatura</label><input id="buscarNomeSankhya" type="search" maxlength="200" placeholder="Ex.: EDREDON"></div><button id="filtrarNomesSankhya" type="button" class="btn-secondary">Buscar nomes</button><div class="form-group"><label for="nomeOrigemSankhya">Nomes dos cortes já criados</label><select id="nomeOrigemSankhya"><option value="">Abra para carregar</option></select></div></div>
+      <p id="estadoNomesSankhya" class="small-help" role="status">Abra este painel para carregar a lista.</p>
+      <div class="sankhya-opcoes-adicionar"><div class="form-group"><label for="produtoPossivelSankhya">Produto ou conjunto que pode sair desse nome</label><select id="produtoPossivelSankhya"><option value="">Carregando catálogo...</option></select></div><button id="adicionarPossibilidadeSankhya" type="button" class="btn-secondary">+ Adicionar opção</button></div>
+      <div id="listaPossibilidadesSankhya"></div>
+      <button id="salvarPossibilidadesSankhya" type="button" disabled>Salvar opções desta nomenclatura</button>
+      <p class="small-help">Cada opção é uma alternativa. Conjuntos e ternos carregam seus componentes juntos. A cor é escolhida depois, no PI realmente cortado.</p>
+    </details>
 
-    <section id="editorSankhya" class="section-card" hidden>
-      <h2>Correspondência dos itens</h2>
-      <p class="section-help">Informe os códigos e controles exatamente como cadastrados no ERP. Nesta etapa, os dados são informados manualmente e ainda não são validados pela API do Sankhya.</p>
-      <form id="formCorrespondenciaSankhya">
-        <fieldset id="camposCorrespondenciaSankhya" class="sankhya-editor">
-          <div class="form-group"><label for="itemSankhya">Item do corte</label><select id="itemSankhya" required></select></div>
-          <p id="origemSankhya" class="sankhya-origem"></p>
-          <div id="destinosSankhya"></div>
-          <div class="button-row"><button id="adicionarDestinoSankhya" type="button" class="btn-secondary">+ Adicionar produto de destino</button><button type="submit">Salvar correspondência</button></div>
-          <p class="small-help">A correspondência vale para outros cortes com o mesmo modelo, tecido e cor. Um conjunto pode ter vários produtos de destino, como blazer e vestido.</p>
-        </fieldset>
-      </form>
-    </section>
   </main>
   <div id="toastContainer" class="toast-container"></div>
   <script type="module" src="js/pages/sankhya/main.js"></script>

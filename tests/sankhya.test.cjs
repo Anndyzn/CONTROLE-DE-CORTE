@@ -40,6 +40,23 @@ after(()=>new Promise(resolve=>servidor.close(resolve)))
 const destino = (codigo, produto) => ({codigo_produto:codigo, produto, controle:'BRANCO'})
 const regra = () => ({modelo:'CONJUNTO FEMININO',tecido:'OXFORD',cor:'BRANCO',versao:0,
   destinos:[destino(6073,'PI CORTE BLAZER CONJUNTO FEMININO'),destino(6069,'PI CORTE VESTIDO CONJUNTO FEMININO')]})
+test('catálogo valida produto e controle e substitui a descrição recebida pela oficial',()=>{
+  const validar=destinos=>validarCorrespondencia({...regra(),destinos})
+  const aprovado=validar([{codigo_produto:6070,produto:'nome incorreto',controle:' branco '}])
+  assert.equal(aprovado.destinos[0].controle,'BRANCO')
+  assert.notEqual(aprovado.destinos[0].produto,'nome incorreto')
+  assert.throws(()=>validar([{codigo_produto:999999,controle:''}]))
+  assert.throws(()=>validar([{codigo_produto:6070,controle:''}]))
+  assert.throws(()=>validar([{codigo_produto:6086,controle:'BRANCO'}]))
+  assert.throws(()=>validar([destino(6070,'X'),{...destino(6070,'X'),controle:'BEGE'}]))
+  assert.equal(montarConferencia(itens,[aprovado])[0].ordens.length,1)
+})
+test('vínculo antigo com várias cores do mesmo produto exige revisão e não gera OPs',()=>{
+  const antigo={...regra(),destinos:[destino(6070,'X'),{...destino(6070,'X'),controle:'BEGE'}]}
+  const item=montarConferencia(itens,[antigo])[0]
+  assert.equal(item.ordens.length,0)
+  assert.match(item.pendencias.join(' '),/vínculo antigo/)
+})
 beforeEach(()=>{
   regras=new Map(); consultas=[];falhar=false;liberado=0
   corte={numero:922,produto:'CONJUNTO FEMININO',itens_finalizados:1,status:'FINALIZADO'}
@@ -77,8 +94,8 @@ test('valida limites, códigos, campos, duplicatas e versão antes de gravar',as
     {destinos:[]},{destinos:Array(11).fill(destino(1,'X'))},
     {destinos:[destino(1,'X'),destino(1,'X')]},
     {destinos:[destino('6073','X')]},{destinos:[destino(1.5,'X')]},
-    {destinos:[destino(2147483648,'X')]},{destinos:[{...destino(1,'X'),controle:''}]},
-    {destinos:[destino(1,'')]},{destinos:[null]}
+    {destinos:[destino(2147483648,'X')]},{destinos:[{...destino(1,'X'),controle:123}]},
+    {destinos:[null]}
   ]) assert.equal((await salvar({...regra(),...alteracao})).status,400)
   assert.equal(consultas.length,0)
 })
@@ -176,14 +193,54 @@ test('guia recusa correspondência incompleta, quantidade zero, PIs abertos e co
 })
 
 test('guia usa os dados atuais e preserva textos que parecem fórmulas como texto',async()=>{
-  const r=regra();r.destinos[0].produto='=1+1'
+  const r=regra();r.modelo='=1+1';itens[0].modelo='=1+1'
   await salvar(r)
   await fetch(base+'/sankhya/cortes/922/conferencia')
-  itens[0].quantidade_pecas=100;itens[0].modelo='CONJUNTO FEMININO'
+  itens[0].quantidade_pecas=100
   const resposta=await fetch(base+'/sankhya/cortes/922/excel')
   const livro=new ExcelJS.Workbook();await livro.xlsx.load(Buffer.from(await resposta.arrayBuffer()))
   const ops=livro.getWorksheet('OPs para lançar')
   assert.equal(ops.getCell('H6').value,100)
-  assert.equal(ops.getCell('F6').value,'=1+1');assert.equal(ops.getCell('F6').type,ExcelJS.ValueType.String)
-  assert.equal(ops.getCell('F6').formula,undefined)
+  assert.equal(ops.getCell('C6').value,'=1+1');assert.equal(ops.getCell('C6').type,ExcelJS.ValueType.String)
+  assert.equal(ops.getCell('C6').formula,undefined)
+})
+
+test('vínculo pertence ao PI e independe do nome do corte, inclusive com PIs ainda abertos',async()=>{
+  await salvar(regra());consultas=[]
+  corte.produto='NOME INTERNO QUALQUER';corte.itens_finalizados=0;corte.status='EM PRODUÇÃO'
+  let resposta=await fetch(base+'/sankhya/cortes/922/vinculos')
+  assert.equal(resposta.status,200)
+  let dados=await resposta.json()
+  assert.equal(dados.itens[0].correspondencia.destinos.length,2)
+  assert.equal(dados.completa,true);assert.equal(dados.guia_disponivel,false)
+  assert.equal((await fetch(base+'/sankhya/cortes/922/excel')).status,409)
+  assert.equal((await fetch(base+'/sankhya/cortes/922/conferencia')).status,409)
+  corte.status='FINALIZADO';corte.itens_finalizados=1
+  dados=await(await fetch(base+'/sankhya/cortes/922/vinculos')).json()
+  assert.equal(dados.guia_disponivel,true)
+  itens[0].modelo='OUTRO PI';corte.produto='CONJUNTO FEMININO'
+  dados=await(await fetch(base+'/sankhya/cortes/922/vinculos')).json()
+  assert.equal(dados.itens[0].correspondencia,null)
+  assert.equal(dados.guia_disponivel,false)
+  assert.ok(!consultas.some(c=>/^(INSERT|UPDATE|DELETE)/.test(c.q)))
+})
+
+test('controle opcional aceita vazio, ausente ou nulo, preservando a cor do PI e o Excel',async()=>{
+  for(const controle of ['', '   ', undefined, null]){
+    const r=validarCorrespondencia({...regra(),destinos:[{codigo_produto:6086,produto:'PI CORTE EDREDON INF',controle}]})
+    assert.equal(r.destinos[0].controle,'')
+    assert.equal(r.cor,'BRANCO')
+  }
+  assert.throws(()=>validarCorrespondencia({...regra(),destinos:[{...destino(1,'X'),controle:'X'.repeat(101)}]}),/100 caracteres/)
+  const r=regra();r.destinos=[{codigo_produto:6086,produto:'PI CORTE EDREDON INF',controle:''}]
+  assert.equal((await salvar(r)).status,200)
+  const dados=await(await fetch(base+'/sankhya/cortes/922/vinculos')).json()
+  assert.equal(dados.completa,true);assert.equal(dados.itens[0].cor,'BRANCO')
+  assert.equal(dados.itens[0].ordens[0].controle,'')
+  const resposta=await fetch(base+'/sankhya/cortes/922/excel')
+  assert.equal(resposta.status,200)
+  const livro=new ExcelJS.Workbook();await livro.xlsx.load(Buffer.from(await resposta.arrayBuffer()))
+  assert.equal(livro.getWorksheet('OPs para lançar').getCell('G6').value,'Sem controle')
+  assert.equal(livro.getWorksheet('OPs para lançar').getCell('D6').value,'BRANCO')
+  assert.throws(()=>validarCorrespondencia({...regra(),destinos:[{codigo_produto:6086,produto:'X',controle:''},{codigo_produto:6086,produto:'X'}]}),/repetidos/)
 })

@@ -181,8 +181,10 @@
             <input
               type="text"
               id="produtoNovo"
-              placeholder="Digite o produto"
+              placeholder="Digite para buscar um produto cadastrado"
+              aria-describedby="ajudaProdutoNovo"
             >
+            <p id="ajudaProdutoNovo" class="small-help">Confira as sugestões e selecione o nome existente. Se o produto ainda não estiver cadastrado, digite o novo nome e continue.</p>
           </div>
 
           <div class="form-group">
@@ -423,6 +425,8 @@
       <p class="section-help">
         Registre os produtos e materiais utilizados neste corte.
       </p>
+      <p class="section-help">O nome do corte é uma identificação. Cada PI abaixo é relacionado aos produtos do Sankhya pelo modelo, tecido e cor.</p>
+      <p id="resumoVinculosPIs" class="section-help" role="status" aria-live="polite">Cadastre os PIs para consultar seus vínculos com o Sankhya.</p>
 
       <!-- Aparece quando os PIs já foram registrados -->
       <div

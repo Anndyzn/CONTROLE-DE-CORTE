@@ -11,6 +11,7 @@ import {
 import { validarValoresItem } from "../../utils/validations.js"
 import { solicitarJustificativa } from "../../admin/justificativa.js"
 import { confirmarAcao } from "../../core/confirmacao.js"
+import { atualizarVinculosPIs } from "./vinculos.js"
 import { definirBaseItemRascunho, limparRascunhoGrupo, versaoRascunho } from "./rascunho.js"
 
 import {
@@ -48,6 +49,7 @@ export async function carregarItensCorte(numeroCorte, {aindaAtual = () => true} 
     tabela.innerHTML = ""
 
     if (itens.length === 0) {
+      atualizarVinculosPIs(numeroCorte, [], [], {aindaAtual})
       tabela.innerHTML = `
         <tr>
           <td colspan="9">
@@ -59,33 +61,13 @@ export async function carregarItensCorte(numeroCorte, {aindaAtual = () => true} 
       return 0
     }
 
+    const linhas = []
     itens.forEach((item) => {
       const linha = document.createElement("tr")
 
       linha.innerHTML = `
-        <td>${maiusculo(item.modelo)}</td>
-        <td>${maiusculo(item.cor)}</td>
-        <td>${maiusculo(item.tecido)}</td>
-
-        <td>
-          ${formatarNumero(item.metragem_usada)}
-        </td>
-
-        <td>
-          ${formatarNumero(item.sobra_metros)}
-        </td>
-
-        <td>
-          ${formatarNumero(item.perda_metros)}
-        </td>
-
-        <td>
-          ${formatarNumero(item.metros_faltantes)}
-        </td>
-
-        <td>
-          ${formatarQuantidade(item.quantidade_pecas)}
-        </td>
+        <td></td><td></td><td></td><td></td>
+        <td></td><td></td><td></td><td></td>
 
         <td>
           ${
@@ -116,6 +98,12 @@ export async function carregarItensCorte(numeroCorte, {aindaAtual = () => true} 
         </td>
       `
 
+      const valores = [maiusculo(item.modelo), maiusculo(item.cor), maiusculo(item.tecido),
+        formatarNumero(item.metragem_usada), formatarNumero(item.sobra_metros),
+        formatarNumero(item.perda_metros), formatarNumero(item.metros_faltantes),
+        formatarQuantidade(item.quantidade_pecas)]
+      valores.forEach((valor, indice) => { if (linha.cells?.[indice]) linha.cells[indice].textContent = valor })
+
       if (!itensFinalizados) {
         configurarEdicao(linha, item)
 
@@ -127,7 +115,10 @@ export async function carregarItensCorte(numeroCorte, {aindaAtual = () => true} 
       }
 
       tabela.appendChild(linha)
+      linhas.push(linha)
     })
+
+    atualizarVinculosPIs(numeroCorte, itens, linhas, {aindaAtual})
 
     return itens.length
 

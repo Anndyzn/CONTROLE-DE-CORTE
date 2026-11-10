@@ -1,5 +1,6 @@
 import dbPg from "../database-pg"
 import { ErroRegra } from "./corte-bloqueado"
+import { conferirDestinoCatalogo } from "./sankhya-catalogo"
 
 export type DestinoOP = { codigo_produto: number; produto: string; controle: string }
 export type CorrespondenciaOP = { modelo: string; tecido: string; cor: string; destinos: DestinoOP[]; versao: number }
@@ -36,13 +37,15 @@ export function validarCorrespondencia(dados: unknown): CorrespondenciaOP {
     if (!Number.isSafeInteger(d.codigo_produto) || Number(d.codigo_produto) <= 0 || Number(d.codigo_produto) > 2147483647) {
       throw new ErroRegra(400, "Informe um código de produto inteiro e positivo.")
     }
-    const produto = texto(d.produto, "o nome do produto no Sankhya")
     // O controle é um identificador do ERP: conservar a grafia informada.
-    const controle = texto(d.controle, "o controle de cor no Sankhya", 100)
-    const identificador = JSON.stringify([d.codigo_produto, normalizarNome(controle)])
-    if (vistos.has(identificador)) throw new ErroRegra(400, "Produto e controle repetidos na mesma correspondência.")
+    if (d.controle != null && (typeof d.controle !== "string" || d.controle.trim().length > 100)) {
+      throw new ErroRegra(400, "O controle de cor deve ser um texto de até 100 caracteres, ou ficar vazio.")
+    }
+    const controle = typeof d.controle === "string" ? d.controle.trim().replace(/\s+/g, " ") : ""
+    const identificador = String(d.codigo_produto)
+    if (vistos.has(identificador)) throw new ErroRegra(400, "Produtos repetidos: escolha apenas um controle de cada produto por PI. Registre outras variações em itens separados.")
     vistos.add(identificador)
-    return { codigo_produto: Number(d.codigo_produto), produto, controle }
+    return conferirDestinoCatalogo({codigo_produto: Number(d.codigo_produto), controle})
   })
   return {modelo, tecido, cor, destinos, versao: Number(valor.versao)}
 }
@@ -55,17 +58,29 @@ export function montarConferencia(itens: ItemCorte[], correspondencias: Correspo
     const pendencias: string[] = []
     if (!regra) pendencias.push("Cadastre os produtos e controles correspondentes no Sankhya.")
     if (!Number.isSafeInteger(quantidade) || quantidade <= 0) pendencias.push("A quantidade de peças deve ser inteira e maior que zero para preparar uma OP.")
+    let destinos: DestinoOP[] = []
+    if (regra) {
+      try {
+        if (new Set(regra.destinos.map(d => d.codigo_produto)).size !== regra.destinos.length) {
+          throw new ErroRegra(400, "Revise o vínculo antigo: selecione apenas o controle cortado de cada produto, em vez de todas as variações.")
+        }
+        destinos = regra.destinos.map(conferirDestinoCatalogo)
+      } catch (erro) {
+        if (!(erro instanceof ErroRegra)) throw erro
+        pendencias.push(erro.message)
+      }
+    }
     return {
       ...item,
-      correspondencia: regra ?? null,
+      correspondencia: regra ? {...regra, destinos: destinos.length ? destinos : regra.destinos} : null,
       pendencias,
       // Cada destino recebe a quantidade do item. Consumo total nunca é duplicado entre OPs.
-      ordens: pendencias.length ? [] : regra!.destinos.map(destino => ({...destino, quantidade}))
+      ordens: pendencias.length ? [] : destinos.map(destino => ({...destino, quantidade}))
     }
   })
 }
 
-export async function carregarConferenciaSankhya(numero: number) {
+export async function carregarConferenciaSankhya(numero: number, {exigirFinalizacao = true} = {}) {
   const client = await dbPg.connect()
   try {
     await client.query("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY")
@@ -74,7 +89,8 @@ export async function carregarConferenciaSankhya(numero: number) {
       FROM cortes c WHERE c.numero = $1`, [numero])
     const corte = resultado.rows[0]
     if (!corte) throw new ErroRegra(404, "Corte não encontrado.")
-    if (corte.status !== "FINALIZADO" || Number(corte.itens_finalizados) !== 1) {
+    const finalizado = corte.status === "FINALIZADO" && Number(corte.itens_finalizados) === 1
+    if (exigirFinalizacao && !finalizado) {
       throw new ErroRegra(409, "Finalize a produção e confirme os PIs antes de preparar as OPs.")
     }
     const itens = await client.query("SELECT id, modelo, cor, tecido, quantidade_pecas, metragem_usada FROM itens_corte WHERE numero_corte = $1 ORDER BY id", [numero])
@@ -85,8 +101,10 @@ export async function carregarConferenciaSankhya(numero: number) {
     )
     const conferencia = montarConferencia(itens.rows, regras.rows)
     await client.query("COMMIT")
-    return {corte, itens: conferencia, total_ops: conferencia.reduce((total, item) => total + item.ordens.length, 0),
-      completa: conferencia.every(item => item.pendencias.length === 0), envio_disponivel: false}
+    const total = conferencia.reduce((total, item) => total + item.ordens.length, 0)
+    const completa = conferencia.every(item => item.pendencias.length === 0)
+    return {corte, itens: conferencia, total_ops: total, completa,
+      guia_disponivel: finalizado && completa && total > 0, envio_disponivel: false}
   } catch (erro) { await client.query("ROLLBACK"); throw erro }
   finally { client.release() }
 }

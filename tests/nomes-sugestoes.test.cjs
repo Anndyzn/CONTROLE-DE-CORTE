@@ -4,7 +4,7 @@ const fs=require('node:fs')
 let modulo,campos,listas,timers,obter,chamadas,sequencia=0
 beforeEach(async()=>{
   listas={};timers=[];chamadas=[]
-  const elemento=()=>({value:'',eventos:{},children:[],setAttribute(k,v){this[k]=v},replaceChildren(){this.children=[]},append(c){this.children.push(c)},addEventListener(n,f){this.eventos[n]=f},insertAdjacentElement(_,e){listas[this.id]=e}})
+  const elemento=()=>({value:'',eventos:{},children:[],setAttribute(k,v){this[k]=v},getAttribute(k){return this[k]},focus(){this.focado=true;this.eventos.focus?.()},dispatchEvent(e){this.eventos[e.type]?.()},replaceChildren(){this.children=[]},append(c){this.children.push(c)},addEventListener(n,f){this.eventos[n]=f},insertAdjacentElement(_,e){listas[this.id]=e;campos[e.id]=e}})
   campos={produtoNovo:elemento(),modeloItem:elemento()}
   for(const [id,campo]of Object.entries(campos))campo.id=id
   globalThis.document={getElementById:id=>campos[id],createElement:()=>elemento()}
@@ -42,4 +42,26 @@ test('falha de sugestões mantém cadastro livre e limpa opções antigas',async
   await campos.modeloItem.eventos.focus()
   assert.equal(campos.modeloItem.value,'CONJ')
   assert.equal(listas.modeloItem.children.length,0)
+  assert.match(campos.modeloItemEstadoSugestoes.textContent,/Não foi possível consultar/)
+})
+
+test('selecionar sugestão preenche a grafia cadastrada sem submeter ou disparar nova busca',async()=>{
+  campos.produtoNovo.value='veu';await campos.produtoNovo.eventos.focus()
+  const total=chamadas.length
+  listas.produtoNovo.children[0].eventos.click()
+  assert.equal(campos.produtoNovo.value,'VÉU GOTA')
+  assert.equal(listas.produtoNovo.children.length,0)
+  assert.equal(chamadas.length,total)
+  assert.equal(campos.produtoNovo.focado,true)
+  assert.match(campos.produtoNovoEstadoSugestoes.textContent,/selecionado/)
+})
+test('busca vazia não consulta; ausência de resultado permite nome novo e informa a pessoa',async()=>{
+  await campos.produtoNovo.eventos.focus();assert.equal(chamadas.length,0)
+  obter=async()=>({nomes:[]})
+  campos.produtoNovo.value='NOVO PRODUTO';campos.produtoNovo.eventos.input()
+  await timers.at(-1)()
+  assert.match(campos.produtoNovoEstadoSugestoes.textContent,/Nenhum nome encontrado/)
+  assert.equal(campos.produtoNovo.value,'NOVO PRODUTO')
+  campos.produtoNovo.value='';campos.produtoNovo.eventos.input()
+  assert.equal(listas.produtoNovo.children.length,0)
 })

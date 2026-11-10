@@ -39,7 +39,7 @@ export async function gerarGuiaSankhyaExcel(dados: Awaited<ReturnType<typeof car
   const ordens = planilha("OPs para lançar", ["Corte", "Item de origem", "Modelo no controle", "Cor no controle", "Código produto Sankhya", "Produto no Sankhya", "Controle (cor) Sankhya", "Quantidade de peças", "Nº OP lançada (preencher)"], [12,16,30,22,22,48,26,22,26])
   for (const item of dados.itens) for (const ordem of item.ordens) {
     ordens.addRow([Number(dados.corte.numero), Number(item.id), item.modelo, item.cor, ordem.codigo_produto,
-      ordem.produto, ordem.controle, ordem.quantidade, null])
+      ordem.produto, ordem.controle || "Sem controle", ordem.quantidade, null])
   }
   const itens = planilha("Consumo por item", ["Corte", "Item de origem", "Modelo", "Cor", "Tecido", "Metragem total (m)", "Quantidade no controle"], [12,16,34,24,26,24,26])
   for (const item of dados.itens) itens.addRow([Number(dados.corte.numero), Number(item.id), item.modelo, item.cor,
@@ -49,6 +49,7 @@ export async function gerarGuiaSankhyaExcel(dados: Awaited<ReturnType<typeof car
   notas.getColumn(1).width = 115
   for (const texto of ["Guia para lançamento manual no Sankhya",
     "1. Confira produto, código, controle de cor e quantidade na aba OPs para lançar. Cada linha representa uma OP prevista.",
+    "Quando a coluna Controle indicar Sem controle, deixe esse campo vazio no ERP. A cor do PI original permanece registrada no guia.",
     "2. Verifique se a OP já foi lançada manualmente no ERP. Exportar novamente não registra nem impede duplicações no Sankhya.",
     "3. Crie as OPs pelo procedimento habitual e anote seus números na última coluna, se desejar.",
     "4. O processo produtivo, a planta, a unidade e os demais campos devem ser conferidos no ERP. Este guia não define esses valores.",
