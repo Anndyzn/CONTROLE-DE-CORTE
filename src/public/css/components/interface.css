@@ -468,3 +468,4 @@ textarea::placeholder {
     font-size: 12px;
   }
 }
+.conferencia-itens{padding-left:22px;max-height:320px;overflow:auto;line-height:1.6}.conferencia-itens li{padding:8px 0;border-bottom:1px solid #d5dfef}.confirmacao-dialog:has(.conferencia-itens){width:min(720px,calc(100vw - 32px));max-height:90vh;overflow:auto}

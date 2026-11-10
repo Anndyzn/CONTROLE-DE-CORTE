@@ -41,6 +41,17 @@ let consultaComProduto =
 let parametrosConsultaAplicada = null
 let sequenciaConsulta = 0
 let atualizarExportacao = () => {}
+const camposMemoria=["filtroNumero","filtroProduto","filtroDataInicial","filtroDataFinal","filtroStatus"]
+let restauracaoConsulta=null
+let posicaoLista=null
+function guardarConsulta() {
+  try {
+    sessionStorage.setItem("consulta-cortes-v1",JSON.stringify({
+      campos:Object.fromEntries(camposMemoria.map(id=>[id,document.getElementById(id)?.value??""])),
+      exibidos:quantidadeResultadosVisiveis,scroll:posicaoLista??window.scrollY
+    }))
+  } catch { /* A consulta continua funcionando se o navegador bloquear o armazenamento. */ }
+}
 
 
 // ========================================
@@ -138,6 +149,8 @@ async function abrirDetalhesCorte(
   item,
   linha
 ) {
+  posicaoLista=window.scrollY
+  guardarConsulta()
   try {
     corteConsultaAtual =
       item.numero
@@ -397,6 +410,7 @@ function carregarMaisResultadosConsulta() {
     QUANTIDADE_POR_PAGINA
 
   renderizarResultadosConsulta()
+  guardarConsulta()
 }
 
 
@@ -405,6 +419,7 @@ function carregarMaisResultadosConsulta() {
 // ========================================
 
 export async function carregarResultadosConsulta() {
+  posicaoLista=null
   const sequencia = ++sequenciaConsulta
   parametrosConsultaAplicada = null
   atualizarExportacao()
@@ -558,6 +573,14 @@ export async function carregarResultadosConsulta() {
     limparDetalhesCorte()
 
     renderizarResultadosConsulta()
+    if (restauracaoConsulta) {
+      quantidadeResultadosVisiveis=Math.max(QUANTIDADE_POR_PAGINA,Math.min(Number(restauracaoConsulta.exibidos)||20,resultadosConsulta.length))
+      renderizarResultadosConsulta()
+      const posicao=Number(restauracaoConsulta.scroll)||0
+      requestAnimationFrame(()=>window.scrollTo(0,posicao))
+      restauracaoConsulta=null
+    }
+    guardarConsulta()
 
   } catch (erro) {
     if (sequencia !== sequenciaConsulta) return
@@ -686,6 +709,19 @@ function configurarBuscaComEnter() {
 // ========================================
 
 export function inicializarFiltros() {
+  try {
+    const salvo=JSON.parse(sessionStorage.getItem("consulta-cortes-v1"))
+    if(salvo?.campos){
+      for(const id of camposMemoria)if(typeof salvo.campos[id]==="string")document.getElementById(id).value=salvo.campos[id]
+      restauracaoConsulta=salvo
+    }
+  }catch { /* Ignorar memória antiga ou indisponível. */ }
+  window.addEventListener("pagehide",guardarConsulta)
+  document.getElementById("voltarResultadosConsulta")?.addEventListener("click",()=>{
+    limparDetalhesCorte()
+    window.scrollTo({top:posicaoLista??0,behavior:"smooth"})
+    posicaoLista=null
+  })
   atualizarExportacao = inicializarExportacao(() => parametrosConsultaAplicada)
   const botaoBuscarFiltros =
     document.getElementById(

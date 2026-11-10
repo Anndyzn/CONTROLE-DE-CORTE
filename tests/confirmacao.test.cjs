@@ -4,7 +4,7 @@ const fs = require('node:fs')
 let elementos, modulo, sequencia=0
 beforeEach(async()=>{
   elementos=Object.fromEntries(['tituloConfirmacaoSistema','descricaoConfirmacaoSistema','aceitarConfirmacaoSistema','cancelarConfirmacaoSistema'].map(id=>[id,{textContent:'',focus(){this.focado=true}}]))
-  elementos.confirmacaoSistema={open:false,showModal(){this.open=true},close(){this.open=false;this.onclose()}}
+  elementos.confirmacaoSistema={querySelector(){return null},open:false,showModal(){this.open=true},close(){this.open=false;this.onclose()}}
   globalThis.document={getElementById:id=>elementos[id],querySelector:()=>elementos.confirmacaoSistema.open ? elementos.confirmacaoSistema : null}
   const codigo=fs.readFileSync('src/public/js/core/confirmacao.js','utf8')
   modulo=await import(`data:text/javascript;base64,${Buffer.from(codigo).toString('base64')}#${++sequencia}`)

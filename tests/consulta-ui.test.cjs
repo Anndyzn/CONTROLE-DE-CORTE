@@ -15,6 +15,9 @@ beforeEach(async()=>{
     Object.defineProperty(row,'innerHTML',{set(valor){this.html=valor;this.children=Array.from({length:6},elemento)},get(){return this.html}})
     return row
   }}
+  globalThis.window={scrollY:160,addEventListener(){},scrollTo(){}}
+  globalThis.sessionStorage={getItem(){return null},setItem(){}}
+  globalThis.requestAnimationFrame=fn=>fn()
   consultar=async()=>[]
   globalThis.__consultaDeps={apiGet:(...args)=>consultar(...args),definirCarregamento:()=>{},mostrarToast:()=>{},
     maiusculo:v=>String(v).toUpperCase(),formatarData:v=>v,carregarHistoricoConsulta:()=>{},carregarItensConsulta:()=>{},carregarDashboardCorte:()=>{},
@@ -52,4 +55,18 @@ test('resposta antiga não troca os resultados nem os filtros do Excel, e produt
   assert.equal(elementos.resultadoFiltros.children.length,1)
   assert.equal(elementos.resultadoFiltros.children[0].children[1].textContent,'<IMG SRC=X ONERROR=ALERT(1)>')
   assert.ok(!elementos.resultadoFiltros.children[0].innerHTML.includes('<img'))
+})
+
+test('restores filters, expanded results and list position from this browser session',async()=>{
+ const saved={campos:{filtroProduto:'',filtroNumero:'',filtroDataInicial:'2026-10-01',filtroDataFinal:'',filtroStatus:'FINALIZADO'},exibidos:40,scroll:350}
+ let memory=JSON.stringify(saved),position
+ sessionStorage.getItem=()=>memory;sessionStorage.setItem=(_,v)=>memory=v
+ window.scrollTo=(x,y)=>position=y
+ modulo.inicializarFiltros()
+ consultar=async url=>{assert.match(url,/data_inicial=2026-10-01/);return Array.from({length:45},(_,i)=>({numero:i+1,produto:'PI'}))}
+ await modulo.carregarResultadosConsulta()
+ assert.equal(elementos.resultadoFiltros.children.length,40)
+ assert.equal(position,350)
+ elementos.limparFiltros.eventos.click()
+ assert.equal(elementos.filtroDataInicial.value,'')
 })

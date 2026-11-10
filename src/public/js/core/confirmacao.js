@@ -1,6 +1,6 @@
 let pendente = false
 
-export function confirmarAcao(descricao, {titulo = "Confirmar ação", confirmar = "Confirmar", perigosa = false} = {}) {
+export function confirmarAcao(descricao, {titulo = "Confirmar ação", confirmar = "Confirmar", perigosa = false, linhas = []} = {}) {
   // Evita empilhar confirmações ou confirmar duas vezes a mesma ação.
   if (pendente || document.querySelector("dialog[open]")) return Promise.resolve(false)
   let dialog = document.getElementById("confirmacaoSistema")
@@ -21,6 +21,17 @@ export function confirmarAcao(descricao, {titulo = "Confirmar ação", confirmar
   }
   document.getElementById("tituloConfirmacaoSistema").textContent = titulo
   document.getElementById("descricaoConfirmacaoSistema").textContent = descricao
+  dialog.querySelector(".conferencia-itens")?.remove()
+  if (linhas.length) {
+    const lista = document.createElement("ul")
+    lista.className = "conferencia-itens"
+    for (const texto of linhas) {
+      const item = document.createElement("li")
+      item.textContent = texto
+      lista.append(item)
+    }
+    document.getElementById("descricaoConfirmacaoSistema").after(lista)
+  }
   const aceitar = document.getElementById("aceitarConfirmacaoSistema")
   const cancelar = document.getElementById("cancelarConfirmacaoSistema")
   aceitar.textContent = confirmar

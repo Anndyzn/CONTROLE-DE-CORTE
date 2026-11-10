@@ -64,11 +64,6 @@
       </div>
     </aside>
 
-    <section id="painelPisPendentes" class="section-card pis-pendentes-painel" hidden aria-labelledby="tituloPisPendentes">
-      <h2 id="tituloPisPendentes">Cortes finalizados sem PIs</h2>
-      <p id="estadoPisPendentes" class="small-help" role="status"></p>
-      <div id="listaPisPendentes" class="pis-pendentes-lista"></div>
-    </section>
     <section class="section-card mesas-painel" aria-labelledby="tituloPainelMesas">
       <div class="mesas-painel-cabecalho">
         <div>
@@ -133,6 +128,16 @@
         <p id="estadoFinalizadosRecentes" class="finalizados-estado" role="status">Carregando cortes finalizados...</p>
         <div id="listaFinalizadosRecentes" class="finalizados-lista"></div>
       </section>
+      <details id="painelPisPendentes" class="section-card pis-pendentes-painel" hidden>
+        <summary class="pis-pendentes-resumo">
+          <span class="pis-pendentes-icone" aria-hidden="true">!</span>
+          <div class="pis-pendentes-titulo"><h2>Cortes finalizados sem PIs</h2><span class="small-help">Complete os itens para concluir.</span></div>
+          <span class="pis-pendentes-total" id="totalPisPendentes" aria-live="polite">0</span>
+          <span class="pis-pendentes-ver">Ver cortes <span aria-hidden="true">?</span></span>
+        </summary>
+        <p id="estadoPisPendentes" class="small-help" role="status"></p>
+        <div id="listaPisPendentes" class="pis-pendentes-lista"></div>
+      </details>
     </div>
 
     <section class="section-card busca-corte-card">

@@ -27,6 +27,7 @@ import {
   desabilitarItens
 } from "./ui-corte.js"
 let salvandoItem=false
+let conferindoItens=false
 
 
 // ========================================
@@ -443,6 +444,7 @@ export async function salvarItemCorte({continuar=false}={}) {
 // ========================================
 
 export async function finalizarItensCorte() {
+  if (conferindoItens || salvandoItem) return
   const numeroCorte =
     document.getElementById("numeroCorte").value
 
@@ -457,16 +459,17 @@ export async function finalizarItensCorte() {
   }
 
 
-  const confirmar = await confirmarAcao(
-    "Confirmar itens do corte?\n\n" +
-    "Depois de registrar, não será possível adicionar ou alterar itens.",
-    {titulo: "Confirmar PIs", confirmar: "Confirmar PIs"}
-  )
-
-  if (!confirmar) return
-
-
+  conferindoItens=true
   try {
+    const itens = await apiGet(`/itens-corte/${numeroCorte}`)
+    if (document.getElementById("numeroCorte").value !== numeroCorte) return
+    if (!itens.length) { mostrarToast("Cadastre pelo menos um PI antes de confirmar.","atencao"); return }
+    const quantidade = itens.reduce((total,item)=>total+Number(item.quantidade_pecas),0)
+    const confirmar = await confirmarAcao(
+      `${itens.length} PI(s) · ${formatarQuantidade(quantidade)} peças. Confira os dados antes de bloquear os itens para alterações.`,
+      {titulo:`Conferir PIs do corte ${numeroCorte}`,confirmar:"Conferir e confirmar PIs",linhas:itens.map(i=>`${i.modelo} · ${i.cor} · ${i.tecido} — ${formatarQuantidade(i.quantidade_pecas)} peças · ${formatarNumero(i.metragem_usada)} m`)}
+    )
+    if (!confirmar || document.getElementById("numeroCorte").value !== numeroCorte) return
     await apiPost(
       `/cortes/${numeroCorte}/finalizar-itens`
     )
@@ -495,7 +498,7 @@ export async function finalizarItensCorte() {
       "erro",
       "Erro"
     )
-  }
+  } finally { conferindoItens=false }
 }
 
 

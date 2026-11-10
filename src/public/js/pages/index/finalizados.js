@@ -13,6 +13,8 @@ export async function carregarPisPendentes(){
     const dados=await apiGet("/cortes-pis-pendentes")
     if(consulta!==ultimaConsultaPis)return
     painel.hidden=!dados.cortes.length;lista.replaceChildren()
+    const total=document.getElementById("totalPisPendentes")
+    if(total)total.textContent=String(dados.cortes.length)
     estado.textContent=`${dados.cortes.length} corte(s) finalizado(s) sem PIs cadastrados`
     for(const c of dados.cortes){
       const b=document.createElement("button");b.type="button";b.className="pis-pendentes-corte"
@@ -22,7 +24,7 @@ export async function carregarPisPendentes(){
       b.addEventListener("click",async()=>{document.getElementById("numeroCorte").value=c.numero;await abrirCorte?.(c.numero)})
       lista.append(b)
     }
-  }catch(e){if(consulta!==ultimaConsultaPis)return;painel.hidden=false;lista.replaceChildren();estado.textContent=e.message||"Não foi possível consultar PIs não confirmados."}
+  }catch(e){if(consulta!==ultimaConsultaPis)return;painel.hidden=false;painel.open=true;lista.replaceChildren();const total=document.getElementById("totalPisPendentes");if(total)total.textContent="—";estado.textContent=e.message||"Não foi possível consultar os cortes sem PIs."}
 }
 
 function renderizarResumo() {
