@@ -44,8 +44,8 @@ export async function atualizarVinculosPIs(numero, itens, linhas, {aindaAtual = 
         estado.textContent = "Item alterado. Consulte o corte novamente."
         continue
       }
-      const destinos = atualItem.correspondencia?.destinos
-      if (destinos?.length && atualItem.pendencias?.length) {
+      const destinos = atualItem.produtos_vinculados ?? atualItem.correspondencia?.destinos
+      if (atualItem.correspondencia?.destinos?.length && atualItem.pendencias?.length) {
         estado.textContent = "Vínculo precisa de revisão"
         estado.className = "pi-vinculo-pendente"
         link.textContent = "Revisar vínculo ↗"
@@ -59,7 +59,7 @@ export async function atualizarVinculosPIs(numero, itens, linhas, {aindaAtual = 
         const expansivel = document.createElement("details")
         expansivel.append(texto("summary", "Ver produtos vinculados"))
         const lista = document.createElement("ul")
-        for (const destino of destinos) lista.append(texto("li", `${destino.codigo_produto} — ${destino.produto} · ${destino.controle || "Sem controle"}`))
+        for (const destino of destinos) lista.append(texto("li", `${destino.codigo_produto} — ${destino.produto}${destino.controle !== undefined ? ` · ${destino.controle || "Sem controle"}` : ""}`))
         expansivel.append(lista); detalhes.append(expansivel)
       } else {
         estado.textContent = "Falta vincular ao Sankhya"

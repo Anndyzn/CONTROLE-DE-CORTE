@@ -71,7 +71,7 @@ test('padronização real no PostgreSQL preserva dados, recusa prévia antiga e 
       assert.deepEqual(dados.nomes,[{nome:'VÉU GOTA',registros:1,cortes:1}])
     }finally{await new Promise(resolve=>servidor.close(resolve))}
     // Conferência do marco inicial em banco descartável, sem usar dados da empresa.
-    await pool.query(`CREATE TABLE producao(id SERIAL PRIMARY KEY,numero_corte INTEGER,status TEXT);
+    await pool.query(`CREATE TABLE producao(id SERIAL PRIMARY KEY,numero_corte INTEGER,status TEXT,data DATE DEFAULT CURRENT_DATE);
       INSERT INTO cortes VALUES(923,'ANTIGO FINALIZADO','MESA 2',1),(924,'ABERTO AGORA','MESA 3',0);
       INSERT INTO producao(numero_corte,status) VALUES(923,'FINALIZADO'),(924,'EM PRODUÇÃO')`)
     const {prepararNomesSankhya}=require('../dist/services/sankhya-nomes')
@@ -93,6 +93,25 @@ test('padronização real no PostgreSQL preserva dados, recusa prévia antiga e 
       const dados=await resposta.json();assert.deepEqual(dados.cortes.map(c=>c.numero).sort(),[922,924,925])
       assert.ok(!dados.cortes.some(c=>c.numero===923))
     }finally{await new Promise(resolve=>novoServidor.close(resolve))}
+    // Replicar muda somente escolhas de produto, nunca cor, quantidade ou lançado.
+    const novoPi=(await pool.query(`INSERT INTO itens_corte(numero_corte,modelo,cor,tecido,quantidade_pecas,metragem_usada) VALUES(922,'CONJUNTO FEMININO','BEGE','OXFORD',50,100) RETURNING *`)).rows[0]
+    const fonte=(await pool.query('SELECT * FROM itens_corte WHERE id=2')).rows[0]
+    const {default:lancamentos,assinaturaItem}=require('../dist/routes/sankhya-lancamentos.routes')
+    app.use(express.json());app.use(lancamentos);app.use(require('../dist/routes/consultas.routes').default)
+    await pool.query(`INSERT INTO cortes VALUES(926,'PENDENTE ANTIGO','MESA 1',0),(927,'SEM PI','MESA 2',0),(928,'REABERTO','MESA 3',0);
+      INSERT INTO producao(numero_corte,status,data) VALUES(926,'FINALIZADO',CURRENT_DATE-10),(927,'FINALIZADO',CURRENT_DATE),(928,'FINALIZADO',CURRENT_DATE),(928,'EM PRODUÇÃO',CURRENT_DATE);
+      INSERT INTO itens_corte(numero_corte,modelo,cor,tecido,quantidade_pecas,metragem_usada) VALUES(926,'PI','BRANCO','OXFORD',1,1)`)
+    const conferir=await new Promise(resolve=>{const s=app.listen(0,'127.0.0.1',()=>resolve(s))})
+    try{
+      const base=`http://127.0.0.1:${conferir.address().port}`
+      const replicar=await fetch(base+'/sankhya/itens/2/replicar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({codigos:[6073,6069],versao:0,assinatura:assinaturaItem(fonte)})})
+      assert.equal(replicar.status,200);assert.equal((await replicar.json()).aplicados,1)
+      const estado=(await pool.query('SELECT * FROM sankhya_lancamentos WHERE item_id=$1',[novoPi.id])).rows[0]
+      assert.deepEqual(estado.codigos,[6073,6069]);assert.deepEqual(estado.lancados,[])
+      assert.deepEqual((await pool.query('SELECT * FROM itens_corte WHERE id=$1',[novoPi.id])).rows[0],novoPi)
+      const pendentes=await (await fetch(base+'/cortes-pis-pendentes')).json()
+      assert.deepEqual(pendentes.cortes.map(c=>c.numero).sort(),[926,927]);assert.equal(pendentes.cortes.find(c=>c.numero===926).quantidade_pis,1)
+    }finally{await new Promise(resolve=>conferir.close(resolve))}
   }finally{
     if(pool)await pool.end()
     if(criado)await executar('docker',['rm','--force',nome])

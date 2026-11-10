@@ -1,4 +1,5 @@
-import { apiGet, apiPut } from "../../core/api.js"
+import { apiGet, apiPut, apiPost } from "../../core/api.js"
+import { confirmarAcao } from "../../core/confirmacao.js"
 import { mostrarToast } from "../../core/ui.js"
 let sequencia = 0
 const el = id => document.getElementById(id)
@@ -35,7 +36,7 @@ export async function mostrarCodigosCorte(dados,catalogo,copiar){
     }
     const destinos=item.correspondencia?.destinos??[]
     const validos=destinos.length && new Set(destinos.map(d=>d.codigo_produto)).size===destinos.length && destinos.every(d=>catalogo.produtos.some(p=>p.codigo_produto===d.codigo_produto))
-    let codigos=estado?.codigos??(validos?destinos.map(d=>d.codigo_produto):opcoes.length===1?opcoes[0].codigos:[])
+    let codigos=estado?.codigos??(item.produtos_vinculados?.length?item.produtos_vinculados.map(d=>d.codigo_produto):validos?destinos.map(d=>d.codigo_produto):opcoes.length===1?opcoes[0].codigos:[])
     codigos=[...new Set(codigos)]
     let lancados=estado?.lancados??[],versao=estado?.versao??0,ocupado=false
     let mensagemSalvamento=versao>0?"Salvo":"",falhaSalvamento=false
@@ -60,6 +61,24 @@ export async function mostrarCodigosCorte(dados,catalogo,copiar){
       }
       if(!estado)card.append(texto("p","Não foi possível consultar as marcações. Consulte o corte novamente; os códigos continuam disponíveis para copiar."))
       if(estado?.revisar)card.append(texto("p","O PI foi corrigido. Confira os produtos e marque novamente o que foi lançado."))
+      const normalizar=s=>s.trim().replace(/\s+/g," ").toUpperCase()
+      const outras=dados.itens.some(i=>i.id!==item.id&&normalizar(i.modelo)===normalizar(item.modelo)&&normalizar(i.tecido)===normalizar(item.tecido)&&normalizar(i.cor)!==normalizar(item.cor))
+      if(outras&&codigos.length&&estado){
+        const aplicar=texto("button","Aplicar produtos às outras cores");aplicar.type="button";aplicar.className="btn-secondary";aplicar.disabled=ocupado
+        aplicar.addEventListener("click",async()=>{
+          if(ocupado)return
+          ocupado=true;renderizar()
+          try{
+            if(!await confirmarAcao("Aplicar estes produtos às outras cores do mesmo modelo e tecido neste corte? Vínculos existentes serão preservados e nenhum lançamento será marcado.",{titulo:"Reutilizar produtos",confirmar:"Aplicar produtos"}))return
+            const r=await apiPost(`/sankhya/itens/${item.id}/replicar`,{codigos,versao,assinatura:estado.assinatura})
+            mostrarToast(`${r.aplicados} PI(s) vinculado(s). ${r.preservados} vínculo(s) existente(s) preservado(s).`,"sucesso")
+            window.dispatchEvent(new Event("sankhya-marcacao-salva"))
+            if(seq===sequencia)await mostrarCodigosCorte(dados,catalogo,copiar)
+          }catch(e){mensagemSalvamento=`Não foi possível replicar. ${e.message}`;falhaSalvamento=true}
+          finally{ocupado=false;if(seq===sequencia)renderizar()}
+        })
+        card.append(aplicar)
+      }
       if(disponiveis.length>1){
         const campo=texto("fieldset","");campo.className="sankhya-selecao-produtos";campo.disabled=ocupado||!estado
         campo.append(texto("legend","Produtos cortados nesta cor — pode marcar mais de um"))

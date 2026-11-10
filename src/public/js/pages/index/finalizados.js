@@ -4,6 +4,26 @@ let dadosResumo = null
 let periodoSelecionado = "hoje"
 let abrirCorte = null
 let ultimaConsulta = 0
+let ultimaConsultaPis=0
+export async function carregarPisPendentes(){
+  const painel=document.getElementById("painelPisPendentes"),lista=document.getElementById("listaPisPendentes"),estado=document.getElementById("estadoPisPendentes")
+  if(!painel||!lista||!estado)return
+  const consulta=++ultimaConsultaPis
+  try{
+    const dados=await apiGet("/cortes-pis-pendentes")
+    if(consulta!==ultimaConsultaPis)return
+    painel.hidden=!dados.cortes.length;lista.replaceChildren()
+    estado.textContent=`${dados.cortes.length} corte(s) aguardando confirmação dos PIs`
+    for(const c of dados.cortes){
+      const b=document.createElement("button");b.type="button";b.className="pis-pendentes-corte"
+      const nome=document.createElement("strong");nome.textContent=`${c.numero} · ${c.produto}`
+      const acao=document.createElement("span");acao.textContent=`${c.quantidade_pis} PI(s) · Continuar PIs →`
+      b.append(nome,acao)
+      b.addEventListener("click",async()=>{document.getElementById("numeroCorte").value=c.numero;await abrirCorte?.(c.numero)})
+      lista.append(b)
+    }
+  }catch(e){if(consulta!==ultimaConsultaPis)return;painel.hidden=false;lista.replaceChildren();estado.textContent=e.message||"Não foi possível consultar PIs não confirmados."}
+}
 
 function renderizarResumo() {
   if (!dadosResumo) return
@@ -62,6 +82,7 @@ export function inicializarResumoFinalizados(aoAbrirCorte) {
 }
 
 export async function carregarResumoFinalizados() {
+  carregarPisPendentes()
   const estado = document.getElementById("estadoFinalizadosRecentes")
   if (!estado) return
 

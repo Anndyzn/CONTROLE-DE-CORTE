@@ -64,6 +64,16 @@ test('Hoje mostra apenas a data do servidor e o segundo filtro inclui os dois di
   assert.equal(botoes[1].attributes['aria-pressed'], 'true')
   assert.equal(botoes[0].attributes['aria-pressed'], 'false')
 })
+test('PIs não confirmados ficam visíveis mesmo em corte antigo e atalho abre os PIs',async()=>{
+ for(const id of ['painelPisPendentes','listaPisPendentes','estadoPisPendentes'])elementos[id]=new Elemento()
+ api=async()=>({cortes:[{numero:800,produto:'EDREDON',quantidade_pis:1,data_finalizacao:'2026-09-01'}]})
+ let aberto;modulo.inicializarResumoFinalizados(n=>aberto=n)
+ await modulo.carregarPisPendentes()
+ assert.equal(elementos.painelPisPendentes.hidden,false)
+ const b=elementos.listaPisPendentes.children[0];assert.match(b.children[1].textContent,/1 PI\(s\).*Continuar PIs/)
+ await b.click();assert.equal(aberto,800)
+ api=async()=>({cortes:[]});await modulo.carregarPisPendentes();assert.equal(elementos.painelPisPendentes.hidden,true)
+})
 
 test('cartão seleciona o corte e apresenta o produto como texto', async () => {
   api = async () => ({ ...resposta, cortes: [{ ...resposta.cortes[0], produto: '<img src=x onerror=alert(1)>' }] })

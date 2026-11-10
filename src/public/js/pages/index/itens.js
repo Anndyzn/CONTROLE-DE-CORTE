@@ -13,6 +13,7 @@ import { limparErroCampo, marcarErroCampo, validarObrigatoriosCampos, marcarErro
 import { solicitarJustificativa } from "../../admin/justificativa.js"
 import { confirmarAcao } from "../../core/confirmacao.js"
 import { atualizarVinculosPIs } from "./vinculos.js"
+import { carregarPisPendentes } from "./finalizados.js"
 import { definirBaseItemRascunho, limparRascunhoGrupo, versaoRascunho } from "./rascunho.js"
 
 import {
@@ -416,6 +417,7 @@ export async function salvarItemCorte({continuar=false}={}) {
     }
 
     await carregarItensCorte(numeroCorte)
+    carregarPisPendentes()
 
   } catch (erro) {
     console.error(
@@ -477,6 +479,7 @@ export async function finalizarItensCorte() {
     )
 
     desabilitarItens()
+    carregarPisPendentes()
 
     await carregarItensCorte(numeroCorte)
 

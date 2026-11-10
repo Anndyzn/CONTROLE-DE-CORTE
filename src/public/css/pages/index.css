@@ -1429,3 +1429,7 @@ td:first-child {
 .nomes-sugestoes .nome-sugestao { max-width: 100%; margin: 0; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--primary-soft); color: var(--primary); font-size: 13px; text-align: left; overflow-wrap: anywhere; box-shadow: none; }
 .nomes-sugestoes .nome-sugestao:hover { border-color: var(--primary); }
 .nomes-sugestoes .nome-sugestao:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.pis-pendentes-painel { border-left: 4px solid #d98a09 !important; }
+.pis-pendentes-lista { display: grid; gap: 6px; max-height: 220px; overflow: auto; }
+.pis-pendentes-corte { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; background: #fff8e7; color: var(--text); border: 1px solid #efdfb8; border-radius: 8px; text-align: left; box-shadow: none; }
+.pis-pendentes-corte span { color: var(--text-soft); font-size: 12px; }

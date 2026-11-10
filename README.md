@@ -59,6 +59,15 @@ sendo reunidos ao carregar páginas anteriores, indicando a quantidade já exibi
 
 ### Códigos Sankhya
 
+Na Home, **PIs ainda não confirmados** mantém visíveis os cortes com produção finalizada
+e PIs abertos, sem limite de data, incluindo cortes com zero ou um PI. **Continuar PIs**
+abre diretamente o corte; a confirmação remove a pendência.
+
+No Sankhya, **Aplicar produtos às outras cores** replica somente os códigos selecionados
+para PIs do mesmo corte, modelo e tecido, com outra cor e sem seleção/vínculo já existente.
+Cor, consumo, quantidade e marcações de lançamento não são copiados. O processo é
+transacional e preserva escolhas anteriores.
+
 **Salvar e adicionar outro PI** mantém modelo e tecido, limpa cor e valores e foca a
 próxima cor. Falhas preservam os dados; cliques duplos não duplicam o envio. Se a pessoa
 alterar os campos durante o envio, eles não são apagados depois de salvar.

@@ -18,14 +18,23 @@ beforeEach(async()=>{
  globalThis.window={dispatchEvent(){}}
  obter=async u=>u.includes('/lancamentos')?{itens:[structuredClone(estado)]}:{nomes:[{opcoes:[{codigos:[6073],rotulo:'BLAZER'},{codigos:[6069],rotulo:'VESTIDO'}]}]}
  gravar=async b=>{estado={...estado,...b,versao:b.versao+1};return {versao:estado.versao}}
- globalThis.__codigosDeps={apiGet:u=>obter(u),apiPut:(u,b)=>{envios.push({u,b});return gravar(b)},mostrarToast:m=>mensagens.push(m)}
+ globalThis.__codigosDeps={apiGet:u=>obter(u),apiPut:(u,b)=>{envios.push({u,b});return gravar(b)},apiPost:async(u,b)=>{envios.push({u,b});return {aplicados:1,preservados:0}},confirmarAcao:async()=>true,mostrarToast:m=>mensagens.push(m)}
  const fonte=fs.readFileSync('src/public/js/pages/sankhya/codigos.js','utf8').replace(/^import .*$/gm,'')
- modulo=await import(`data:text/javascript;base64,${Buffer.from('const {apiGet,apiPut,mostrarToast}=globalThis.__codigosDeps;\n'+fonte).toString('base64')}#${++seq}`)
+ modulo=await import(`data:text/javascript;base64,${Buffer.from('const {apiGet,apiPut,apiPost,confirmarAcao,mostrarToast}=globalThis.__codigosDeps;\n'+fonte).toString('base64')}#${++seq}`)
 })
 const mostrar=()=>modulo.mostrarCodigosCorte(dados(),catalogo,t=>copias.push(t))
 const card=()=>els.listaCodigosCorteSankhya.children[0]
 const campo=()=>card().children.find(e=>e.className==='sankhya-selecao-produtos')
 const linhas=()=>card().children.filter(e=>e.className==='sankhya-possibilidade')
+test('atalho solicita replicação dos dois produtos para outras cores sem controles ou quantidades',async()=>{
+ estado.codigos=[6073,6069]
+ const d=dados();d.itens.push({...d.itens[0],id:2,cor:'BEGE'})
+ await modulo.mostrarCodigosCorte(d,catalogo,t=>copias.push(t))
+ const botao=card().children.find(e=>e.textContent==='Aplicar produtos às outras cores')
+ assert.ok(botao);await botao.eventos.click()
+ assert.equal(envios[0].u,'/sankhya/itens/1/replicar')
+ assert.deepEqual(envios[0].b,{codigos:[6073,6069],versao:0,assinatura:'a'.repeat(64)})
+})
 async function marcarProduto(i,valor=true){const c=campo().children[i+1].children[0];c.checked=valor;await c.eventos.change()}
 test('seleciona dois produtos na mesma cor e preserva a seleção ao reabrir',async()=>{
  await mostrar();await marcarProduto(0);await marcarProduto(1)

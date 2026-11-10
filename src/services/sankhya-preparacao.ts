@@ -1,6 +1,7 @@
 import dbPg from "../database-pg"
 import { ErroRegra } from "./corte-bloqueado"
-import { conferirDestinoCatalogo } from "./sankhya-catalogo"
+import { conferirDestinoCatalogo, obterCatalogoSankhya } from "./sankhya-catalogo"
+import { createHash } from "crypto"
 
 export type DestinoOP = { codigo_produto: number; produto: string; controle: string }
 export type CorrespondenciaOP = { modelo: string; tecido: string; cor: string; destinos: DestinoOP[]; versao: number }
@@ -50,6 +51,22 @@ export function validarCorrespondencia(dados: unknown): CorrespondenciaOP {
   return {modelo, tecido, cor, destinos, versao: Number(valor.versao)}
 }
 
+export function resolverProdutos(item: ItemCorte, correspondencias: CorrespondenciaOP[]) {
+  const exata = correspondencias.find(r => chave(r) === chave(item))
+  const candidatas = exata ? [exata] : correspondencias.filter(r => normalizarNome(r.modelo) === normalizarNome(item.modelo) && normalizarNome(r.tecido) === normalizarNome(item.tecido))
+  const conjuntos = new Map<string, number[]>()
+  for (const regra of candidatas) {
+    const codigos = [...new Set(regra.destinos.map(d => d.codigo_produto))].sort((a,b) => a-b)
+    if (codigos.length !== regra.destinos.length || codigos.some(c => !obterCatalogoSankhya().produtos.some(p => p.codigo_produto === c))) return null
+    conjuntos.set(JSON.stringify(codigos), codigos)
+  }
+  if (conjuntos.size !== 1) return null
+  return [...conjuntos.values()][0].map(c => {
+    const p = obterCatalogoSankhya().produtos.find(p => p.codigo_produto === c)!
+    return {codigo_produto:c, produto:p.produto}
+  })
+}
+
 export function montarConferencia(itens: ItemCorte[], correspondencias: CorrespondenciaOP[]) {
   const regras = new Map(correspondencias.map(regra => [chave(regra), regra]))
   return itens.map(item => {
@@ -72,6 +89,7 @@ export function montarConferencia(itens: ItemCorte[], correspondencias: Correspo
     }
     return {
       ...item,
+      produtos_vinculados: resolverProdutos(item, correspondencias),
       correspondencia: regra ? {...regra, destinos: destinos.length ? destinos : regra.destinos} : null,
       pendencias,
       // Cada destino recebe a quantidade do item. Consumo total nunca é duplicado entre OPs.
@@ -100,6 +118,28 @@ export async function carregarConferenciaSankhya(numero: number, {exigirFinaliza
       [[...new Set(itens.rows.map(item => normalizarNome(item.modelo)))]]
     )
     const conferencia = montarConferencia(itens.rows, regras.rows)
+    if (!exigirFinalizacao && itens.rows.length) {
+      const estados = await client.query("SELECT item_id, codigos, assinatura FROM sankhya_lancamentos WHERE item_id = ANY($1::integer[])", [itens.rows.map(i => i.id)])
+      const atuais = new Map<number, number[]>()
+      for (const item of itens.rows) {
+        const estado = estados.rows.find(e => Number(e.item_id) === Number(item.id))
+        const assinatura = createHash("sha256").update(JSON.stringify([item.modelo,item.cor,item.tecido,String(item.quantidade_pecas),String(item.metragem_usada)])).digest("hex")
+        if (estado?.assinatura === assinatura) atuais.set(Number(item.id), estado.codigos)
+      }
+      const produtos = (codigos: number[]) => codigos.map(c => obterCatalogoSankhya().produtos.find(p => p.codigo_produto === c)).filter((p): p is NonNullable<typeof p> => !!p).map(p => ({codigo_produto:p.codigo_produto,produto:p.produto}))
+      for (const item of conferencia) {
+        if (atuais.has(Number(item.id))) item.produtos_vinculados = produtos(atuais.get(Number(item.id))!)
+        else if (!item.correspondencia) {
+          const pares = conferencia.filter(i => atuais.has(Number(i.id)) && normalizarNome(i.modelo) === normalizarNome(item.modelo) && normalizarNome(i.tecido) === normalizarNome(item.tecido))
+          const conjuntos = new Map(pares.map(i => {const c = [...atuais.get(Number(i.id))!].sort((a,b)=>a-b); return [JSON.stringify(c),c]}))
+          for (const regra of regras.rows.filter(r => normalizarNome(r.modelo) === normalizarNome(item.modelo) && normalizarNome(r.tecido) === normalizarNome(item.tecido))) {
+            const c = [...new Set(regra.destinos.map(d => d.codigo_produto))].sort((a,b)=>a-b)
+            conjuntos.set(JSON.stringify(c),c)
+          }
+          if (pares.length) item.produtos_vinculados = conjuntos.size === 1 ? produtos([...conjuntos.values()][0]) : null
+        }
+      }
+    }
     await client.query("COMMIT")
     const total = conferencia.reduce((total, item) => total + item.ordens.length, 0)
     const completa = conferencia.length > 0 && conferencia.every(item => item.pendencias.length === 0)

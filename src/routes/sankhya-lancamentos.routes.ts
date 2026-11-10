@@ -20,6 +20,33 @@ export function validarLancamento(v: any) {
   if(v.lancados.some((c:number)=>!v.codigos.includes(c)))throw new ErroRegra(400,"Um produto lançado deve permanecer selecionado.")
   return {codigos:v.codigos as number[],lancados:v.lancados as number[],versao:v.versao as number,assinatura:v.assinatura as string}
 }
+router.post("/sankhya/itens/:id/replicar",async(req,res)=>{
+ if(!numeroCorteValido(req.params.id))return res.status(400).json({erro:"PI inválido."})
+ let c
+ try{
+  const v=validarLancamento({...req.body,lancados:[]})
+  if(!v.codigos.length)throw new ErroRegra(400,"Selecione os produtos antes de aplicar às outras cores.")
+  const normalizar=(s:string)=>s.trim().replace(/\s+/g," ").toUpperCase()
+  c=await db.connect();await c.query("BEGIN")
+  const inicial=await c.query("SELECT numero_corte FROM itens_corte WHERE id=$1",[Number(req.params.id)])
+  if(!inicial.rows.length)throw new ErroRegra(404,"PI não encontrado.")
+  const todos=await c.query("SELECT i.* FROM itens_corte i WHERE i.numero_corte=$1 ORDER BY i.id FOR UPDATE",[inicial.rows[0].numero_corte])
+  const origem=todos.rows.find(i=>Number(i.id)===Number(req.params.id))
+  if(!origem||assinaturaItem(origem)!==v.assinatura)throw new ErroRegra(409,"O PI foi alterado. Consulte o corte novamente.")
+  const estados=await c.query("SELECT item_id,versao FROM sankhya_lancamentos WHERE item_id=ANY($1::integer[]) FOR UPDATE",[todos.rows.map(i=>i.id)])
+  const estadoOrigem=estados.rows.find(e=>Number(e.item_id)===Number(origem.id))
+  if(Number(estadoOrigem?.versao??0)!==v.versao)throw new ErroRegra(409,"Os vínculos foram alterados em outra tela. Consulte o corte novamente.")
+  const existentes=await c.query("SELECT modelo,tecido,cor FROM sankhya_correspondencias WHERE modelo=$1",[normalizar(origem.modelo)])
+  let aplicados=0,preservados=0
+  for(const i of todos.rows){
+   if(Number(i.id)===Number(origem.id)||normalizar(i.modelo)!==normalizar(origem.modelo)||normalizar(i.tecido)!==normalizar(origem.tecido)||normalizar(i.cor)===normalizar(origem.cor))continue
+   if(estados.rows.some(e=>Number(e.item_id)===Number(i.id))||existentes.rows.some(e=>normalizar(e.tecido)===normalizar(i.tecido)&&normalizar(e.cor)===normalizar(i.cor))){preservados++;continue}
+   const r=await c.query(`INSERT INTO sankhya_lancamentos(item_id,codigos,lancados,assinatura) VALUES($1,$2::jsonb,'[]'::jsonb,$3) ON CONFLICT DO NOTHING RETURNING item_id`,[i.id,JSON.stringify(v.codigos),assinaturaItem(i)])
+   if(r.rows.length)aplicados++;else preservados++
+  }
+  await c.query("COMMIT");res.json({aplicados,preservados})
+ }catch(e){if(c)await c.query("ROLLBACK");erro(res,e)}finally{c?.release()}
+})
 router.get("/sankhya/cortes/:numero/lancamentos",async(req,res)=>{
   if(!numeroCorteValido(req.params.numero))return res.status(400).json({erro:"Corte inválido."})
   try {

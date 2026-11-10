@@ -12,7 +12,8 @@ beforeEach(async()=>{
  globalThis.__piDeps={apiGet:async u=>u.endsWith('finalizacao-itens')?{itens_finalizados:0}:[],apiPost:(u,b)=>{envios.push({u,b});return post()},apiPut(){},apiDelete(){},mostrarToast(){},validarValoresItem:()=>null,solicitarJustificativa:async()=>({}),confirmarAcao(){},atualizarVinculosPIs(){},definirBaseItemRascunho(){},limparRascunhoGrupo(){},versaoRascunho(){},maiusculo:v=>v,formatarNumero:v=>v,formatarQuantidade:v=>v,desabilitarItens(){},limparErroCampo(){},marcarErroCampo(){},validarObrigatoriosCampos(){},marcarErrosNumericos(){},limparCamposItens(){for(const id of ids)els[id].value='';els.corOutra.style.display='none';els.tecidoOutro.style.display='none'}}
  const codigo=fs.readFileSync('src/public/js/pages/index/itens.js','utf8').replace(/^import[\s\S]*?from "[^"]+"\r?\n/gm,'')
  const nomes=Object.keys(globalThis.__piDeps).join(',')
- modulo=await import(`data:text/javascript;base64,${Buffer.from(`const {${nomes}}=globalThis.__piDeps;\n`+codigo).toString('base64')}#${++seq}`)
+ globalThis.__piDeps.carregarPisPendentes=()=>{}
+ modulo=await import(`data:text/javascript;base64,${Buffer.from(`const {${nomes},carregarPisPendentes}=globalThis.__piDeps;\n`+codigo).toString('base64')}#${++seq}`)
 })
 test('salva e prepara outro PI mantendo somente modelo e tecido, inclusive Outro',async()=>{
  await modulo.salvarItemCorte({continuar:true})

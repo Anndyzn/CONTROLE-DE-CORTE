@@ -6,6 +6,15 @@ import { montarConsultaCortes } from "../services/consulta-cortes"
 import { gerarRelatorioExcel } from "../services/relatorio-excel"
 
 const router = Router()
+router.get("/cortes-pis-pendentes",async(_req,res)=>{
+  try{
+    const r=await dbPg.query(`SELECT c.numero,c.produto,c.mesa,TO_CHAR(p.data,'YYYY-MM-DD') AS data_finalizacao,
+      (SELECT COUNT(*)::integer FROM itens_corte i WHERE i.numero_corte=c.numero) AS quantidade_pis
+      FROM cortes c JOIN LATERAL (SELECT status,data FROM producao WHERE numero_corte=c.numero ORDER BY id DESC LIMIT 1) p ON TRUE
+      WHERE p.status='FINALIZADO' AND COALESCE(c.itens_finalizados,0)<>1 ORDER BY c.numero DESC`)
+    res.setHeader("Cache-Control","no-store");res.json({cortes:r.rows})
+  }catch(e){console.error("Falha ao consultar PIs pendentes:",e);res.status(500).json({erro:"Não foi possível consultar os PIs não confirmados."})}
+})
 
 router.get("/cortes-finalizados-recentes", async (req, res) => {
   const periodo = periodoResumo()

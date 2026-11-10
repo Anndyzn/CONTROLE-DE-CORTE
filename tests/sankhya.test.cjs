@@ -13,6 +13,7 @@ const pool = {
     if (/^(BEGIN|COMMIT|ROLLBACK|CREATE|ALTER|SELECT pg_advisory)/.test(q)) return {rows:[]}
     if (q.includes('SELECT c.numero, c.produto FROM cortes')) return {rows: corte ? [{numero:corte.numero, produto:corte.produto}] : []}
     if (q.includes('FROM cortes c WHERE')) return {rows:corte ? [structuredClone(corte)] : []}
+    if (q.startsWith('SELECT item_id, codigos')) return {rows:[]}
     if (q.startsWith('SELECT id, modelo')) return {rows:structuredClone(itens)}
     if (q.startsWith('SELECT modelo, tecido')) return {rows:structuredClone([...regras.values()])}
     if (/^(INSERT|UPDATE)/.test(q)) {

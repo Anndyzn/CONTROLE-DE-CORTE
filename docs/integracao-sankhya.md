@@ -2,6 +2,18 @@
 
 ## Interface atual simplificada
 
+**Aplicar produtos às outras cores** usa os produtos selecionados como referência para
+outros PIs do mesmo corte, com modelo e tecido iguais após normalizar espaços e maiúsculas.
+Requer confirmação. Apenas PIs de outra cor ainda sem seleção salva ou correspondência
+anterior recebem os códigos. Vínculos existentes ficam preservados e são contabilizados
+na mensagem. Não replica controles, produção, quantidade, consumo nem checks de lançamento.
+A origem deve continuar com a mesma assinatura e versão; qualquer falha desfaz o lote.
+Rota: `POST /sankhya/itens/:id/replicar`.
+
+Na Home, `GET /cortes-pis-pendentes` lista produção finalizada pelo último lançamento,
+com `itens_finalizados` diferente de 1, independentemente da data e do número de PIs.
+Não interfere na liberação de mesa nem na fila de acompanhamento do Sankhya.
+
 ### Fila de acompanhamento
 
 **Pendentes / Lançados / Todos** mostram somente cortes em acompanhamento. Na primeira
