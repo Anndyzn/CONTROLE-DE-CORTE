@@ -3,6 +3,48 @@
   --text-muted: #627389;
 }
 
+/* Os mesmos destinos, na mesma ordem, em todas as telas. */
+.page-index .app-header-modern,
+.page-consultar .app-header-modern,
+.page-admin .app-header-modern { margin-bottom: 12px; }
+.system-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 22px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.system-nav a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 10px 20px;
+  border-radius: 7px;
+  color: var(--text-soft);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+.system-nav a:hover { background: var(--primary-soft); color: var(--primary-deep); }
+.system-nav a[aria-current="page"] { background: var(--primary-deep); color: #fff; }
+.system-nav a:focus-visible,
+button:focus-visible,
+summary:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+}
+.section-card > .section-help { margin-top: 8px; margin-bottom: 18px; }
+.section-card > form + .section-help { margin-top: 16px; margin-bottom: 0; }
+table tbody tr:focus-within { outline: 2px solid var(--primary); outline-offset: -2px; }
+@media (max-width: 700px) {
+  .system-nav { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin-bottom: 16px; }
+  .system-nav a { min-width: 0; padding: 10px 4px; font-size: 13px; }
+}
+
 .form-group label,
 label {
   font-size: 13px;
