@@ -72,7 +72,7 @@ test('padronização real no PostgreSQL preserva dados, recusa prévia antiga e 
     }finally{await new Promise(resolve=>servidor.close(resolve))}
     // Conferência do marco inicial em banco descartável, sem usar dados da empresa.
     await pool.query(`CREATE TABLE producao(id SERIAL PRIMARY KEY,numero_corte INTEGER,status TEXT,data DATE DEFAULT CURRENT_DATE);
-      INSERT INTO cortes VALUES(923,'ANTIGO FINALIZADO','MESA 2',1),(924,'ABERTO AGORA','MESA 3',0);
+      INSERT INTO cortes VALUES(923,'ANTIGO FINALIZADO','MESA 2',0),(924,'ABERTO AGORA','MESA 3',0);
       INSERT INTO producao(numero_corte,status) VALUES(923,'FINALIZADO'),(924,'EM PRODUÇÃO')`)
     const {prepararNomesSankhya}=require('../dist/services/sankhya-nomes')
     const {prepararLancamentosSankhya}=require('../dist/routes/sankhya-lancamentos.routes')
@@ -111,6 +111,8 @@ test('padronização real no PostgreSQL preserva dados, recusa prévia antiga e 
       assert.deepEqual((await pool.query('SELECT * FROM itens_corte WHERE id=$1',[novoPi.id])).rows[0],novoPi)
       const pendentes=await (await fetch(base+'/cortes-pis-pendentes')).json()
       assert.deepEqual(pendentes.cortes.map(c=>c.numero).sort(),[926,927]);assert.equal(pendentes.cortes.find(c=>c.numero===926).quantidade_pis,1)
+      assert.ok(!pendentes.cortes.some(c=>c.numero===923), 'Old unconfirmed cuts outside tracking stay out of the Home alert')
+      assert.equal((await pool.query('SELECT itens_finalizados FROM cortes WHERE numero=923')).rows[0].itens_finalizados,0)
     }finally{await new Promise(resolve=>conferir.close(resolve))}
   }finally{
     if(pool)await pool.end()
