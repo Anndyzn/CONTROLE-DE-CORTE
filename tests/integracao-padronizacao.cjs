@@ -26,7 +26,7 @@ test('padronização real no PostgreSQL preserva dados, recusa prévia antiga e 
     const {prepararCorrespondenciasSankhya}=require('../dist/services/sankhya-preparacao')
     const {previaPadronizacao,aplicarPadronizacao}=require('../dist/services/padronizacao-nomes')
     await pool.query(`CREATE TABLE cortes (numero INTEGER PRIMARY KEY, produto TEXT, mesa TEXT, itens_finalizados INTEGER);
-      CREATE TABLE itens_corte (id BIGSERIAL PRIMARY KEY, numero_corte INTEGER REFERENCES cortes(numero), modelo TEXT, cor TEXT, tecido TEXT, quantidade_pecas INTEGER, metragem_usada NUMERIC);
+      CREATE TABLE itens_corte (id BIGSERIAL PRIMARY KEY, numero_corte INTEGER REFERENCES cortes(numero), modelo TEXT, cor TEXT, tecido TEXT, quantidade_pecas INTEGER, metragem_usada NUMERIC, sobra_metros NUMERIC DEFAULT 0, perda_metros NUMERIC DEFAULT 0, metros_faltantes NUMERIC DEFAULT 0);
       INSERT INTO cortes VALUES (922,'CONJUNTO FEMINIA','MESA 1',1);
       INSERT INTO itens_corte (numero_corte,modelo,cor,tecido,quantidade_pecas,metragem_usada) VALUES
         (922,'CONJUNTO FEMINIA','BRANCO','OXFORD',216,481.68),(922,'CONJUNTO FEMINIA','AZUL','OXFORD',150,359.95);`)
@@ -71,7 +71,7 @@ test('padronização real no PostgreSQL preserva dados, recusa prévia antiga e 
       assert.deepEqual(dados.nomes,[{nome:'VÉU GOTA',registros:1,cortes:1}])
     }finally{await new Promise(resolve=>servidor.close(resolve))}
     // Conferência do marco inicial em banco descartável, sem usar dados da empresa.
-    await pool.query(`CREATE TABLE producao(id SERIAL PRIMARY KEY,numero_corte INTEGER,status TEXT,data DATE DEFAULT CURRENT_DATE);
+    await pool.query(`CREATE TABLE producao(id SERIAL PRIMARY KEY,numero_corte INTEGER,status TEXT,data DATE DEFAULT CURRENT_DATE,turno TEXT,operador TEXT,folha_inicio INTEGER,folha_parou INTEGER,hora_inicio TEXT,hora_fim TEXT);
       INSERT INTO cortes VALUES(923,'ANTIGO FINALIZADO','MESA 2',0),(924,'ABERTO AGORA','MESA 3',0);
       INSERT INTO producao(numero_corte,status) VALUES(923,'FINALIZADO'),(924,'EM PRODUÇÃO')`)
     const {prepararNomesSankhya}=require('../dist/services/sankhya-nomes')
@@ -97,7 +97,7 @@ test('padronização real no PostgreSQL preserva dados, recusa prévia antiga e 
     const novoPi=(await pool.query(`INSERT INTO itens_corte(numero_corte,modelo,cor,tecido,quantidade_pecas,metragem_usada) VALUES(922,'CONJUNTO FEMININO','BEGE','OXFORD',50,100) RETURNING *`)).rows[0]
     const fonte=(await pool.query('SELECT * FROM itens_corte WHERE id=2')).rows[0]
     const {default:lancamentos,assinaturaItem}=require('../dist/routes/sankhya-lancamentos.routes')
-    app.use(express.json());app.use(lancamentos);app.use(require('../dist/routes/consultas.routes').default)
+    app.use(express.json());app.use(lancamentos);app.use(require('../dist/routes/consultas.routes').default);app.use(require('../dist/routes/itens.routes').default);app.use(require('../dist/routes/producao.routes').default)
     await pool.query(`INSERT INTO cortes VALUES(926,'PENDENTE ANTIGO','MESA 1',0),(927,'SEM PI','MESA 2',0),(928,'REABERTO','MESA 3',0);
       INSERT INTO producao(numero_corte,status,data) VALUES(926,'FINALIZADO',CURRENT_DATE-10),(927,'FINALIZADO',CURRENT_DATE),(928,'FINALIZADO',CURRENT_DATE),(928,'EM PRODUÇÃO',CURRENT_DATE);
       INSERT INTO itens_corte(numero_corte,modelo,cor,tecido,quantidade_pecas,metragem_usada) VALUES(926,'PI','BRANCO','OXFORD',1,1)`)
@@ -113,6 +113,20 @@ test('padronização real no PostgreSQL preserva dados, recusa prévia antiga e 
       assert.deepEqual(pendentes.cortes.map(c=>c.numero).sort(),[927]);assert.equal(pendentes.cortes[0].quantidade_pis,0)
       assert.ok(!pendentes.cortes.some(c=>c.numero===923), 'Old unconfirmed cuts outside tracking stay out of the Home alert')
       assert.equal((await pool.query('SELECT itens_finalizados FROM cortes WHERE numero=923')).rows[0].itens_finalizados,0)
+      const lote=async itens=>fetch(base+'/itens-corte/lote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({numero_corte:927,itens})})
+      const pi=cor=>({modelo:'EDREDON',tecido:'OXFORD',cor,metragem_usada:12,quantidade_pecas:22})
+      assert.equal((await lote([pi('BRANCO'),pi('BEGE')])).status,201)
+      assert.equal(Number((await pool.query('SELECT COUNT(*) FROM itens_corte WHERE numero_corte=927')).rows[0].count),2)
+      const producao={data:'2026-11-18',numero_corte:925,turno:'1º TURNO',operador:'TESTE',folha_inicio:0,folha_parou:10,status:'EM PRODUÇÃO',hora_inicio:'08:00',hora_fim:'09:00'}
+      const produzir=body=>fetch(base+'/producao',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+      assert.equal((await produzir(producao)).status,201)
+      const repetido=await produzir(producao);assert.equal(repetido.status,409)
+      const aviso=await repetido.json();assert.equal(aviso.codigo,'PRODUCAO_SEMELHANTE')
+      assert.equal((await produzir({...producao,confirmacao_duplicidade:aviso.confirmacao})).status,201)
+      await pool.query(`CREATE FUNCTION recusar_cor_fixture() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.cor='FALHA' THEN RAISE EXCEPTION 'Batch fixture failure'; END IF; RETURN NEW; END $$;
+        CREATE TRIGGER recusar_cor_fixture BEFORE INSERT ON itens_corte FOR EACH ROW EXECUTE FUNCTION recusar_cor_fixture()`)
+      assert.equal((await lote([pi('ROSA'),pi('FALHA')])).status,500)
+      assert.equal(Number((await pool.query('SELECT COUNT(*) FROM itens_corte WHERE numero_corte=927')).rows[0].count),2)
     }finally{await new Promise(resolve=>conferir.close(resolve))}
   }finally{
     if(pool)await pool.end()

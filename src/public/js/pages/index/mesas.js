@@ -169,8 +169,8 @@ function renderizarPainelMesas() {
         produto.textContent = corte.produto || "Produto não informado"
         item.append(numero, produto, previaUltimaProducao(corte))
         if (acoesMesas.abrirCorte) {
-          const abrir = botaoAcaoMesa("Abrir corte", () => acoesMesas.abrirCorte(corte.numero), true)
-          abrir.setAttribute("aria-label", `Abrir corte ${corte.numero} da ${mesa}`)
+          const abrir = botaoAcaoMesa("Lançar produção", () => acoesMesas.abrirCorte(corte.numero), true)
+          abrir.setAttribute("aria-label", `Lançar produção no corte ${corte.numero} da ${mesa}`)
           item.append(abrir)
         }
         lista.append(item)

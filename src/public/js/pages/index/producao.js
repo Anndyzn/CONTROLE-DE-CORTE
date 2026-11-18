@@ -1,4 +1,4 @@
-import { apiPost } from "../../core/api.js"
+import { registrarProducaoConferida, descreverProducao } from "./duplicidade-producao.js"
 import { validarFolhas } from "../../utils/validations.js"
 import { marcarErroCampo, limparErroCampo } from "../../core/erros-campos.js"
 import { salvarRascunhoGrupo, limparRascunhoGrupo, versaoRascunho, atualizarBaseProducaoRascunho } from "./rascunho.js"
@@ -33,6 +33,20 @@ const camposProducao =
     "folhaParouInput",
     "statusProducao"
   ]
+let salvandoProducao=false
+
+function ocultarDuplicidade(){
+  const aviso=document.getElementById("alertaDuplicidadeProducao")
+  if(aviso)aviso.hidden=true
+}
+
+function mostrarDuplicidade(registros){
+  const aviso=document.getElementById("alertaDuplicidadeProducao"),lista=document.getElementById("listaDuplicidadeProducao")
+  if(!aviso||!lista)return
+  lista.replaceChildren()
+  for(const registro of registros){const li=document.createElement("li");li.textContent=descreverProducao(registro);lista.append(li)}
+  aviso.hidden=false
+}
 
 
 function obterCampo(id) {
@@ -157,6 +171,7 @@ function preencherHorarioAtual(idCampo) {
 // ========================================
 
 export async function salvarProducao() {
+  if(salvandoProducao)return
   const botaoSalvar =
     document.getElementById("salvarProducao")
 
@@ -269,6 +284,9 @@ export async function salvarProducao() {
 
   let producaoBloqueada = false
   const versao = versaoRascunho("producao", numeroCorte)
+  const capturados=Object.fromEntries([...camposProducao,"folhaInicio","numeroCorte"].map(id=>[id,obterCampo(id)?.value]))
+  const aindaAtual=()=>Object.entries(capturados).every(([id,valor])=>obterCampo(id)?.value===valor)
+  salvandoProducao=true
 
   try {
     definirCarregamento(
@@ -278,12 +296,13 @@ export async function salvarProducao() {
     )
 
 
-    const salvo = await apiPost(
-      "/producao",
-      producao
-    )
+    const salvo = await registrarProducaoConferida(producao,{aindaAtual,aoEncontrar:mostrarDuplicidade})
+    if(!salvo)return
     limparRascunhoGrupo("producao", numeroCorte, versao)
     atualizarBaseProducaoRascunho(numeroCorte, salvo.id)
+    if(obterCampo("numeroCorte").value!==numeroCorte)return
+    const formularioInalterado=aindaAtual()
+    ocultarDuplicidade()
 
     // ========================================
     // AVISO DE SUCESSO
@@ -316,7 +335,7 @@ export async function salvarProducao() {
 
     renderizarStatus(status)
 
-    limparFormularioProducao()
+    if(formularioInalterado)limparFormularioProducao()
 
 
     await carregarHistorico(numeroCorte)
@@ -345,7 +364,7 @@ export async function salvarProducao() {
     }
 
   } catch (erro) {
-    if (erro.status === 409) {
+    if (erro.status === 409 && erro.codigo !== "PRODUCAO_SEMELHANTE" && obterCampo("numeroCorte").value===numeroCorte) {
       renderizarStatus("FINALIZADO")
       desabilitarProducao("FINALIZADO")
       producaoBloqueada = true
@@ -366,6 +385,11 @@ export async function salvarProducao() {
     )
 
   } finally {
+    salvandoProducao=false
+    if(obterCampo("numeroCorte").value!==numeroCorte){
+      botaoSalvar.textContent=botaoSalvar.dataset.textoOriginal||"Salvar produção"
+      return
+    }
     if (
       producaoBloqueada
     ) {
@@ -543,6 +567,7 @@ function configurarValidacaoProducao() {
 
     const limparErro = () => {
       limparCampoInvalido(campo)
+      ocultarDuplicidade()
     }
 
     campo.addEventListener(
@@ -563,6 +588,14 @@ function configurarValidacaoProducao() {
 // ========================================
 
 export function inicializarProducao() {
+  document.getElementById("conferirHistoricoDuplicidade")?.addEventListener("click",async()=>{
+    await carregarHistorico(document.getElementById("numeroCorte").value)
+    const conteudo=document.getElementById("conteudoHistorico")
+    if(conteudo)conteudo.style.display="block"
+    const alternar=document.getElementById("alternarHistorico")
+    if(alternar)alternar.textContent="Ocultar histórico"
+    document.getElementById("secaoHistorico")?.scrollIntoView({behavior:"smooth",block:"start"})
+  })
   const botaoSalvar =
     document.getElementById("salvarProducao")
 

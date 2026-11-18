@@ -42,6 +42,10 @@ export async function carregarItensCorte(numeroCorte, {aindaAtual = () => true} 
 
     const itensFinalizados =
       finalizacao.itens_finalizados === 1
+    const proxima=document.getElementById("proximaEtapaPis")
+    if(proxima)proxima.hidden=!itensFinalizados
+    const link=document.getElementById("abrirSankhyaPis")
+    if(link)link.href=`sankhya.html?corte=${encodeURIComponent(numeroCorte)}`
 
     const itens =
       await apiGet(`/itens-corte/${numeroCorte}`)
@@ -146,6 +150,8 @@ function configurarEdicao(linha, item) {
     linha.querySelector(".btn-editar-item")
 
   botaoEditar.addEventListener("click", () => {
+    if(salvandoItem||conferindoItens||document.getElementById("gradePis")?.dataset?.ocupado==="true")return
+    document.getElementById("modoPiIndividual")?.click?.()
     definirBaseItemRascunho(item)
     document.getElementById("itemEditandoId").value =
       item.id
@@ -198,6 +204,7 @@ function configurarExclusao(
   botaoExcluir.addEventListener(
     "click",
     async () => {
+      if(salvandoItem||conferindoItens||document.getElementById("gradePis")?.dataset?.ocupado==="true")return
       const confirmar = await confirmarAcao(
         "Deseja excluir este item do corte?",
         {titulo: "Excluir PI", confirmar: "Excluir PI", perigosa: true}
@@ -241,7 +248,7 @@ function configurarExclusao(
 // ========================================
 
 export async function salvarItemCorte({continuar=false}={}) {
-  if(salvandoItem)return
+  if(salvandoItem||conferindoItens||document.getElementById("gradePis")?.dataset?.ocupado==="true")return
   for(const id of ["modeloItem","corItem","corOutra","tecidoItem","tecidoOutro","metragemItem","sobraItem","perdaItem","metrosFaltantesItem","quantidadeItem"])limparErroCampo(id)
   const numeroCorte =
     document.getElementById("numeroCorte").value
@@ -445,6 +452,9 @@ export async function salvarItemCorte({continuar=false}={}) {
 
 export async function finalizarItensCorte() {
   if (conferindoItens || salvandoItem) return
+  if(document.getElementById("gradePis")?.dataset?.pendente==="true"){
+    mostrarToast("Salve as cores preenchidas na grade antes de confirmar os PIs.","atencao");return
+  }
   const numeroCorte =
     document.getElementById("numeroCorte").value
 

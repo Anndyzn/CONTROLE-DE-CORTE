@@ -251,8 +251,8 @@ test('os cartões abrem o corte correto e preparam um novo somente na mesa livre
   const cards=elementos.painelMesas.children
   const abrir=cards[0].children[1].children[0].children[3]
   const novo=cards[1].children[2]
-  assert.equal(abrir.textContent,'Abrir corte')
-  assert.equal(abrir.attributes['aria-label'],'Abrir corte 922 da MESA 1')
+  assert.equal(abrir.textContent,'Lançar produção')
+  assert.equal(abrir.attributes['aria-label'],'Lançar produção no corte 922 da MESA 1')
   await abrir.events.click()
   await novo.events.click()
   assert.deepEqual(abertas,[922])

@@ -74,6 +74,7 @@ async function consultar(sql, valores = [], desfazer = []) {
   if (/SELECT status FROM producao/.test(query)) {
     return { rows: producoesDoCorte(valores[0]).slice(0, 1) }
   }
+  if(query.startsWith("SELECT id, TO_CHAR(data"))return {rows:producoesDoCorte(valores[0]).filter(p=>p.data===valores[1]&&normalizarMesa(p.turno)===valores[2]&&normalizarMesa(p.operador)===valores[3]).slice(0,10)}
   if (/SELECT id, numero_corte FROM producao WHERE id/.test(query)) {
     return { rows: banco.producao.filter(p => BigInt(p.id) === BigInt(valores[0])) }
   }
@@ -199,6 +200,25 @@ const producao = {
   folha_inicio: 10, folha_parou: 20, status: 'EM PRODUÇÃO', hora_inicio: '08:00', hora_fim: '09:00'
 }
 const item = { numero_corte: 843, modelo: 'PI', cor: 'BRANCO', tecido: 'VOIL', metragem_usada: 12.5, quantidade_pecas: 5 }
+
+test('produção semelhante avisa e exige confirmar os registros vistos antes de salvar outro lançamento',async()=>{
+  banco.producao=[{...producao,id:1}]
+  const aviso=await enviar('/producao',producao)
+  assert.equal(aviso.status,409);assert.equal(aviso.dados.codigo,'PRODUCAO_SEMELHANTE');assert.equal(banco.producao.length,1)
+  assert.equal(aviso.dados.registros[0].id,1)
+  assert.equal((await enviar('/producao',{...producao,confirmacao_duplicidade:true})).status,409)
+  assert.equal((await enviar('/producao',{...producao,confirmacao_duplicidade:aviso.dados.confirmacao})).status,201)
+  assert.equal(banco.producao.length,2)
+  assert.equal((await enviar('/producao',{...producao,confirmacao_duplicidade:aviso.dados.confirmacao})).status,409)
+})
+
+test('confirmação não vale depois de alterar os dados e nomes equivalentes também geram aviso',async()=>{
+  banco.producao=[{...producao,id:1}]
+  const aviso=await enviar('/producao',producao)
+  assert.equal((await enviar('/producao',{...producao,folha_parou:25,confirmacao_duplicidade:aviso.dados.confirmacao})).status,409)
+  assert.equal((await enviar('/producao',{...producao,operador:' operador '})).status,409)
+  assert.equal((await enviar('/producao',{...producao,operador:'OUTRO OPERADOR'})).status,201)
+})
 
 test('recusa folhas invertidas e números negativos, vazios ou não finitos sem consultar o banco', async () => {
   for (const alteracao of [

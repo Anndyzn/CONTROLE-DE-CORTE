@@ -4,6 +4,7 @@ import { numeroCorteValido, validarProducao } from "../utils/validacoes"
 import { ErroRegra, executarNoCorte } from "../services/corte-bloqueado"
 import { executarAlteracaoProducao } from "../services/alteracao-producao"
 import { ErroMesaOcupada } from "../services/mesa-disponivel"
+import { conferirDuplicidadeProducao, ErroProducaoSemelhante } from "../services/duplicidade-producao"
 
 const router = Router()
 
@@ -37,6 +38,8 @@ router.post("/producao", async (req, res) => {
         throw new ErroRegra(409, "Este corte já está finalizado. Novos lançamentos de produção estão bloqueados.")
       }
 
+      await conferirDuplicidadeProducao(client,req.body,req.body.confirmacao_duplicidade)
+
       return client.query(
         `
         INSERT INTO producao (
@@ -59,6 +62,9 @@ router.post("/producao", async (req, res) => {
       id: resultado.rows[0].id
     })
   } catch (erro) {
+    if(erro instanceof ErroProducaoSemelhante)return res.status(409).json({
+      erro:erro.message,codigo:"PRODUCAO_SEMELHANTE",registros:erro.registros,confirmacao:erro.confirmacao
+    })
     if (erro instanceof ErroRegra) return res.status(erro.status).json({ erro: erro.message })
     console.error(erro)
 

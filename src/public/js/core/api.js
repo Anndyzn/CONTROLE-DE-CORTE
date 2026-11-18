@@ -46,6 +46,8 @@ export async function apiPost(
     erro.codigo = dados.codigo
     erro.mesa = dados.mesa
     erro.cortes = dados.cortes
+    erro.registros = dados.registros
+    erro.confirmacao = dados.confirmacao
     throw erro
   }
 

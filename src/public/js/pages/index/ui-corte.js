@@ -1,6 +1,7 @@
 import { limparErroCampo } from "../../core/erros-campos.js"
 
 export function mostrarAreaCorte(ativo) {
+  if(!ativo){const aviso=document.getElementById("alertaDuplicidadeProducao");if(aviso)aviso.hidden=true}
   for (const id of ["corteSelecionado", "secaoProducao", "secaoHistorico"]) {
     const secao = document.getElementById(id)
     if (secao) secao.hidden = !ativo

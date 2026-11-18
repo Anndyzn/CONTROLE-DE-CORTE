@@ -6,6 +6,38 @@ import { ErroRegra, executarNoCorte } from "../services/corte-bloqueado"
 
 const router = Router()
 
+router.post("/itens-corte/lote", async (req,res) => {
+  const {numero_corte,itens}=req.body??{}
+  if(!numeroCorteValido(numero_corte)||!Array.isArray(itens)||!itens.length||itens.length>50) {
+    return res.status(400).json({erro:"Informe um corte válido e de 1 a 50 cores."})
+  }
+  for(const [indice,item] of itens.entries()) {
+    const erro=validarItem(item??{})
+    if(erro)return res.status(400).json({erro:`Linha ${indice+1}: ${erro}`})
+  }
+  try {
+    const salvos=await executarNoCorte(Number(numero_corte),async(client,corte)=>{
+      if(Number(corte.itens_finalizados)===1)throw new ErroRegra(409,"Os PIs já foram confirmados. Reabra os itens pelo Admin antes de adicionar cores.")
+      const resultado=[]
+      for(const item of itens) {
+        const r=await client.query(`INSERT INTO itens_corte
+          (numero_corte,modelo,cor,tecido,metragem_usada,sobra_metros,perda_metros,metros_faltantes,quantidade_pecas)
+          VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,[
+          Number(numero_corte),item.modelo.trim(),item.cor.trim(),item.tecido.trim(),Number(item.metragem_usada),
+          Number(item.sobra_metros??0),Number(item.perda_metros??0),Number(item.metros_faltantes??0),Number(item.quantidade_pecas)
+        ])
+        resultado.push(r.rows[0])
+      }
+      return resultado
+    })
+    return res.status(201).json({itens:salvos})
+  }catch(erro){
+    if(erro instanceof ErroRegra)return res.status(erro.status).json({erro:erro.message})
+    console.error("Erro ao salvar cores do corte:",erro)
+    return res.status(500).json({erro:"Não foi possível salvar as cores. Nenhum item deste envio foi gravado."})
+  }
+})
+
 // ========================================
 // CADASTRAR ITEM DO CORTE
 // ========================================

@@ -283,6 +283,7 @@
     <section class="section-card producao-card" id="secaoProducao" hidden>
       <div class="section-title-row">
         <div>
+          <span class="form-etapa">1 · Produção</span>
           <h2>
             Registrar produção do turno
           </h2>
@@ -418,7 +419,13 @@
         </fieldset>
       </div>
 
+      <aside id="alertaDuplicidadeProducao" class="aviso-conferencia" aria-labelledby="tituloDuplicidadeProducao" hidden>
+        <div class="aviso-conferencia-cabecalho"><span class="aviso-conferencia-icone" aria-hidden="true">!</span><div><strong id="tituloDuplicidadeProducao">Confira os lançamentos deste turno</strong><p>Já existe produção para a mesma data e operador. Seus campos foram mantidos.</p></div></div>
+        <details><summary>Ver lançamentos existentes</summary><ul id="listaDuplicidadeProducao"></ul></details>
+        <button id="conferirHistoricoDuplicidade" type="button" class="btn-secondary">Conferir histórico do corte</button>
+      </aside>
       <div class="producao-actions">
+        <span class="small-help">Confira data, operador e folhas antes de salvar.</span>
         <button type="button" id="salvarProducao" class="primary-action">
           Salvar produção
         </button>
@@ -430,6 +437,7 @@
       id="blocoItensCorte"
       style="display: none;"
     >
+      <span class="form-etapa">2 · Itens cortados</span>
       <h2>PIs cortados</h2>
 
       <p class="section-help">
@@ -458,6 +466,10 @@
 
       <!-- Formulário aparece somente enquanto os PIs podem ser alterados -->
       <div id="formItensCorte">
+        <div class="pi-modos" role="group" aria-label="Forma de cadastrar PIs">
+          <button id="modoPiGrade" type="button" aria-pressed="true">Por cor</button>
+          <button id="modoPiIndividual" type="button" aria-pressed="false">PI individual / corrigir</button>
+        </div>
 
         <fieldset class="form-section">
           <legend>Produto e material</legend>
@@ -497,6 +509,8 @@
             <option value="MANTA ACRILICA">MANTA ACRILICA</option>
             <option value="TECIDO BEMBER">TECIDO BEMBER</option>
             <option value="VOIL BRANCO">VOIL BRANCO</option>
+            <option value="VOIL BRANCO">VELUDO</option>
+            <option value="VOIL BRANCO">MONT-SERRAT</option>
             <option value="OUTRA">OUTRA</option>
           </select>
           <input type="text" id="tecidoOutro" placeholder="Digite o tecido" style="display:none; margin-top: 8px;">
@@ -536,6 +550,17 @@
       </div>
         </fieldset>
 
+          <section id="gradePis" class="grade-pis" aria-label="PIs por cor" data-pendente="false">
+            <p class="small-help">Use uma linha por cor. Modelo e tecido são os mesmos para todas as linhas.</p>
+            <div id="rascunhoGradeAviso" hidden><span>Há uma grade salva para este corte.</span> <button id="restaurarGradePis" type="button" class="btn-secondary">Restaurar grade</button></div>
+            <datalist id="coresGradePis"></datalist>
+            <div class="table-wrap"><table>
+              <thead><tr><th>Cor</th><th>Metragem (m)</th><th>Sobra (m)</th><th>Perda (m)</th><th>Faltantes (m)</th><th>Peças</th><th>Ação</th></tr></thead>
+              <tbody id="linhasGradePis"></tbody>
+            </table></div>
+            <p id="estadoGradePis" role="status" class="small-help">Adicione as cores cortadas.</p>
+            <div class="button-row"><button id="adicionarCorPi" type="button" class="btn-secondary">+ Adicionar cor</button><button id="salvarGradePis" type="button">Conferir e salvar cores</button></div>
+          </section>
           <input
             type="hidden"
             id="itemEditandoId"
@@ -574,6 +599,10 @@
           </thead>
           <tbody id="listaItensCorte"></tbody>
         </table>
+      </div>
+      <div id="proximaEtapaPis" class="pi-proxima-etapa" hidden>
+        <span>PIs confirmados. Próxima etapa: conferir os produtos para o lançamento.</span>
+        <a id="abrirSankhyaPis" class="header-btn" href="sankhya.html">Conferir no Sankhya →</a>
       </div>
     </section>
 
