@@ -290,7 +290,7 @@
             Registrar produção do turno
           </h2>
           <p class="section-help">
-            Confirme o início e informe o término, a folha final e a situação do corte.
+            Assuma o corte, confirme seu início e registre a produção ao terminar.
           </p>
 
         <div
@@ -311,23 +311,23 @@
         </button>
       </div>
 
+      <div id="painelAssumirCorte" class="trabalhos-painel">
+        <p id="estadoInicioTrabalho" class="small-help" role="status">Consultando o início do trabalho…</p>
+        <div class="inicio-acoes"><button type="button" id="assumirCorteSelecionado" disabled>Assumir corte</button><button type="button" id="recarregarInicioTrabalho" class="btn-secondary" hidden>Tentar novamente</button></div>
+      </div>
       <div id="painelTrabalhos" class="trabalhos-painel" hidden>
         <div id="conferenciaInicio">
           <div class="inicio-cabecalho"><strong>1. Confira seu início</strong><button type="button" id="atualizarTrabalhos" class="inicio-link">Atualizar</button></div>
           <div id="escolhaTrabalho" class="form-group" hidden><label for="trabalhoPendente">Início a concluir</label><select id="trabalhoPendente"></select></div>
           <p id="trabalhoInicioResumo" class="inicio-operador"></p>
           <p id="trabalhoInicioHorario" class="inicio-horario"></p>
-          <div id="camposInicioReal" class="inicio-real-grid" hidden>
-            <div class="form-group"><label for="inicioRealData">Data real do início</label><input type="date" id="inicioRealData" required></div>
-            <div class="form-group"><label for="inicioRealHora">Hora real do início</label><input type="time" id="inicioRealHora" required></div>
-            <p class="small-help">A correção será salva junto com a produção. O registro original será preservado.</p>
-          </div>
-          <div class="inicio-acoes"><button type="button" id="usarInicioTrabalho">Usar meu horário de início</button><button type="button" id="corrigirInicioTrabalho" class="btn-secondary">Informar início real</button></div>
+          <div class="inicio-acoes"><button type="button" id="usarInicioTrabalho">Usar meu horário de início</button><button type="button" id="corrigirInicioTrabalho" class="btn-secondary">Corrigir início</button><button type="button" id="cancelarInicioPendente" class="inicio-link inicio-link-perigo">Cancelar início</button></div>
         </div>
         <div id="trabalhoSelecionado" hidden>
           <div class="inicio-cabecalho"><strong>✓ Início confirmado</strong><button type="button" id="cancelarTrabalho" class="inicio-link">Alterar início</button></div>
           <p id="trabalhoSelecionadoResumo"></p>
           <span class="small-help">Agora informe o término real, a folha final e o status. Se atravessou a meia-noite, informe a hora do dia seguinte.</span>
+          <div class="inicio-acoes"><button type="button" id="corrigirInicioConfirmado" class="inicio-link">Corrigir início</button><button type="button" id="cancelarInicioConfirmado" class="inicio-link inicio-link-perigo">Cancelar início</button></div>
         </div>
       </div>
       <div class="producao-grid">
@@ -685,6 +685,22 @@
   </div>
 
 
+  <dialog id="dialogCorrigirInicio" class="confirmacao-dialog" aria-labelledby="corrigirInicioTitulo">
+    <form id="formCorrigirInicio">
+      <h2 id="corrigirInicioTitulo">Corrigir início de trabalho</h2><p id="corrigirInicioContexto"></p>
+      <div class="inicio-real-grid">
+        <div class="form-group"><label for="corrigirOperador">Operador</label><select id="corrigirOperador" required></select><input id="corrigirOutro" maxlength="200" placeholder="Nome do operador" aria-label="Outro operador" hidden></div>
+        <div class="form-group"><label for="corrigirTurno">Turno</label><select id="corrigirTurno" required></select></div>
+        <div class="form-group"><label for="corrigirData">Data do início</label><input id="corrigirData" type="date" required></div>
+        <div class="form-group"><label for="corrigirHora">Hora do início</label><input id="corrigirHora" type="time" required></div>
+      </div>
+      <div class="form-group"><label for="corrigirResponsavel">Responsável pela correção</label><input id="corrigirResponsavel" minlength="2" maxlength="100" required autocomplete="name"></div>
+      <div class="form-group"><label for="corrigirMotivoTipo">Motivo</label><select id="corrigirMotivoTipo" required><option value="">Selecione</option><option>Operador incorreto</option><option>Turno incorreto</option><option>Data ou horário incorreto</option><option value="OUTRO">Outro — descrever</option></select></div>
+      <div id="corrigirMotivoOutroGrupo" class="form-group" hidden><label for="corrigirMotivoOutro">O que aconteceu?</label><textarea id="corrigirMotivoOutro" minlength="3" maxlength="1000" rows="2"></textarea></div>
+      <p class="small-help">O registro original e o motivo ficarão no histórico do Admin.</p>
+      <div class="confirmacao-acoes"><button type="button" id="fecharCorrigirInicio" class="confirmacao-cancelar">Voltar</button><button type="submit" id="salvarCorrigirInicio">Salvar correção</button></div>
+    </form>
+  </dialog>
   <dialog id="dialogAssumir" class="confirmacao-dialog" aria-labelledby="assumirTitulo">
     <form method="dialog">
       <h2 id="assumirTitulo">Assumir trabalho</h2>

@@ -38,6 +38,15 @@ function previaUltimaProducao(corte) {
   titulo.textContent = "Última produção"
   cabecalho.append(titulo)
   previa.append(cabecalho)
+  if(Array.isArray(corte.trabalhos_pendentes_anteriores)&&corte.trabalhos_pendentes_anteriores.length){
+    const aviso=document.createElement("div");aviso.className="mesa-trabalho-pendente"
+    const titulo=document.createElement("strong");titulo.textContent="Produção ainda não lançada";aviso.append(titulo)
+    for(const inicio of corte.trabalhos_pendentes_anteriores){
+      const linha=document.createElement("span"),dia=String(inicio.data).split("-").reverse().join("/")
+      linha.textContent=`${inicio.operador} · ${inicio.turno} · início ${inicio.dias_pendente===1?"ontem":dia} às ${inicio.hora_inicio}`;aviso.append(linha)
+    }
+    previa.append(aviso)
+  }
   if(Array.isArray(corte.trabalho_hoje)&&corte.trabalho_hoje.length){
     previa.className+=" mesa-previa-em-trabalho"
     const trabalho=document.createElement("div");trabalho.className="mesa-trabalho-hoje"

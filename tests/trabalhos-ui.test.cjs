@@ -1,24 +1,30 @@
 const {test,beforeEach}=require('node:test')
 const assert=require('node:assert/strict')
 const fs=require('node:fs')
-let modulo,elementos,consulta,confirmacao,observador,seq=0
+let modulo,elementos,consulta,confirmacao,observador,resumo,postar,editar,cancelar,configRascunho,seq=0
 const t={id:1,numero_corte:929,mesa:'MESA 1',operador:'TESTE',turno:'1º TURNO',data:'2026-11-17',hora_inicio:'08:10',producao_base_id:8,folha_inicio:12}
 function elemento(){
  const classes=new Set()
- return {value:'',textContent:'',hidden:false,disabled:false,children:[],options:[],classList:{add:(...c)=>c.forEach(x=>classes.add(x)),remove:(...c)=>c.forEach(x=>classes.delete(x)),contains:c=>classes.has(c)},
+ return {value:'',textContent:'',hidden:false,disabled:false,children:[],options:[],style:{},classList:{add:(...c)=>c.forEach(x=>classes.add(x)),remove:(...c)=>c.forEach(x=>classes.delete(x)),contains:c=>classes.has(c)},
  replaceChildren(...c){this.children=c},append(...c){this.children.push(...c)},focus(){this.focado=true},addEventListener(){},reportValidity(){return false}}
 }
 beforeEach(async()=>{
  elementos=Object.fromEntries(['numeroCorteSelecionado','data','turno','operador','operadorOutro','horaInicio','preencherHoraInicio','secaoProducao','trabalhoSelecionado','trabalhoSelecionadoResumo','horaFim','folhaInicio','folhaParouInput','statusProducao','painelTrabalhos','cancelarTrabalho','atualizarTrabalhos','trabalhoPendente','escolhaTrabalho','conferenciaInicio','trabalhoInicioResumo','trabalhoInicioHorario','inicioRealData','inicioRealHora','camposInicioReal','usarInicioTrabalho','corrigirInicioTrabalho','limparProducao','assumirInicioReal','assumirCamposReais','assumirDataReal','assumirHoraReal'].map(id=>[id,elemento()]))
  elementos.numeroCorteSelecionado.textContent='929'
+ for(const id of ['painelAssumirCorte','estadoInicioTrabalho','assumirCorteSelecionado','recarregarInicioTrabalho','dialogAssumir','assumirOperador','assumirTurno','assumirTitulo','assumirOutro','cancelarInicioPendente','corrigirInicioConfirmado','cancelarInicioConfirmado'])elementos[id]=elemento()
  elementos.operador.options=[{value:'TESTE'},{value:'OUTRO'}]
+ elementos.turno.options=[{value:'1º TURNO'}]
+ for(const option of [...elementos.operador.options,...elementos.turno.options])option.cloneNode=()=>({...option})
+ resumo={corte:{numero:929,mesa:'MESA 1',itens_finalizados:0},ultima_producao:null}
+ postar=async()=>({novo:true,trabalho:t})
  consulta=async()=>({trabalhos:[{...t}]});confirmacao=async()=>true
- globalThis.document={getElementById:id=>elementos[id],createElement:elemento}
+ editar=async()=>false;cancelar=async()=>false
+ globalThis.document={getElementById:id=>elementos[id],createElement:elemento,querySelector:()=>null}
  globalThis.window={addEventListener(){}}
  globalThis.MutationObserver=class{constructor(fn){observador=fn}observe(){}}
- globalThis.__trabalhosTeste={apiGet:(...a)=>consulta(...a),apiPost:()=>{},mostrarToast(){},confirmarAcao:(...a)=>confirmacao(...a),inicializarControleMesas(){}}
+ globalThis.__trabalhosTeste={apiGet:(url)=>url.endsWith('/resumo')?Promise.resolve(resumo):consulta(url),apiPost:(...a)=>postar(...a),mostrarToast(){},confirmarAcao:(...a)=>confirmacao(...a),inicializarControleMesas(){},configurarRascunhoTrabalho:c=>{configRascunho=c},salvarRascunhoGrupo(){},versaoRascunho:()=>null,limparRascunhoGrupo(){},editarInicio:(...a)=>editar(...a),cancelarInicio:(...a)=>cancelar(...a)}
  const codigo=fs.readFileSync('src/public/js/pages/index/trabalhos.js','utf8').replace(/^import[^\n]*\n/gm,'')
- modulo=await import(`data:text/javascript;base64,${Buffer.from('const {apiGet,apiPost,mostrarToast,confirmarAcao,inicializarControleMesas}=globalThis.__trabalhosTeste;\n'+codigo).toString('base64')}#${++seq}`)
+ modulo=await import(`data:text/javascript;base64,${Buffer.from('const {apiGet,apiPost,mostrarToast,confirmarAcao,inicializarControleMesas,configurarRascunhoTrabalho,salvarRascunhoGrupo,versaoRascunho,limparRascunhoGrupo,editarInicio,cancelarInicio}=globalThis.__trabalhosTeste;\n'+codigo).toString('base64')}#${++seq}`)
  modulo.inicializarTrabalhos({buscarCorte:async()=>{},carregarCortesEmAndamento:async()=>{}})
 })
 test('concluir mantém o dia e o início originais, atualiza folha e pede o término real',async()=>{
@@ -28,7 +34,7 @@ test('concluir mantém o dia e o início originais, atualiza folha e pede o tér
  assert.equal(elementos.data.value,'2026-11-17');assert.equal(elementos.horaInicio.value,'08:10')
  assert.equal(elementos.folhaInicio.value,12);assert.equal(elementos.horaFim.value,'')
  assert.equal(elementos.operador.disabled,true);assert.equal(elementos.horaInicio.disabled,true)
- assert.deepEqual(modulo.dadosTrabalho(),{trabalho_id:1,producao_base_id:8})
+ assert.deepEqual(modulo.dadosTrabalho(),{trabalho_id:1,trabalho_versao:0,producao_base_id:8})
  assert.match(elementos.trabalhoSelecionadoResumo.textContent,/TESTE.*MESA 1.*17\/11\/2026/)
 })
 test('cancelar a conferência preserva os campos sem selecionar trabalho',async()=>{
@@ -50,18 +56,45 @@ test('atualização do mesmo corte mantém o início selecionado e troca de cort
  assert.deepEqual(modulo.dadosTrabalho(),{});assert.equal(elementos.data.disabled,false)
 })
 
-test('início real só aparece quando solicitado e segue junto com a produção',async()=>{
+test('corrigir início preserva os campos finais e passa a usar a nova versão',async()=>{
  await modulo.atualizarTrabalhos()
- assert.equal(elementos.camposInicioReal.hidden,true)
- assert.equal(elementos.secaoProducao.classList.contains('aguardando-inicio'),true)
- elementos.corrigirInicioTrabalho.onclick()
- assert.equal(elementos.camposInicioReal.hidden,false)
- elementos.inicioRealData.value='2026-11-16';elementos.inicioRealHora.value='07:30'
  await elementos.usarInicioTrabalho.onclick()
+ elementos.horaFim.value='17:00';elementos.folhaParouInput.value='50'
+ const corrigido={...t,versao:1,data:'2026-11-16',hora_inicio:'07:30',operador:'ANA'}
+ editar=async inicio=>{assert.equal(inicio.id,1);consulta=async()=>({trabalhos:[corrigido]});return {trabalho:corrigido}}
+ await elementos.corrigirInicioConfirmado.onclick()
  assert.equal(elementos.data.value,'2026-11-16');assert.equal(elementos.horaInicio.value,'07:30')
- assert.equal(modulo.dadosTrabalho().corrigir_inicio,true)
+ assert.equal(modulo.dadosTrabalho().trabalho_versao,1)
+ assert.equal(elementos.horaFim.value,'17:00');assert.equal(elementos.folhaParouInput.value,'50')
  assert.equal(elementos.conferenciaInicio.hidden,true)
  assert.equal(elementos.secaoProducao.classList.contains('aguardando-inicio'),false)
+})
+
+test('restaura somente finais do mesmo trabalho e versão usando o início validado pelo servidor',async()=>{
+ const draft={base:{id:'8',folha:12,trabalho:{id:'1',versao:0}},campos:{horaFim:'17:30',folhaParouInput:'60',statusProducao:'EM PRODUÇÃO',operador:'NOME ADULTERADO'}}
+ assert.equal(await modulo.restaurarRascunhoTrabalho('929',draft),true)
+ assert.equal(elementos.operador.value,'TESTE');assert.equal(elementos.horaFim.value,'17:30')
+ assert.equal(elementos.folhaParouInput.value,'60');assert.equal(configRascunho.obterContexto().id,'1')
+})
+
+test('rascunho antigo não sobrescreve trabalho corrigido nem uma folha inicial alterada',async()=>{
+ const draft={base:{id:'8',folha:12,trabalho:{id:'1',versao:0}},campos:{horaFim:'17:30'}}
+ consulta=async()=>({trabalhos:[{...t,versao:1}]})
+ assert.equal(await modulo.restaurarRascunhoTrabalho('929',draft),false)
+ consulta=async()=>({trabalhos:[{...t,folha_inicio:20}]})
+ assert.equal(await modulo.restaurarRascunhoTrabalho('929',draft),false)
+ consulta=async()=>({trabalhos:[]})
+ assert.equal(await modulo.restaurarRascunhoTrabalho('929',draft),false)
+ assert.equal(elementos.horaFim.value,'')
+})
+
+test('cancelar um início libera assumir novamente e limpa somente o lançamento cancelado',async()=>{
+ await modulo.atualizarTrabalhos();await elementos.usarInicioTrabalho.onclick()
+ elementos.horaFim.value='17:00'
+ cancelar=async()=>{consulta=async()=>({trabalhos:[]});return {trabalho:{...t,status:'CANCELADO'}}}
+ await elementos.cancelarInicioConfirmado.onclick()
+ assert.equal(elementos.horaFim.value,'');assert.deepEqual(modulo.dadosTrabalho(),{})
+ assert.equal(elementos.assumirCorteSelecionado.disabled,false)
 })
 
 test('atualizar após confirmar mantém os campos finais em preenchimento',async()=>{
@@ -70,4 +103,52 @@ test('atualizar após confirmar mantém os campos finais em preenchimento',async
  await modulo.atualizarTrabalhos()
  assert.equal(elementos.horaFim.value,'17:30');assert.equal(elementos.folhaParouInput.value,'40')
  assert.equal(elementos.conferenciaInicio.hidden,true)
+})
+
+test('sem início oferece somente assumir e registra o início antes de liberar a conclusão',async()=>{
+ consulta=async()=>({trabalhos:[]})
+ await modulo.atualizarTrabalhos()
+ assert.equal(elementos.painelAssumirCorte.hidden,false)
+ assert.equal(elementos.assumirCorteSelecionado.disabled,false)
+ assert.equal(elementos.painelTrabalhos.hidden,true)
+ assert.deepEqual(modulo.dadosTrabalho(),{})
+ elementos.dialogAssumir.showModal=()=>{
+  elementos.assumirOperador.value='TESTE';elementos.assumirTurno.value='1º TURNO'
+  elementos.dialogAssumir.returnValue='assumir';elementos.dialogAssumir.onclose()
+ }
+ postar=async(url,body)=>{
+  assert.equal(url,'/cortes/929/trabalhos');assert.deepEqual(body,{operador:'TESTE',turno:'1º TURNO'})
+  consulta=async()=>({trabalhos:[t]});return {novo:true,trabalho:t}
+ }
+ await elementos.assumirCorteSelecionado.onclick()
+ assert.equal(elementos.painelAssumirCorte.hidden,true)
+ assert.equal(elementos.conferenciaInicio.hidden,false)
+ assert.deepEqual(modulo.dadosTrabalho(),{})
+ await elementos.usarInicioTrabalho.onclick()
+ assert.equal(modulo.dadosTrabalho().trabalho_id,1)
+})
+
+test('produção finalizada não oferece assumir nem permite retomar um início antigo',async()=>{
+ resumo.ultima_producao={status:'FINALIZADO'}
+ await modulo.atualizarTrabalhos()
+ assert.equal(elementos.assumirCorteSelecionado.hidden,true)
+ assert.equal(elementos.painelTrabalhos.hidden,true)
+ assert.match(elementos.estadoInicioTrabalho.textContent,/finalizada/)
+ assert.deepEqual(modulo.dadosTrabalho(),{})
+})
+
+test('falha na consulta bloqueia assumir e permite tentar novamente',async()=>{
+ consulta=async()=>{throw new Error('Falha de rede')}
+ await modulo.atualizarTrabalhos()
+ assert.equal(elementos.assumirCorteSelecionado.disabled,true)
+ assert.equal(elementos.recarregarInicioTrabalho.hidden,false)
+ assert.deepEqual(modulo.dadosTrabalho(),{})
+})
+
+test('alterar início exige nova confirmação para salvar',async()=>{
+ await modulo.atualizarTrabalhos();await elementos.usarInicioTrabalho.onclick()
+ elementos.cancelarTrabalho.onclick()
+ assert.deepEqual(modulo.dadosTrabalho(),{})
+ await elementos.usarInicioTrabalho.onclick()
+ assert.equal(modulo.dadosTrabalho().trabalho_id,1)
 })

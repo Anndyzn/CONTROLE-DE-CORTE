@@ -1,5 +1,10 @@
 const {test}=require('node:test')
 const assert=require('node:assert/strict')
+// Estes testes exercitam funções puras e não precisam de configuração ou banco real.
+require.cache[require.resolve('../dist/database-pg')]={exports:{
+ query:async()=>{throw new Error('Consulta inesperada neste teste unitário')},
+ connect:async()=>{throw new Error('Conexão inesperada neste teste unitário')}
+}}
 const {resolverProdutos,montarConferencia}=require('../dist/services/sankhya-preparacao')
 const item={id:1,modelo:'CONJUNTO FEMININO',tecido:'OXFORD',cor:'BEGE',quantidade_pecas:22,metragem_usada:12}
 const regra=(cor,codigos=[6073,6069])=>({...item,cor,versao:1,destinos:codigos.map(c=>({codigo_produto:c,produto:'ignorar',controle:cor}))})

@@ -10,6 +10,8 @@ const campos = {
   item: ["itemEditandoId", "modeloItem", "corItem", "corOutra", "tecidoItem", "tecidoOutro", "metragemItem", "sobraItem", "perdaItem", "metrosFaltantesItem", "quantidadeItem"]
 }
 let contexto = null, baseItem = null, restaurando = false, abrirCorte = null
+let contextoTrabalho=()=>null,restaurarTrabalho=null
+export function configurarRascunhoTrabalho({obterContexto,restaurar}){contextoTrabalho=obterContexto;restaurarTrabalho=restaurar}
 const elemento = id => document.getElementById(id)
 const armazenamento = () => new Rascunhos(localStorage)
 
@@ -55,13 +57,15 @@ export function atualizarBaseProducaoRascunho(numero, id) {
 }
 
 export function salvarRascunhoGrupo(grupo) {
-  if(grupo==="producao"&&elemento("secaoProducao")?.classList.contains("producao-vinculada"))return
   if (restaurando || !contexto || !campos[grupo]) return
   if (contexto.novo !== (grupo === "novo")) return
   const valores = Object.fromEntries(campos[grupo].map(id => [id, elemento(id)?.value ?? ""]))
+  const trabalho=grupo==="producao"?contextoTrabalho():null
+  if(trabalho?.numero_corte&&String(trabalho.numero_corte)!==String(contexto.numero))return
+  if(trabalho&&!["horaFim","folhaParouInput","statusProducao"].some(id=>valores[id]))return
   try {
     armazenamento().salvar(String(contexto.numero), contexto.novo, grupo, valores,
-      grupo === "producao" ? {id:String(contexto.ultimaProducaoId ?? ""), folha:Number(elemento("folhaInicio")?.value || 0)}
+      grupo === "producao" ? {id:String(trabalho?.producao_base_id??contexto.ultimaProducaoId??""), folha:Number(elemento("folhaInicio")?.value || 0),...(trabalho?{trabalho}:{})}
         : grupo === "item" ? baseItem : null)
     atualizarAvisoRascunho()
   } catch { falhaArmazenamento() }
@@ -70,6 +74,7 @@ export function salvarRascunhoGrupo(grupo) {
 export function versaoRascunho(grupo, numero = contexto?.numero) {
   try {
     const rascunho = armazenamento().ler()[numero]?.grupos[grupo]
+    if(grupo==="producao"&&rascunho?.base?.trabalho&&JSON.stringify(rascunho.base.trabalho)!==JSON.stringify(contextoTrabalho()))return null
     if (!rascunho || !campos[grupo].every(id => (elemento(id)?.value ?? "") === rascunho.campos[id])) return null
     return rascunho.versao
   } catch { return null }
@@ -101,6 +106,7 @@ export async function restaurarRascunho() {
     botao.disabled = true
     elemento("numeroCorte").value = numero
     const atual = await abrirCorte(numero)
+    if(elemento("numeroCorte").value!==numero)throw new Error("A seleção mudou. O rascunho foi mantido.")
     if (!atual) throw new Error("Não foi possível abrir o corte. O rascunho foi mantido.")
     if (Boolean(atual.novo) !== rascunho.novo) {
       throw new Error(rascunho.novo ? "Esse número de corte já foi cadastrado. O rascunho foi mantido para conferência."
@@ -115,7 +121,11 @@ export async function restaurarRascunho() {
     }
     const producao = rascunho.grupos.producao
     if (!rascunho.novo && producao) {
-      if(elemento("secaoProducao")?.classList.contains("producao-vinculada"))avisos.push("Conclua ou cancele o início selecionado antes de restaurar a produção.")
+      if(producao.base?.trabalho){
+        if(!restaurarTrabalho||!await restaurarTrabalho(numero,producao))avisos.push("O início ou a produção mudou. O rascunho foi mantido para conferência, sem preencher campos antigos.")
+        else restaurados++
+      }
+      else if(elemento("secaoProducao")?.classList.contains("producao-vinculada"))avisos.push("Conclua ou cancele o início selecionado antes de restaurar a produção.")
       else if (atual.ultima_producao?.status === "FINALIZADO") avisos.push("A produção já foi finalizada.")
       else if (String(atual.ultima_producao?.id ?? "") !== (typeof producao.base === "string" ? producao.base : producao.base?.id)
         || (producao.base && typeof producao.base === "object" && Number(atual.ultima_producao?.folha_parou ?? 0) !== producao.base.folha)) {

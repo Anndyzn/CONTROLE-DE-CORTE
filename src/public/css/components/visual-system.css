@@ -222,6 +222,10 @@ body:is(.page-index, .page-consultar, .page-admin) :is(.confirmacao-dialog, .jus
 /* Trabalho atual separado da última produção efetivamente lançada. */
 .mesa-ultima-producao{display:flex;flex-direction:column}
 .mesa-trabalho-hoje{order:-1;display:grid;gap:4px;margin-bottom:12px;padding:10px 12px;border-radius:10px;background:#eaf8f0;color:#126747;font-size:.8rem}
+.mesa-trabalho-pendente{order:-1;display:grid;gap:5px;margin-bottom:12px;padding:10px 12px;border:1px solid #efd294;border-radius:10px;background:#fff7e7;color:#855000;font-size:.8rem;line-height:1.5}
+.page-index .inicio-link-perigo{color:#a32f36}
+#dialogCorrigirInicio{width:min(620px,calc(100vw - 28px))}
+#dialogCorrigirInicio .form-group{margin:10px 0}
 .mesa-previa-em-trabalho{background:#f4faf7;border-color:#c4e5d4}
 .mesa-card .mesa-assumir{margin-top:6px}
 .trabalhos-painel{margin:0 0 18px;padding:16px;border:1px solid #c6dcf5;border-radius:12px;background:#f2f7ff}
@@ -234,9 +238,13 @@ body:is(.page-index, .page-consultar, .page-admin) :is(.confirmacao-dialog, .jus
 .inicio-real-grid .small-help{grid-column:1/-1;margin:0}
 .inicio-opcao{display:flex;align-items:center;gap:8px;margin:14px 0;font-size:.85rem}
 .inicio-opcao input{width:auto;min-height:0}
-.page-index #secaoProducao.aguardando-inicio :is(.producao-grid,.producao-actions,#limparProducao,#alertaDuplicidadeProducao){display:none}
-.page-index #secaoProducao.producao-vinculada :is(.producao-dados-inicio,.producao-hora-inicio,#limparProducao){display:none}
-.page-index #secaoProducao.producao-vinculada .producao-grid{grid-template-columns:minmax(180px,.6fr) minmax(420px,1.4fr);align-items:start}
+.page-index #secaoProducao:not(.producao-vinculada) :is(.producao-grid,.producao-actions,#alertaDuplicidadeProducao),
+.page-index #secaoProducao.aguardando-inicio :is(.producao-grid,.producao-actions,#alertaDuplicidadeProducao){display:none}
+.page-index #secaoProducao :is(.producao-dados-inicio,.producao-hora-inicio,#limparProducao){display:none}
+.page-index #secaoProducao.producao-vinculada .producao-grid{grid-template-columns:minmax(320px,.8fr) minmax(0,1.6fr);align-items:start}
 .page-index #secaoProducao.producao-vinculada .producao-grid>.form-section:last-child{grid-column:auto}
+.page-index #secaoProducao.producao-vinculada .form-section:has(#horaFim) .form-section-grid{grid-template-columns:minmax(0,1fr)}
+.page-index #secaoProducao.producao-vinculada .time-input-row{grid-template-columns:minmax(140px,1fr) 76px}
 #dialogAssumir .form-group{margin:16px 0}
-@media(max-width:800px){.page-index #secaoProducao.producao-vinculada .producao-grid{grid-template-columns:1fr}}
+@media(max-width:1000px){.page-index #secaoProducao.producao-vinculada .producao-grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:420px){.page-index #secaoProducao.producao-vinculada .time-input-row{grid-template-columns:minmax(0,1fr)}.page-index #secaoProducao.producao-vinculada .btn-time-now{justify-self:start}}

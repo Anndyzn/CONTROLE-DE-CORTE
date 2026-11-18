@@ -247,7 +247,11 @@ router.get("/cortes-em-andamento", async (req, res) => {
           COALESCE((SELECT json_agg(json_build_object('id',t.id,'operador',t.operador,'turno',t.turno,
             'hora_inicio',TO_CHAR(COALESCE(t.inicio_real_em,t.iniciado_em) AT TIME ZONE 'America/Sao_Paulo','HH24:MI')) ORDER BY t.iniciado_em)
             FROM trabalhos_corte t WHERE t.numero_corte=c.numero AND t.data_trabalho=$1::date AND t.status='EM_TRABALHO'),'[]'::json) AS trabalho_hoje,
-      EXISTS(SELECT 1 FROM trabalhos_corte t WHERE t.numero_corte=c.numero AND t.status='EM_TRABALHO') AS trabalho_pendente
+      EXISTS(SELECT 1 FROM trabalhos_corte t WHERE t.numero_corte=c.numero AND t.status='EM_TRABALHO') AS trabalho_pendente,
+      COALESCE((SELECT json_agg(json_build_object('id',t.id,'operador',t.operador,'turno',t.turno,
+        'data',TO_CHAR(t.data_trabalho,'YYYY-MM-DD'),'dias_pendente',$1::date-t.data_trabalho,
+        'hora_inicio',TO_CHAR(COALESCE(t.inicio_real_em,t.iniciado_em) AT TIME ZONE 'America/Sao_Paulo','HH24:MI')) ORDER BY t.data_trabalho,t.id)
+        FROM trabalhos_corte t WHERE t.numero_corte=c.numero AND t.status='EM_TRABALHO' AND t.data_trabalho<$1::date),'[]'::json) AS trabalhos_pendentes_anteriores
       FROM cortes c
 
       LEFT JOIN LATERAL (

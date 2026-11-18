@@ -1,6 +1,6 @@
 # Padronização de nomes existentes
 
-No **Admin**, abra **Padronizar nomes**, abaixo da busca de corte.
+No **Admin**, abra a aba **Nomenclaturas** e a seção **Padronizar nomes**.
 
 1. Escolha **Modelos dos PIs** ou **Nomes dos cortes**.
 2. Busque uma parte do nome, como `CONJUNTO`. A busca aceita letras minúsculas e palavras sem os acentos portugueses mais comuns.

@@ -40,6 +40,7 @@ router.post("/producao", async (req, res) => {
         const t=consulta.rows[0]
         if(!t)throw new ErroRegra(404,"Trabalho não encontrado neste corte.")
         if(t.status!=="EM_TRABALHO")throw new ErroRegra(412,"Este trabalho já foi lançado. Atualize o corte.")
+        if(req.body.trabalho_versao!==undefined&&(!Number.isInteger(req.body.trabalho_versao)||req.body.trabalho_versao!==t.versao))throw new ErroRegra(412,"O início deste trabalho foi corrigido. Atualize e confirme os dados novamente.")
         if(req.body.corrigir_inicio===true)inicioReal=await conferirInicioReal(client,{data,hora_inicio})
         if((!inicioReal&&(data!==t.dia||hora_inicio!==t.inicio))||turno!==t.turno||operador!==t.operador||!hora_fim)throw new ErroRegra(400,"Mantenha os dados do início registrado ou informe o início real, e preencha a hora do término.")
         const base=await client.query("SELECT id,folha_parou FROM producao WHERE numero_corte=$1 ORDER BY id DESC LIMIT 1",[numero_corte])

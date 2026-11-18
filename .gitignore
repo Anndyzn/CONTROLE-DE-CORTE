@@ -1,6 +1,11 @@
 node_modules/
+.npm-cache/
 database.db
 .env
+.env.*
+!.env.example
+outputs/
+*.tsbuildinfo
 dist/
 .sql
 *.log

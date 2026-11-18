@@ -204,6 +204,36 @@ test('padronização real no PostgreSQL preserva dados, recusa prévia antiga e 
       assert.ok(cliques.every(r=>r.status===200))
       for(const clique of cliques)assert.equal((await clique.json()).trabalho.id,novoTrabalho.id)
       assert.equal(Number((await pool.query('SELECT COUNT(*) FROM trabalhos_corte WHERE numero_corte=931')).rows[0].count),2)
+      // Correção/cancelamento exigem motivo, versão atual e auditoria atômica.
+      const alterar=(metodo,id,body)=>fetch(base+`/cortes/931/trabalhos/${id}`,{method:metodo,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+      const correcao={operador:'ANA',turno:'2º TURNO',data:ontem.data,hora_inicio:'07:00',versao:0,responsavel:'TESTE ISOLADO',motivo:'Operador e horário incorretos'}
+      assert.equal((await alterar('PUT',novoTrabalho.id,{...correcao,motivo:''})).status,400)
+      const original=(await pool.query('SELECT * FROM trabalhos_corte WHERE id=$1',[novoTrabalho.id])).rows[0]
+      assert.equal((await alterar('PUT',novoTrabalho.id,{...correcao,responsavel:'FALHA TESTE'})).status,500)
+      assert.deepEqual((await pool.query('SELECT * FROM trabalhos_corte WHERE id=$1',[novoTrabalho.id])).rows[0],original)
+      const corrigir=await alterar('PUT',novoTrabalho.id,correcao);assert.equal(corrigir.status,200)
+      const inicioCorrigido=(await corrigir.json()).trabalho
+      assert.equal(inicioCorrigido.versao,1);assert.equal(inicioCorrigido.operador,'ANA');assert.equal(inicioCorrigido.hora_inicio,'07:00')
+      assert.deepEqual(new Date(inicioCorrigido.iniciado_em),original.iniciado_em)
+      assert.equal((await alterar('PUT',novoTrabalho.id,correcao)).status,412)
+      const mesasPendentes=await(await fetch(base+'/cortes-em-andamento')).json()
+      const pendencia=mesasPendentes.find(c=>c.numero===931).trabalhos_pendentes_anteriores
+      assert.equal(pendencia.length,1);assert.equal(pendencia[0].dias_pendente,1);assert.equal(pendencia[0].operador,'ANA')
+      const atual=await(await fetch(base+'/cortes/931/trabalhos')).json()
+      const baseProducao=atual.trabalhos[0]
+      assert.equal((await produzir({...producao,numero_corte:931,data:inicioCorrigido.data,turno:inicioCorrigido.turno,operador:inicioCorrigido.operador,hora_inicio:'07:00',folha_inicio:10,folha_parou:20,trabalho_id:novoTrabalho.id,trabalho_versao:0,producao_base_id:baseProducao.producao_base_id})).status,412)
+      assert.equal((await alterar('DELETE',novoTrabalho.id,{...correcao,versao:0})).status,412)
+      assert.equal((await alterar('DELETE',novoTrabalho.id,{...correcao,versao:1,responsavel:'FALHA TESTE'})).status,500)
+      assert.equal((await pool.query('SELECT status FROM trabalhos_corte WHERE id=$1',[novoTrabalho.id])).rows[0].status,'EM_TRABALHO')
+      assert.equal((await alterar('DELETE',novoTrabalho.id,{...correcao,versao:1})).status,200)
+      assert.equal((await alterar('DELETE',novoTrabalho.id,{...correcao,versao:1})).status,412)
+      assert.equal((await alterar('PUT',primeiroTrabalho.id,correcao)).status,412)
+      const auditoria=(await pool.query('SELECT acao,antes,depois,motivo FROM historico_admin WHERE registro_id=$1 AND acao IN (\'CORRECAO_INICIO\',\'CANCELAMENTO_INICIO\') ORDER BY id',[novoTrabalho.id])).rows
+      assert.deepEqual(auditoria.map(r=>r.acao),['CORRECAO_INICIO','CANCELAMENTO_INICIO'])
+      assert.equal(auditoria[0].antes.operador,'CICERA');assert.equal(auditoria[0].depois.operador,'ANA');assert.ok(auditoria[0].motivo)
+      assert.equal(auditoria[1].depois.status,'CANCELADO')
+      assert.equal((await assumirMesmo()).status,201)
+      assert.equal(Number((await pool.query('SELECT COUNT(*) FROM producao WHERE numero_corte=931')).rows[0].count),1)
       assert.equal((await post('/cortes/923/trabalhos',{operador:'TESTE',turno:'1º TURNO'})).status,409)
       await pool.query(`CREATE FUNCTION recusar_cor_fixture() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.cor='FALHA' THEN RAISE EXCEPTION 'Batch fixture failure'; END IF; RETURN NEW; END $$;
         CREATE TRIGGER recusar_cor_fixture BEFORE INSERT ON itens_corte FOR EACH ROW EXECUTE FUNCTION recusar_cor_fixture()`)

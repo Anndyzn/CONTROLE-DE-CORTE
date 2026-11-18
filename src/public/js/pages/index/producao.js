@@ -236,6 +236,13 @@ export async function salvarProducao() {
   }
 
 
+  const trabalho=dadosTrabalho()
+  if(!trabalho.trabalho_id){
+    mostrarToast("Assuma o corte e confirme o horário de início antes de registrar a produção.","atencao","Confirme o início")
+    document.getElementById("painelAssumirCorte")?.scrollIntoView({behavior:"smooth",block:"center"})
+    return
+  }
+
   const camposInvalidos =
     obterCamposInvalidos({
       data,
@@ -272,7 +279,7 @@ export async function salvarProducao() {
   }
 
   const producao = {
-    ...dadosTrabalho(),
+    ...trabalho,
     data,
     numero_corte: Number(numeroCorte),
     turno,

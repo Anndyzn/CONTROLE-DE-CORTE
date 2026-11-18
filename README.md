@@ -1,176 +1,147 @@
-# 🧵 Sistema de Controle de Corte
+# Sistema de Controle de Corte
 
-Sistema web desenvolvido para otimizar o controle de cortes na produção têxtil, permitindo acompanhar cortes, turnos, apontamentos e consumo de materiais de forma organizada, padronizada e confiável.
+Controle interno da produção têxtil: cortes, ocupação das mesas, operadores,
+turnos, folhas produzidas, consumo e peças cortadas. Também organiza códigos
+para facilitar o lançamento manual no Sankhya.
 
----
+## Uso diário
 
-## 📌 Problemas identificados
+1. Crie um corte em uma mesa livre, usando as sugestões de nomes existentes.
+2. Use **Assumir** para registrar operador, turno e início do trabalho.
+3. Ao lançar a produção, confirme o início e informe término real, folha final
+   e se o corte continua em produção ou foi finalizado.
+4. Após finalizar, cadastre os PIs com modelo, cor, tecido, consumo e quantidade;
+   confira os itens e confirme os PIs.
+5. No **Sankhya**, confira os produtos, copie os códigos e marque manualmente
+   os produtos que já foram lançados no ERP.
 
-Dificuldade em:
+O servidor impede valores negativos, folha final menor que a inicial, produção
+em cortes finalizados e criação de outro corte em mesa ocupada.
 
-- Saber onde cada corte parou
-- Garantir continuidade correta entre turnos
-- Controlar histórico de produção
-- Registrar materiais utilizados no corte
-- Evitar erros de planilhas manuais
-- Consultar rapidamente cortes finalizados e em andamento
-- Controlar perdas, sobras e metragem utilizada
-- Centralizar informações da produção em um único sistema
+## Recursos por tela
 
----
+- **Início:** ocupação das mesas, última produção, trabalho iniciado, cortes em
+  andamento, busca por número e finalizados de hoje ou até dois dias anteriores.
+  O cartão **Cortes finalizados sem PIs** acompanha cortes sem itens cadastrados,
+  dentro do marco de acompanhamento; históricos excluídos não geram cobranças retroativas.
+- **Produção:** início pendente pode ser corrigido ou cancelado com responsável
+  e motivo. Inícios de dias anteriores sem produção lançada aparecem destacados.
+- **Rascunhos:** cadastro, produção e PIs podem ser recuperados no mesmo navegador.
+  Restaurar não envia dados; o sistema verifica se o estado atual permite a recuperação.
+- **Consultar:** filtros mantidos no navegador, histórico e Excel dos resultados
+  filtrados, com abas Cortes, Produção e PIs.
+- **Sankhya:** fila de pendentes e lançados, vários produtos por PI, componentes
+  de conjuntos e cópia de códigos. Produtos podem ser aplicados às outras cores
+  do mesmo modelo e tecido, preservando escolhas existentes.
+- **Admin:** correções, reaberturas, exclusões, padronização de nomes e nomenclaturas
+  sem vínculo. Histórico com antes/depois, responsável e motivo; padronizações
+  realizadas juntas aparecem agrupadas.
 
-## 💡 Solução desenvolvida
+O lançamento no Sankhya continua manual: este sistema não cria OPs nem movimenta
+estoque. O catálogo de códigos é local. Não há autenticação; o responsável nas
+alterações é informado pela pessoa.
 
-Sistema web interno que permite:
+## Executar localmente
 
-- Cadastro de cortes
-- Registro de produção por turno
-- Continuidade automática entre operadores e turnos
-- Histórico completo de produção
-- Controle de itens e materiais do corte
-- Dashboard resumido do corte
-- Consulta avançada de cortes
-- Controle de status dos cortes
-- Visualização de cortes em andamento em tempo real
+Requisitos: Node.js 22, npm e conexão com o PostgreSQL do projeto provisionado.
+O CI também testa o sistema em Node.js 24.
 
----
+```powershell
+npm.cmd ci
+Copy-Item .env.example .env
+```
 
-## ⚙️ Funcionalidades
+Preencha `DATABASE_URL` no `.env` com a conexão autorizada e execute:
 
-### Padronização de nomes
-- No Admin, **Padronizar nomes** permite selecionar grafias existentes dos nomes dos cortes ou modelos dos PIs e conferir os registros antes de aplicar.
-- Exige responsável e motivo, audita cada alteração e recusa prévia desatualizada. Modelos preservam seus vínculos Sankhya por cópia de correspondências, com bloqueio em caso de conflito.
-- Produto do novo corte e modelo dos PIs oferecem até cinco sugestões dos nomes existentes, permitindo digitação livre.
-- Funcionamento e limites: [Padronização de nomes](docs/padronizacao-nomes.md).
+```powershell
+npm.cmd run dev
+```
 
-### Histórico no Admin
+Acesse **http://localhost:3000**. A porta pode ser definida por `PORT`.
+Em outros shells, use `npm` no lugar de `npm.cmd`.
+O comando `dev` não reinicia automaticamente após alterações no backend.
 
-Na Home, abrir um corte em produção leva ao lançamento e ao próximo campo vazio;
-cortes finalizados continuam abrindo os PIs. Formulários de produção e PIs mostram
-erros junto aos campos, com foco no primeiro problema. No Sankhya, cada PI informa
-Salvando / Salvo ou a falha, restaurando a seleção anterior quando a gravação é recusada.
+O servidor prepara as estruturas auxiliares de histórico, trabalhos e Sankhya.
+As tabelas principais `cortes`, `producao` e `itens_corte` precisam existir antes,
+em banco provisionado ou restaurado de backup verificado. A conexão precisa
+poder preparar as estruturas auxiliares. O arquivo legado `.sql` não é uma
+migração completa da versão atual.
 
-O histórico no Admin apresenta campos **Antes / Depois**, nomes anteriores e novos,
-responsável, motivo e data. Permite filtrar por corte, tipo, período e texto (incluindo
-nomenclaturas antigas), com paginação para consultar todo o histórico registrado.
-Padronizações feitas juntas aparecem agrupadas, destacando os nomes antigos e o nome
-que deve ser usado. Os detalhes preservam cada corte e PI afetado. Grupos continuam
-sendo reunidos ao carregar páginas anteriores, indicando a quantidade já exibida.
+Se o `.env` local apontar para produção, gravações locais também alteram os dados
+de produção. Use banco separado para experimentos.
 
-### Códigos Sankhya
+Para executar a versão compilada:
 
-Na Home, **PIs ainda não confirmados** mantém visíveis os cortes com produção finalizada
-e PIs abertos, sem limite de data, incluindo cortes com zero ou um PI. **Continuar PIs**
-abre diretamente o corte; a confirmação remove a pendência.
+```powershell
+npm.cmd run build
+npm.cmd start
+```
 
-No Sankhya, **Aplicar produtos às outras cores** replica somente os códigos selecionados
-para PIs do mesmo corte, modelo e tecido, com outra cor e sem seleção/vínculo já existente.
-Cor, consumo, quantidade e marcações de lançamento não são copiados. O processo é
-transacional e preserva escolhas anteriores.
+## Verificação
 
-**Salvar e adicionar outro PI** mantém modelo e tecido, limpa cor e valores e foca a
-próxima cor. Falhas preservam os dados; cliques duplos não duplicam o envio. Se a pessoa
-alterar os campos durante o envio, eles não são apagados depois de salvar.
+```powershell
+npm.cmd test
+npm.cmd run test:padronizacao
+npm.cmd run test:backup
+```
 
-No Sankhya, **Próximo pendente** consulta a fila atualizada e abre outro corte finalizado
-que ainda precisa de lançamento, começando pelo mais antigo. Não marca lançamentos e
-aguarda uma gravação em andamento antes de permitir a navegação.
+- `test`: compila e executa testes unitários e de interface simulada, sem banco real.
+- `test:padronizacao`: integração com PostgreSQL 17 descartável, incluindo nomes,
+  vínculos, acompanhamento e trabalhos iniciados.
+- `test:backup`: testa backup e recuperação com dados fictícios em banco isolado.
 
-- **Pendentes / Lançados / Todos** acompanham os cortes abertos na primeira ativação e os novos. A fila abre os códigos diretamente, sem formulário de busca. Links antigos para um corte específico continuam funcionando.
-- No Admin, **Correções / Nomenclaturas / Histórico** ficam em abas; Nomenclaturas mostra os nomes acompanhados que ainda precisam de produto Sankhya, com atalho para vincular.
+Os dois testes de integração exigem Docker disponível. O script manual
+`tests/integracao-sankhya-nomes.cjs` verifica planos SQL em transação somente leitura
+usando `DATABASE_URL`; não faz parte da suíte automática.
+O GitHub Actions executa as verificações em pushes e pull requests, sem credenciais de produção.
 
-- Em **Produtos possíveis por nome do corte**, liste as nomenclaturas existentes e salve alternativas do catálogo Sankhya. Depois escolha a alternativa no PI para preencher os códigos e descrições do ERP; controles e vínculo efetivo são conferidos antes de salvar. A tela Consultar e os registros históricos permanecem como estão.
-- Em **PIs cortados**, cada item mostra seus produtos vinculados e um atalho para conferir/cadastrar a correspondência em outra aba. A associação usa modelo do PI, tecido e cor; o nome do corte é apenas uma identificação.
-- Vínculos podem ser conferidos em itens antigos e novos, mesmo antes da confirmação dos PIs. Eles não indicam que uma OP já foi lançada no ERP.
-- Na Home, **Sankhya** abre a conferência dos itens de cortes finalizados com PIs confirmados.
-- Cadastre correspondências por modelo, tecido e cor, com um ou vários produtos e controles do ERP.
-- A tela atual mostra somente o produto e seu código para copiar. Uma opção cadastrada aparece automaticamente; conjuntos mostram seus componentes juntos. Excel e editor individual foram retirados da interface.
-- Escolha produtos e uma variação por produto no catálogo local fornecido pela equipe. Conjunto feminino e terno carregam seus dois componentes juntos; confira e salve. A lista não é sincronizada com o ERP.
-- O guia não importa dados nem cria OPs no Sankhya; apontamento, consumo real e confirmação continuam no ERP.
-- Funcionamento e próximos passos: [Integração Sankhya](docs/integracao-sankhya.md).
+### Dependências
 
-### Backup e testes no GitHub
-- Backup local do schema `public`, com SHA-256 e conferência por recuperação em PostgreSQL isolado.
-- Rotina diária no Windows, às 8h de Brasília, dependente do computador e do Docker Desktop disponíveis.
-- Comandos, requisitos e recuperação protegida: [Backup e recuperação](docs/backup-e-recuperacao.md).
-- GitHub Actions executa os testes em Node.js 22/24 e testa uma recuperação real com dados fictícios em PostgreSQL 17, em pushes e pull requests. Não são usadas credenciais de produção no CI.
-- Para o Render aguardar os testes, selecione **Settings → Auto-Deploy → After CI Checks Pass** depois de confirmar uma execução verde no GitHub. **On Commit** publica sem esperar esses testes.
+Use `npm.cmd ci` para instalar as versões verificadas do `package-lock.json`.
+A ferramenta de desenvolvimento é `ts-node`; compilador e tipos ficam nas dependências
+de desenvolvimento. O `overrides` do ExcelJS fixa `uuid` em `11.1.1`, versão corrigida
+que mantém a API CommonJS usada pela biblioteca. Ao atualizar o ExcelJS, reavalie
+esse ajuste e confira a geração e leitura dos arquivos Excel.
+Aviso do mantenedor: [correção do uuid](https://github.com/uuidjs/uuid/security/advisories/GHSA-w5hq-g745-h8pq).
 
-### Rascunhos e histórico administrativo
-- No resumo do corte no Admin, **Corrigir produto** permite ajustar somente o nome, sem alterar mesa, número, produção ou PIs. Exige responsável e motivo e registra nome anterior e novo no histórico. Uma correção baseada em nome desatualizado é recusada.
-- Os campos do cadastro do corte, da produção e dos PIs são salvos automaticamente neste navegador, separados por corte.
-- Ao voltar, use **Restaurar** ou **Descartar** no aviso de rascunho. Restaurar preenche os campos; o envio continua manual.
-- Após um envio confirmado, somente o rascunho daquele formulário é removido. Falhas de conexão mantêm o rascunho.
-- A restauração consulta o estado atual do corte. Produção com lançamento mais recente, cortes já finalizados e PIs registrados ou alterados não recebem valores antigos automaticamente.
-- Rascunhos de `localhost` e do site no Render são separados, assim como navegadores e computadores diferentes.
-- Correções, reaberturas e exclusões pedem **responsável** e **motivo**, validados também pelo servidor. Isso inclui correções e exclusões de PIs na tela inicial.
-- O responsável é informado pela pessoa; o sistema ainda não autentica sua identidade.
-- O Admin oferece um histórico paginado, com filtro por corte, data e hora, motivo e dados anteriores/posteriores. Exclusões completas conservam também os lançamentos e PIs removidos nesse histórico; isso não substitui um backup.
-- A tabela `historico_admin` e seu índice são preparados automaticamente na inicialização, sem modificar os registros existentes de cortes, produção ou PIs. A conexão PostgreSQL precisa poder criar a tabela na primeira execução. O acesso direto à tabela pelo cliente Supabase fica bloqueado por RLS; a aplicação usa sua conexão de servidor.
-- A alteração principal e o registro no histórico são feitos na mesma transação: se o histórico falhar, a alteração é desfeita.
-- O histórico cobre as ações feitas após a instalação desta versão; alterações anteriores não são reconstruídas.
+## Backup e publicação
 
-### 📋 Gestão de cortes
-- 🔍 Buscar corte
-- ➕ Criar novo corte
-- 🏷️ Cadastro de produto e mesa
-- 📌 Controle de status do corte
+```powershell
+npm.cmd run backup:create
+npm.cmd run backup:status
+```
 
-### 🏭 Produção
-- 👷 Registro por operador e turno
-- 🔄 Continuidade automática da última folha
-- ⏱️ Controle de horário e duração
-- 📊 Histórico completo de apontamentos
+Consulte [Backup e recuperação](docs/backup-e-recuperacao.md) para requisitos,
+agendamento diário, verificação e restauração protegida. A rotina local depende
+do computador disponível. Backups e `.env` não devem ser versionados.
 
-### 🧵 Itens do corte
-- 📦 Cadastro de modelos
-- 🎨 Controle de cores
-- 🧶 Controle de tecidos
-- 📏 Metragem utilizada
-- ♻️ Controle de sobra
-- ⚠️ Controle de perda
-- 📦 Quantidade de peças produzidas
+No Render: configure `DATABASE_URL`, build `npm ci && npm run build` e inicialização
+`npm start`. O servidor usa a variável `PORT` fornecida pelo ambiente.
+**On Commit** publica sem aguardar testes. Para aguardar o GitHub Actions, use
+**After CI Checks Pass** após confirmar uma execução verde. Confira o commit no deploy.
 
-### 📈 Consultas e dashboard
-- **Exportar Excel** baixa um arquivo `.xlsx` com três abas: **Cortes** (resumo e totais), **Produção** e **PIs**. Exporta todos os resultados da última busca, além dos 20 inicialmente visíveis. Os mesmos filtros são aplicados no servidor; datas consideram a última produção de cada corte, como na consulta. As abas de detalhes incluem o histórico completo dos cortes encontrados. O relatório é somente leitura e preserva números, datas e acentos.
-- 📊 Dashboard automático do corte
-- 📋 Lista de cortes em andamento
-- 🔎 Consulta de cortes finalizados
-- 📅 Filtros por data e status
-- 📑 Histórico detalhado do corte
-- 🧾 Visualização dos itens utilizados
+A configuração Docker existente é de desenvolvimento. Para subir apenas o app:
+`docker compose up --build app`. O serviço opcional `cloudflared` depende de
+`CLOUDFLARE_TOKEN` e não é necessário no Render.
 
-### 🛠️ Administração
-- ✏️ Reabertura de itens do corte
-- 🗑️ Exclusão de itens
-- 📝 Edição de itens cadastrados
-- 🔒 Bloqueio automático após finalização
+## Estrutura
 
----
+| Caminho | Conteúdo |
+| --- | --- |
+| `src/server.ts` | Inicialização do Express e das estruturas auxiliares |
+| `src/routes/` | Rotas HTTP e validação das operações |
+| `src/services/` | Regras compartilhadas, transações e histórico |
+| `src/public/` | HTML, CSS, JavaScript e catálogo local Sankhya |
+| `scripts/` | Backup, recuperação e agendamento |
+| `tests/` | Testes unitários e integrações isoladas |
+| `docs/` | Procedimentos e documentação funcional |
+| `.github/workflows/` | Verificação automática no GitHub |
 
-## 🛠️ Tecnologias utilizadas
+Backend: Node.js, Express e TypeScript. Banco: PostgreSQL/Supabase.
+Frontend: HTML, CSS e JavaScript com módulos.
 
-### Backend
-- Node.js
-- Express
-- TypeScript
+## Documentação complementar
 
-### Banco de dados
-- PostgreSQL
-- Supabase
-
-### Frontend
-- HTML5
-- CSS3
-- JavaScript
-
-### Infraestrutura
-- Docker
-- Docker Compose
-- Render
-
----
-
-## 🎯 Objetivo do sistema
-
-Melhorar a organização e rastreabilidade do setor de corte, reduzindo erros operacionais, aumentando a visibilidade da produção e facilitando a tomada de decisão no ambiente fabril.
+- [Padronização de nomes](docs/padronizacao-nomes.md)
+- [Apoio ao lançamento no Sankhya](docs/integracao-sankhya.md)
+- [Backup e recuperação](docs/backup-e-recuperacao.md)

@@ -163,3 +163,29 @@ test('cancelar o descarte mantém o rascunho; confirmar descarta somente o que e
   assert.equal(store.ler()['843'], undefined)
   assert.ok(store.ler()['844'])
 })
+
+test('salva término e folha como rascunho vinculado ao início confirmado e restaura sem enviar produção',async()=>{
+ const vinculo={id:'15',versao:2,producao_base_id:'10',corrigido:false}
+ let recebidos
+ modulo.configurarRascunhoTrabalho({obterContexto:()=>vinculo,restaurar:async(numero,draft)=>{recebidos={numero,draft};elementos.horaFim.value=draft.campos.horaFim;elementos.folhaParouInput.value=draft.campos.folhaParouInput;return true}})
+ modulo.inicializarRascunhos(async()=>({ultima_producao:{id:10,status:'EM PRODUÇÃO'}}))
+ modulo.selecionarContextoRascunho({numero:'843',novo:false,ultimaProducaoId:10})
+ elementos.horaFim.value='17:20';elementos.folhaParouInput.value='85'
+ modulo.salvarRascunhoGrupo('producao')
+ assert.deepEqual(store.ler()['843'].grupos.producao.base.trabalho,vinculo)
+ elementos.horaFim.value='';elementos.folhaParouInput.value=''
+ await modulo.restaurarRascunho()
+ assert.equal(recebidos.numero,'843');assert.equal(elementos.horaFim.value,'17:20');assert.equal(elementos.folhaParouInput.value,'85')
+ assert.ok(store.ler()['843'])
+})
+
+test('não remove rascunho de outro início mesmo se os campos forem iguais',()=>{
+ let vinculo={id:'15',versao:0,producao_base_id:'10',corrigido:false}
+ modulo.configurarRascunhoTrabalho({obterContexto:()=>vinculo,restaurar:async()=>false})
+ modulo.selecionarContextoRascunho({numero:'843',novo:false,ultimaProducaoId:10})
+ elementos.horaFim.value='17:20';modulo.salvarRascunhoGrupo('producao')
+ vinculo={...vinculo,id:'16'}
+ assert.equal(modulo.versaoRascunho('producao','843'),null)
+ modulo.limparRascunhoGrupo('producao','843',null)
+ assert.equal(store.ler()['843'].grupos.producao.base.trabalho.id,'15')
+})

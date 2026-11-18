@@ -1,6 +1,7 @@
 import { apiGet } from "../core/api.js"
 
 const acoes = {
+  CORRECAO_INICIO:"Início de trabalho corrigido", CANCELAMENTO_INICIO:"Início de trabalho cancelado",
   PADRONIZACAO_PRODUTO: "Nome do corte padronizado", PADRONIZACAO_MODELO: "Modelo do PI padronizado",
   EDICAO_PRODUTO: "Nome do produto corrigido",
   EDICAO_PRODUCAO: "Produção corrigida", REABERTURA_PRODUCAO: "Corte reaberto",
@@ -8,6 +9,7 @@ const acoes = {
   REABERTURA_PIS: "PIs reabertos", EXCLUSAO_CORTE: "Corte excluído"
 }
 const campos = {
+  iniciado_em:"Início registrado originalmente",inicio_real_em:"Início real",data_trabalho:"Data do trabalho",versao:"Versão do início",
   numero: "Corte", numero_corte: "Corte", produto: "Nome do corte", mesa: "Mesa", data: "Data",
   turno: "Turno", operador: "Operador", folha_inicio: "Folha inicial", folha_parou: "Folha final",
   hora_inicio: "Hora inicial", hora_fim: "Hora final", status: "Status", modelo: "Modelo do PI",

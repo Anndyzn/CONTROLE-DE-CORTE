@@ -3,7 +3,7 @@ import dbPg from "../database-pg"
 import { numeroCorteValido } from "../utils/validacoes"
 
 const router = Router()
-const acoes = ["PADRONIZACAO_PRODUTO","PADRONIZACAO_MODELO","EDICAO_PRODUTO","EDICAO_PRODUCAO","REABERTURA_PRODUCAO","EXCLUSAO_PRODUCAO","EDICAO_PI","EXCLUSAO_PI","REABERTURA_PIS","EXCLUSAO_CORTE"]
+const acoes = ["CORRECAO_INICIO","CANCELAMENTO_INICIO","PADRONIZACAO_PRODUTO","PADRONIZACAO_MODELO","EDICAO_PRODUTO","EDICAO_PRODUCAO","REABERTURA_PRODUCAO","EXCLUSAO_PRODUCAO","EDICAO_PI","EXCLUSAO_PI","REABERTURA_PIS","EXCLUSAO_CORTE"]
 function dataValida(valor: unknown) {
   if(typeof valor!=="string" || !/^\d{4}-\d{2}-\d{2}$/.test(valor) || valor.startsWith("0000"))return false
   const d=new Date(`${valor}T00:00:00Z`)

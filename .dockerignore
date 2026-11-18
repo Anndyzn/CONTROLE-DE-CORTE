@@ -1,0 +1,14 @@
+.git
+node_modules
+.npm-cache
+dist
+.env
+.env.*
+backup
+backups
+outputs
+*.log
+*.dump
+*.backup
+*.db
+.sql

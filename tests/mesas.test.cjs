@@ -43,6 +43,13 @@ test('trabalho de hoje não substitui a data da última produção',()=>{
  assert.match(texto,/17\/11\/2026/);assert.match(texto,/MATHEUS/)
 })
 
+test('início de ontem sinaliza produção pendente sem afirmar que há trabalho hoje',()=>{
+ modulo.atualizarOcupacaoMesas([{numero:929,mesa:'MESA 1',produto:'TESTE',trabalho_hoje:[],trabalhos_pendentes_anteriores:[{operador:'ANA',turno:'1º TURNO',data:'2026-11-17',hora_inicio:'08:10',dias_pendente:1}],ultima_producao:null}])
+ assert.match(elementos.painelMesas.textContent,/Produção ainda não lançada/)
+ assert.match(elementos.painelMesas.textContent,/ANA.*ontem às 08:10/)
+ assert.doesNotMatch(elementos.painelMesas.textContent,/Em trabalho hoje/)
+})
+
 test('esconde Assumir enquanto há início pendente e mantém acesso ao lançamento',()=>{
  modulo.inicializarControleMesas({assumirTrabalho:async()=>{},abrirCorte:async()=>{}})
  modulo.atualizarOcupacaoMesas([{numero:929,mesa:'MESA 1',produto:'TESTE',trabalho_pendente:true}])
