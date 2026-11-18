@@ -14,6 +14,8 @@ import sankhyaNomesRoutes from "./routes/sankhya-nomes.routes"
 import { prepararNomesSankhya } from "./services/sankhya-nomes"
 import lancamentosSankhyaRoutes, { prepararLancamentosSankhya } from "./routes/sankhya-lancamentos.routes"
 import acompanhamentoSankhyaRoutes, { prepararAcompanhamentoSankhya } from "./routes/sankhya-acompanhamento.routes"
+import trabalhosRoutes from "./routes/trabalhos.routes"
+import { prepararTrabalhosCorte } from "./services/trabalho-corte"
 
 const app = express()
 
@@ -45,11 +47,12 @@ app.use(sankhyaNomesRoutes)
 app.use(lancamentosSankhyaRoutes)
 app.use(acompanhamentoSankhyaRoutes)
 app.use(nomenclaturasRoutes)
+app.use(trabalhosRoutes)
 
 const PORT =
   process.env.PORT || 3000
 
-prepararHistoricoAdmin().then(prepararCorrespondenciasSankhya).then(prepararNomesSankhya).then(prepararLancamentosSankhya).then(prepararAcompanhamentoSankhya).then(() => {
+prepararHistoricoAdmin().then(prepararCorrespondenciasSankhya).then(prepararNomesSankhya).then(prepararLancamentosSankhya).then(prepararAcompanhamentoSankhya).then(prepararTrabalhosCorte).then(() => {
   app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`)
   })

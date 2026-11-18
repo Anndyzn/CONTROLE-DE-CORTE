@@ -60,8 +60,8 @@ export async function carregarItensCorte(numeroCorte, {aindaAtual = () => true} 
       atualizarVinculosPIs(numeroCorte, [], [], {aindaAtual})
       tabela.innerHTML = `
         <tr>
-          <td colspan="9">
-            Nenhum item encontrado
+          <td colspan="9" class="estado-vazio">
+            ${itensFinalizados ? "Nenhum PI cadastrado neste corte." : "Nenhum PI cadastrado. Use o formulário acima para cadastrar os itens cortados."}
           </td>
         </tr>
       `

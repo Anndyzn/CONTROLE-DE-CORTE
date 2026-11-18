@@ -92,7 +92,7 @@ test('cartão seleciona o corte e apresenta o produto como texto', async () => {
 test('resumo vazio e falha de carregamento têm mensagens diferentes', async t => {
   api = async () => ({ ...resposta, cortes: [] })
   await modulo.carregarResumoFinalizados()
-  assert.equal(elementos.estadoFinalizadosRecentes.textContent, 'Nenhum corte finalizado hoje.')
+  assert.equal(elementos.estadoFinalizadosRecentes.textContent, 'Nenhum corte finalizado hoje. Use Até 2 dias atrás para ampliar o período.')
   assert.equal(elementos.totalFinalizadosRecentes.textContent, '0 cortes')
   t.mock.method(console, 'error', () => {})
   api = async () => { throw new Error('Falha de conexão') }

@@ -243,7 +243,11 @@ router.get("/cortes-em-andamento", async (req, res) => {
           'folha_inicio', p.folha_inicio,
           'folha_parou', p.folha_parou,
           'dias_sem_lancamento', $1::date - p.data::date
-        ) END AS ultima_producao
+          ) END AS ultima_producao,
+          COALESCE((SELECT json_agg(json_build_object('id',t.id,'operador',t.operador,'turno',t.turno,
+            'hora_inicio',TO_CHAR(COALESCE(t.inicio_real_em,t.iniciado_em) AT TIME ZONE 'America/Sao_Paulo','HH24:MI')) ORDER BY t.iniciado_em)
+            FROM trabalhos_corte t WHERE t.numero_corte=c.numero AND t.data_trabalho=$1::date AND t.status='EM_TRABALHO'),'[]'::json) AS trabalho_hoje,
+      EXISTS(SELECT 1 FROM trabalhos_corte t WHERE t.numero_corte=c.numero AND t.status='EM_TRABALHO') AS trabalho_pendente
       FROM cortes c
 
       LEFT JOIN LATERAL (

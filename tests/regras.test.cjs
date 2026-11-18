@@ -74,6 +74,7 @@ async function consultar(sql, valores = [], desfazer = []) {
   if (/SELECT status FROM producao/.test(query)) {
     return { rows: producoesDoCorte(valores[0]).slice(0, 1) }
   }
+  if(query.startsWith("SELECT id FROM trabalhos_corte"))return {rows:[]}
   if(query.startsWith("SELECT id, TO_CHAR(data"))return {rows:producoesDoCorte(valores[0]).filter(p=>p.data===valores[1]&&normalizarMesa(p.turno)===valores[2]&&normalizarMesa(p.operador)===valores[3]).slice(0,10)}
   if (/SELECT id, numero_corte FROM producao WHERE id/.test(query)) {
     return { rows: banco.producao.filter(p => BigInt(p.id) === BigInt(valores[0])) }

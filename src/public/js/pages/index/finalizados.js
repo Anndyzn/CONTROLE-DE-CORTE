@@ -46,8 +46,8 @@ function renderizarResumo() {
 
   estado.hidden = cortes.length > 0
   estado.textContent = periodoSelecionado === "hoje"
-    ? "Nenhum corte finalizado hoje."
-    : "Nenhum corte finalizado hoje ou nos dois dias anteriores."
+    ? "Nenhum corte finalizado hoje. Use Até 2 dias atrás para ampliar o período."
+    : "Nenhum corte finalizado neste período. Acompanhe os cortes em andamento."
 
   cortes.forEach((corte) => {
     const botao = document.createElement("button")

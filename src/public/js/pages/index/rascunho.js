@@ -55,6 +55,7 @@ export function atualizarBaseProducaoRascunho(numero, id) {
 }
 
 export function salvarRascunhoGrupo(grupo) {
+  if(grupo==="producao"&&elemento("secaoProducao")?.classList.contains("producao-vinculada"))return
   if (restaurando || !contexto || !campos[grupo]) return
   if (contexto.novo !== (grupo === "novo")) return
   const valores = Object.fromEntries(campos[grupo].map(id => [id, elemento(id)?.value ?? ""]))
@@ -114,7 +115,8 @@ export async function restaurarRascunho() {
     }
     const producao = rascunho.grupos.producao
     if (!rascunho.novo && producao) {
-      if (atual.ultima_producao?.status === "FINALIZADO") avisos.push("A produção já foi finalizada.")
+      if(elemento("secaoProducao")?.classList.contains("producao-vinculada"))avisos.push("Conclua ou cancele o início selecionado antes de restaurar a produção.")
+      else if (atual.ultima_producao?.status === "FINALIZADO") avisos.push("A produção já foi finalizada.")
       else if (String(atual.ultima_producao?.id ?? "") !== (typeof producao.base === "string" ? producao.base : producao.base?.id)
         || (producao.base && typeof producao.base === "object" && Number(atual.ultima_producao?.folha_parou ?? 0) !== producao.base.folha)) {
         avisos.push("Há um lançamento mais recente ou a última folha foi corrigida. Os campos de produção não foram restaurados.")

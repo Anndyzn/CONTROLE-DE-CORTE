@@ -38,19 +38,28 @@ function previaUltimaProducao(corte) {
   titulo.textContent = "Última produção"
   cabecalho.append(titulo)
   previa.append(cabecalho)
+  if(Array.isArray(corte.trabalho_hoje)&&corte.trabalho_hoje.length){
+    previa.className+=" mesa-previa-em-trabalho"
+    const trabalho=document.createElement("div");trabalho.className="mesa-trabalho-hoje"
+    const status=document.createElement("strong");status.textContent="Em trabalho hoje"
+    trabalho.append(status)
+    for(const inicio of corte.trabalho_hoje){const pessoa=document.createElement("span");pessoa.textContent=`${inicio.operador} · ${inicio.turno} · desde ${inicio.hora_inicio}`;trabalho.append(pessoa)}
+    previa.append(trabalho)
+  }
 
   const producao = corte.ultima_producao
   if (!producao) {
     const mensagem = document.createElement("p")
     mensagem.className = "mesa-producao-vazia"
     mensagem.textContent = producao === null
-      ? "Este corte ainda não possui lançamentos de produção."
+      ? "Sem produção registrada. Use Lançar produção para iniciar."
       : "Prévia indisponível. Use Atualizar para consultar a última produção."
     previa.append(mensagem)
     return previa
   }
 
   const dias = producao.dias_sem_lancamento
+  if(Number.isInteger(dias)&&(dias>=2||dias<0))previa.className+=" mesa-previa-antiga"
   if (Number.isInteger(dias)) {
     const idade = document.createElement("span")
     idade.className = "mesa-producao-idade"
@@ -172,6 +181,12 @@ function renderizarPainelMesas() {
           const abrir = botaoAcaoMesa("Lançar produção", () => acoesMesas.abrirCorte(corte.numero), true)
           abrir.setAttribute("aria-label", `Lançar produção no corte ${corte.numero} da ${mesa}`)
           item.append(abrir)
+        }
+        if(acoesMesas.assumirTrabalho&&!corte.trabalho_pendente&&!corte.trabalho_hoje?.length){
+          const assumir=botaoAcaoMesa("Assumir hoje",()=>acoesMesas.assumirTrabalho(corte),true)
+          assumir.className+=" mesa-assumir btn-secondary"
+          assumir.setAttribute("aria-label",`Assumir o trabalho no corte ${corte.numero} da ${mesa} hoje`)
+          item.append(assumir)
         }
         lista.append(item)
       }

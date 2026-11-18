@@ -36,6 +36,22 @@ beforeEach(async () => {
   modulo.inicializarControleMesas()
 })
 
+test('trabalho de hoje não substitui a data da última produção',()=>{
+ modulo.atualizarOcupacaoMesas([{numero:929,mesa:'MESA 1',produto:'TESTE',trabalho_hoje:[{operador:'ANA',turno:'1º TURNO',hora_inicio:'08:10'}],ultima_producao:{data:'2026-11-17',operador:'MATHEUS',folha_inicio:0,folha_parou:12,dias_sem_lancamento:1}}])
+ const texto=elementos.painelMesas.textContent
+ assert.match(texto,/Em trabalho hoje/);assert.match(texto,/ANA.*08:10/)
+ assert.match(texto,/17\/11\/2026/);assert.match(texto,/MATHEUS/)
+})
+
+test('esconde Assumir enquanto há início pendente e mantém acesso ao lançamento',()=>{
+ modulo.inicializarControleMesas({assumirTrabalho:async()=>{},abrirCorte:async()=>{}})
+ modulo.atualizarOcupacaoMesas([{numero:929,mesa:'MESA 1',produto:'TESTE',trabalho_pendente:true}])
+ assert.doesNotMatch(elementos.painelMesas.textContent,/Assumir hoje/)
+ assert.match(elementos.painelMesas.textContent,/Lançar produção/)
+ modulo.atualizarOcupacaoMesas([{numero:929,mesa:'MESA 1',produto:'TESTE',trabalho_pendente:false}])
+ assert.match(elementos.painelMesas.textContent,/Assumir hoje/)
+})
+
 test('mesa ocupada exibe aviso com o número do corte e desabilita o cadastro', () => {
   modulo.atualizarOcupacaoMesas([{numero:843, mesa:'MESA 1', status:'EM PRODUÇÃO'}])
   assert.equal(elementos.cadastrarCorte.disabled, true)
@@ -200,12 +216,12 @@ test('idade da produção distingue ontem, vários dias e datas futuras com os d
 test('corte sem produção é identificado; uma prévia indisponível não é confundida com ausência de lançamentos', () => {
   modulo.atualizarOcupacaoMesas([{...corteComProducao(),ultima_producao:null}])
   let card = elementos.painelMesas.children[0]
-  assert.match(card.textContent, /ainda não possui lançamentos de produção/)
+  assert.match(card.textContent, /Sem produção registrada.*Lançar produção/)
   assert.doesNotMatch(card.textContent,/Operador|Folhas/)
   modulo.atualizarOcupacaoMesas([{numero:922,produto:'VEU GOTA',mesa:'MESA 1'}])
   card = elementos.painelMesas.children[0]
   assert.match(card.textContent,/Prévia indisponível/)
-  assert.doesNotMatch(card.textContent,/não possui lançamentos/)
+  assert.doesNotMatch(card.textContent,/Sem produção registrada/)
 })
 
 test('atualização da ocupação substitui a prévia antiga pelo último lançamento', () => {

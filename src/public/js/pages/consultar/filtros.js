@@ -373,8 +373,8 @@ function renderizarResultadosConsulta() {
   if (resultadosConsulta.length === 0) {
     tabela.innerHTML = `
       <tr>
-        <td colspan="6">
-          Nenhum corte encontrado
+        <td colspan="6" class="estado-vazio">
+          Nenhum corte encontrado. Ajuste os filtros ou use Limpar para ampliar a busca.
         </td>
       </tr>
     `

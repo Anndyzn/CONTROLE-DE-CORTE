@@ -26,11 +26,11 @@
       </div>
 
       <div class="header-actions">
-        
 
-        
 
-        
+
+
+
 
         <a
           href="https://docs.google.com/spreadsheets/d/1A_95JQXkPPbAtUFMIEWzeNV5xCOVqjls8ynQtAl3vOg/edit?usp=sharing"
@@ -80,36 +80,120 @@
     </section>
 
     <div class="cortes-visao-rapida">
-      <details class="section-card topo-andamento lista-andamento">
-        <summary class="andamento-resumo">
-          <h2>
-            Cortes em andamento
-            <span class="section-help">Lista completa dos cortes ainda abertos.</span>
-          </h2>
-          <span class="andamento-controle">
-            <span id="totalCortesEmAndamento" class="andamento-total">—</span>
-            <span class="andamento-abrir">Ver lista</span>
-            <span class="andamento-fechar">Ocultar lista</span>
-            <span class="andamento-seta" aria-hidden="true">⌄</span>
-          </span>
-        </summary>
+      <div class="cortes-coluna-principal">
+        <details class="section-card topo-andamento lista-andamento">
+          <summary class="andamento-resumo">
+            <h2>
+              Cortes em andamento
+              <span class="section-help">Lista completa dos cortes ainda abertos.</span>
+            </h2>
+            <span class="andamento-controle">
+              <span id="totalCortesEmAndamento" class="andamento-total">—</span>
+              <span class="andamento-abrir">Ver lista</span>
+              <span class="andamento-fechar">Ocultar lista</span>
+              <span class="andamento-seta" aria-hidden="true">⌄</span>
+            </span>
+          </summary>
 
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Número</th>
-                <th>Produto</th>
-                <th>Mesa</th>
-                <th>Última folha</th>
-                <th>Status</th>
-                <th>Ação</th>
-              </tr>
-            </thead>
-            <tbody id="cortesEmAndamento"></tbody>
-          </table>
-        </div>
-      </details>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Número</th>
+                  <th>Produto</th>
+                  <th>Mesa</th>
+                  <th>Última folha</th>
+                  <th>Status</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody id="cortesEmAndamento"></tbody>
+            </table>
+          </div>
+        </details>
+
+        <section class="section-card busca-corte-card">
+          <div class="section-title-row">
+            <div>
+              <h2>Buscar corte</h2>
+              <p class="section-help">
+                Localize um corte pelo número ou inicie um novo.
+              </p>
+            </div>
+          </div>
+
+          <div class="busca-corte-bar">
+            <div class="form-group busca-corte-campo">
+              <label for="numeroCorte">Número do corte</label>
+
+              <input
+                type="number"
+                id="numeroCorte"
+                placeholder="Ex: 843"
+              >
+            </div>
+
+            <button
+              type="button"
+              id="buscarCorte"
+              class="btn-buscar-corte"
+            >
+              Buscar
+            </button>
+
+            <button
+              type="button"
+              id="gerarProximoCorte"
+              class="btn-proximo-corte"
+            >
+              + Novo corte
+            </button>
+          </div>
+
+          <div
+            id="novoCorte"
+            class="novo-corte-form"
+            style="display: none;"
+          >
+            <h3>Novo corte</h3>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="produtoNovo">Produto</label>
+                <input
+                  type="text"
+                  id="produtoNovo"
+                  placeholder="Digite para buscar um produto cadastrado"
+                  aria-describedby="ajudaProdutoNovo"
+                >
+                <p id="ajudaProdutoNovo" class="small-help">Confira as sugestões e selecione o nome existente. Se o produto ainda não estiver cadastrado, digite o novo nome e continue.</p>
+              </div>
+
+              <div class="form-group">
+                <label for="mesaNova">Mesa</label>
+                <select id="mesaNova" aria-describedby="avisoMesaOcupada">
+                  <option value="">Selecione</option>
+                  <option value="MESA 1">MESA 1</option>
+                  <option value="MESA 2">MESA 2</option>
+                  <option value="MESA 3">MESA 3</option>
+                </select>
+              </div>
+            </div>
+
+            <p id="avisoMesaOcupada" class="mesa-ocupada-aviso" role="alert" hidden></p>
+
+            <div class="button-row">
+              <button
+                type="button"
+                id="cadastrarCorte"
+              >
+                Cadastrar corte
+              </button>
+              <button type="button" id="cancelarNovoCorte" class="btn-secondary">Cancelar cadastro</button>
+            </div>
+          </div>
+        </section>
+      </div>
 
       <section class="section-card finalizados-recentes-card" aria-labelledby="tituloFinalizadosRecentes">
         <div class="finalizados-cabecalho">
@@ -139,88 +223,6 @@
         <div id="listaPisPendentes" class="pis-pendentes-lista"></div>
       </details>
     </div>
-
-    <section class="section-card busca-corte-card">
-      <div class="section-title-row">
-        <div>
-          <h2>Buscar corte</h2>
-          <p class="section-help">
-            Localize um corte pelo número ou inicie um novo.
-          </p>
-        </div>
-      </div>
-
-      <div class="busca-corte-bar">
-        <div class="form-group busca-corte-campo">
-          <label for="numeroCorte">Número do corte</label>
-
-          <input
-            type="number"
-            id="numeroCorte"
-            placeholder="Ex: 843"
-          >
-        </div>
-
-        <button
-          type="button"
-          id="buscarCorte"
-          class="btn-buscar-corte"
-        >
-          Buscar
-        </button>
-
-        <button
-          type="button"
-          id="gerarProximoCorte"
-          class="btn-proximo-corte"
-        >
-          + Novo corte
-        </button>
-      </div>
-
-      <div
-        id="novoCorte"
-        class="novo-corte-form"
-        style="display: none;"
-      >
-        <h3>Novo corte</h3>
-
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="produtoNovo">Produto</label>
-            <input
-              type="text"
-              id="produtoNovo"
-              placeholder="Digite para buscar um produto cadastrado"
-              aria-describedby="ajudaProdutoNovo"
-            >
-            <p id="ajudaProdutoNovo" class="small-help">Confira as sugestões e selecione o nome existente. Se o produto ainda não estiver cadastrado, digite o novo nome e continue.</p>
-          </div>
-
-          <div class="form-group">
-            <label for="mesaNova">Mesa</label>
-            <select id="mesaNova" aria-describedby="avisoMesaOcupada">
-              <option value="">Selecione</option>
-              <option value="MESA 1">MESA 1</option>
-              <option value="MESA 2">MESA 2</option>
-              <option value="MESA 3">MESA 3</option>
-            </select>
-          </div>
-        </div>
-
-        <p id="avisoMesaOcupada" class="mesa-ocupada-aviso" role="alert" hidden></p>
-
-        <div class="button-row">
-          <button
-            type="button"
-            id="cadastrarCorte"
-          >
-            Cadastrar corte
-          </button>
-          <button type="button" id="cancelarNovoCorte" class="btn-secondary">Cancelar cadastro</button>
-        </div>
-      </div>
-    </section>
 
     <section
       class="section-card corte-selecionado-card"
@@ -288,7 +290,7 @@
             Registrar produção do turno
           </h2>
           <p class="section-help">
-            Informe turno, operador, horários e a folha onde o corte parou.
+            Confirme o início e informe o término, a folha final e a situação do corte.
           </p>
 
         <div
@@ -309,8 +311,27 @@
         </button>
       </div>
 
+      <div id="painelTrabalhos" class="trabalhos-painel" hidden>
+        <div id="conferenciaInicio">
+          <div class="inicio-cabecalho"><strong>1. Confira seu início</strong><button type="button" id="atualizarTrabalhos" class="inicio-link">Atualizar</button></div>
+          <div id="escolhaTrabalho" class="form-group" hidden><label for="trabalhoPendente">Início a concluir</label><select id="trabalhoPendente"></select></div>
+          <p id="trabalhoInicioResumo" class="inicio-operador"></p>
+          <p id="trabalhoInicioHorario" class="inicio-horario"></p>
+          <div id="camposInicioReal" class="inicio-real-grid" hidden>
+            <div class="form-group"><label for="inicioRealData">Data real do início</label><input type="date" id="inicioRealData" required></div>
+            <div class="form-group"><label for="inicioRealHora">Hora real do início</label><input type="time" id="inicioRealHora" required></div>
+            <p class="small-help">A correção será salva junto com a produção. O registro original será preservado.</p>
+          </div>
+          <div class="inicio-acoes"><button type="button" id="usarInicioTrabalho">Usar meu horário de início</button><button type="button" id="corrigirInicioTrabalho" class="btn-secondary">Informar início real</button></div>
+        </div>
+        <div id="trabalhoSelecionado" hidden>
+          <div class="inicio-cabecalho"><strong>✓ Início confirmado</strong><button type="button" id="cancelarTrabalho" class="inicio-link">Alterar início</button></div>
+          <p id="trabalhoSelecionadoResumo"></p>
+          <span class="small-help">Agora informe o término real, a folha final e o status. Se atravessou a meia-noite, informe a hora do dia seguinte.</span>
+        </div>
+      </div>
       <div class="producao-grid">
-        <fieldset class="form-section">
+        <fieldset class="form-section producao-dados-inicio">
           <legend>Turno e operador</legend>
           <div class="form-section-grid form-section-grid-tres">
         <div class="form-group">
@@ -353,7 +374,7 @@
         <fieldset class="form-section">
           <legend>Horários</legend>
           <div class="form-section-grid">
-        <div class="form-group form-group-time">
+        <div class="form-group form-group-time producao-hora-inicio">
           <label for="horaInicio">Hora início</label>
 
           <div class="time-input-row">
@@ -664,6 +685,20 @@
   </div>
 
 
+  <dialog id="dialogAssumir" class="confirmacao-dialog" aria-labelledby="assumirTitulo">
+    <form method="dialog">
+      <h2 id="assumirTitulo">Assumir trabalho</h2>
+      <p>A data e a hora de início serão registradas agora. Lance a produção ao terminar.</p>
+      <div class="form-group"><label for="assumirOperador">Operador</label><select id="assumirOperador" required></select><input id="assumirOutro" placeholder="Nome do operador" maxlength="200" aria-label="Outro operador" hidden></div>
+      <div class="form-group"><label for="assumirTurno">Turno</label><select id="assumirTurno" required></select></div>
+      <label class="inicio-opcao"><input type="checkbox" id="assumirInicioReal"> Já estava trabalhando neste corte</label>
+      <div id="assumirCamposReais" class="inicio-real-grid" hidden>
+        <div class="form-group"><label for="assumirDataReal">Data real do início</label><input type="date" id="assumirDataReal"></div>
+        <div class="form-group"><label for="assumirHoraReal">Hora real do início</label><input type="time" id="assumirHoraReal"></div>
+      </div>
+      <div class="confirmacao-acoes"><button type="submit" value="cancelar" formnovalidate class="confirmacao-cancelar">Cancelar</button><button type="submit" value="assumir">Assumir agora</button></div>
+    </form>
+  </dialog>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script

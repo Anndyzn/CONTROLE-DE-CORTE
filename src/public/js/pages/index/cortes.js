@@ -421,8 +421,8 @@ export async function carregarCortesEmAndamento({
     if (cortes.length === 0) {
       tabela.innerHTML = `
         <tr>
-          <td colspan="6">
-            Nenhum corte em andamento
+          <td colspan="6" class="estado-vazio">
+            Nenhum corte em andamento. Escolha uma mesa livre para iniciar um novo.
           </td>
         </tr>
       `

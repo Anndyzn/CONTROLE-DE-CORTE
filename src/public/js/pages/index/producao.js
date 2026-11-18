@@ -1,4 +1,5 @@
 import { registrarProducaoConferida, descreverProducao } from "./duplicidade-producao.js"
+import { dadosTrabalho, limparTrabalho, atualizarTrabalhos } from "./trabalhos.js"
 import { validarFolhas } from "../../utils/validations.js"
 import { marcarErroCampo, limparErroCampo } from "../../core/erros-campos.js"
 import { salvarRascunhoGrupo, limparRascunhoGrupo, versaoRascunho, atualizarBaseProducaoRascunho } from "./rascunho.js"
@@ -271,6 +272,7 @@ export async function salvarProducao() {
   }
 
   const producao = {
+    ...dadosTrabalho(),
     data,
     numero_corte: Number(numeroCorte),
     turno,
@@ -302,6 +304,9 @@ export async function salvarProducao() {
     atualizarBaseProducaoRascunho(numeroCorte, salvo.id)
     if(obterCampo("numeroCorte").value!==numeroCorte)return
     const formularioInalterado=aindaAtual()
+    limparTrabalho()
+    await atualizarTrabalhos()
+    if(obterCampo("numeroCorte").value!==numeroCorte)return
     ocultarDuplicidade()
 
     // ========================================
@@ -541,6 +546,7 @@ function configurarLimparProducao() {
     ?.addEventListener(
       "click",
       () => {
+        limparTrabalho()
         limparFormularioProducao({
           limparTurno: true
         })

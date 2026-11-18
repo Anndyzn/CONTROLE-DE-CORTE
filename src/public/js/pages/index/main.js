@@ -29,6 +29,7 @@ import { inicializarTabelasResponsivas } from "../../core/tabelas.js"
 import { inicializarSugestoesNomes } from "./nomes.js"
 import { inicializarVinculosPIs } from "./vinculos.js"
 import { inicializarGradePis } from "./grade-pis.js"
+import { inicializarTrabalhos } from "./trabalhos.js"
 
 
 async function iniciarPagina() {
@@ -69,6 +70,7 @@ desabilitarProducao("SEM_CORTE")
   inicializarRascunhos(buscarCorte)
   inicializarSugestoesNomes()
   inicializarVinculosPIs()
+  inicializarTrabalhos({buscarCorte,carregarCortesEmAndamento})
 
 
   // ========================================

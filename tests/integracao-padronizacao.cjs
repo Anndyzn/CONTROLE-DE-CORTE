@@ -78,6 +78,7 @@ test('padronização real no PostgreSQL preserva dados, recusa prévia antiga e 
     const {prepararLancamentosSankhya}=require('../dist/routes/sankhya-lancamentos.routes')
     const {prepararAcompanhamentoSankhya,default:acompanhamento}=require('../dist/routes/sankhya-acompanhamento.routes')
     await prepararNomesSankhya();await prepararLancamentosSankhya();await prepararAcompanhamentoSankhya()
+    await require('../dist/services/trabalho-corte').prepararTrabalhosCorte()
     const acompanhados=async()=>(await pool.query('SELECT numero FROM sankhya_acompanhamento ORDER BY numero')).rows.map(r=>r.numero)
     assert.deepEqual(await acompanhados(),[922,924])
     await pool.query("INSERT INTO producao(numero_corte,status) VALUES(922,'FINALIZADO')")
@@ -102,6 +103,8 @@ test('padronização real no PostgreSQL preserva dados, recusa prévia antiga e 
       INSERT INTO producao(numero_corte,status,data) VALUES(926,'FINALIZADO',CURRENT_DATE-10),(927,'FINALIZADO',CURRENT_DATE),(928,'FINALIZADO',CURRENT_DATE),(928,'EM PRODUÇÃO',CURRENT_DATE);
       INSERT INTO itens_corte(numero_corte,modelo,cor,tecido,quantidade_pecas,metragem_usada) VALUES(926,'PI','BRANCO','OXFORD',1,1)`)
     const conferir=await new Promise(resolve=>{const s=app.listen(0,'127.0.0.1',()=>resolve(s))})
+    app.use(require('../dist/routes/trabalhos.routes').default)
+    app.use(require('../dist/routes/cortes.routes').default)
     try{
       const base=`http://127.0.0.1:${conferir.address().port}`
       const replicar=await fetch(base+'/sankhya/itens/2/replicar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({codigos:[6073,6069],versao:0,assinatura:assinaturaItem(fonte)})})
@@ -123,6 +126,60 @@ test('padronização real no PostgreSQL preserva dados, recusa prévia antiga e 
       const repetido=await produzir(producao);assert.equal(repetido.status,409)
       const aviso=await repetido.json();assert.equal(aviso.codigo,'PRODUCAO_SEMELHANTE')
       assert.equal((await produzir({...producao,confirmacao_duplicidade:aviso.confirmacao})).status,201)
+      // Início separado, idempotente, e conclusão lançada no dia seguinte.
+      await pool.query("INSERT INTO cortes VALUES(929,'TRABALHO FIXTURE','MESA 1',0)")
+      const post=(url,body)=>fetch(base+url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+      assert.equal((await post('/cortes/929/trabalhos',{operador:'',turno:'1º TURNO'})).status,400)
+      const inicio=await post('/cortes/929/trabalhos',{operador:'teste trabalho',turno:'1º TURNO',data:'2000-01-01',hora_inicio:'00:00'})
+      assert.equal(inicio.status,201)
+      const t=(await inicio.json()).trabalho
+      const hoje=(await pool.query("SELECT TO_CHAR(CURRENT_TIMESTAMP AT TIME ZONE 'America/Sao_Paulo','YYYY-MM-DD') AS dia")).rows[0].dia
+      assert.equal(t.data,hoje);assert.equal(t.mesa,'MESA 1');assert.equal(t.operador,'TESTE TRABALHO')
+      const mesas=await(await fetch(base+'/cortes-em-andamento')).json()
+      const mesaTrabalho=mesas.find(c=>c.numero===929)
+      assert.equal(mesaTrabalho.trabalho_hoje.length,1);assert.equal(mesaTrabalho.ultima_producao,null)
+      const repeticao=await post('/cortes/929/trabalhos',{operador:' TESTE  TRABALHO ',turno:'1º TURNO'})
+      assert.equal(repeticao.status,200);assert.equal((await repeticao.json()).trabalho.id,t.id)
+      assert.equal(Number((await pool.query('SELECT COUNT(*) FROM producao WHERE numero_corte=929')).rows[0].count),0)
+      await pool.query("UPDATE trabalhos_corte SET data_trabalho=data_trabalho-1,iniciado_em=((data_trabalho-1)+time '08:10') AT TIME ZONE 'America/Sao_Paulo' WHERE id=$1",[t.id])
+      const carregar=async()=>(await(await fetch(base+'/cortes/929/trabalhos')).json()).trabalhos
+      const ontem=(await carregar())[0]
+      assert.notEqual(ontem.data,hoje);assert.equal(ontem.hora_inicio,'08:10')
+      assert.equal((await(await fetch(base+'/cortes-em-andamento')).json()).find(c=>c.numero===929).trabalho_hoje.length,0)
+      const conclusao={...producao,numero_corte:929,data:ontem.data,operador:ontem.operador,turno:ontem.turno,hora_inicio:ontem.hora_inicio,hora_fim:'17:20',trabalho_id:t.id,producao_base_id:'',folha_inicio:0,folha_parou:20}
+      assert.equal((await produzir({...conclusao,data:hoje})).status,400)
+      assert.equal((await produzir({...conclusao,numero_corte:925})).status,404)
+      assert.equal((await produzir({...conclusao,producao_base_id:999})).status,412)
+      const outroInicio=await post('/cortes/929/trabalhos',{operador:'OUTRO TESTE',turno:'2º TURNO'})
+      assert.equal(outroInicio.status,200);assert.equal((await outroInicio.json()).trabalho.id,t.id)
+      const outroId=(await pool.query("INSERT INTO trabalhos_corte(numero_corte,mesa,operador,turno) VALUES(929,'MESA 1','LEGADO','2º TURNO') RETURNING id")).rows[0].id
+      assert.equal((await produzir({...conclusao,status:'FINALIZADO'})).status,412)
+      await pool.query('DELETE FROM trabalhos_corte WHERE id=$1',[outroId])
+      assert.equal((await carregar()).length,1)
+      // Falhar ao gravar a conclusão deve preservar o início pendente.
+      await pool.query(`CREATE FUNCTION falha_trabalho_fixture() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.numero_corte=929 THEN RAISE EXCEPTION 'Work fixture failure'; END IF; RETURN NEW; END $$;
+        CREATE TRIGGER falha_trabalho_fixture BEFORE INSERT ON producao FOR EACH ROW EXECUTE FUNCTION falha_trabalho_fixture()`)
+      assert.equal((await produzir(conclusao)).status,500);assert.equal((await carregar()).length,1)
+      await pool.query('DROP TRIGGER falha_trabalho_fixture ON producao')
+      assert.equal((await produzir({...conclusao,corrigir_inicio:true,data:'2026-02-30'})).status,400)
+      assert.equal((await produzir({...conclusao,corrigir_inicio:true,data:'2099-01-01'})).status,400)
+      const inicioOriginal=(await pool.query('SELECT iniciado_em FROM trabalhos_corte WHERE id=$1',[t.id])).rows[0].iniciado_em
+      const corrigida={...conclusao,corrigir_inicio:true,hora_inicio:'07:30'}
+      assert.equal((await produzir(corrigida)).status,201);assert.equal((await carregar()).length,0)
+      assert.equal((await produzir(conclusao)).status,412)
+      const registrada=(await pool.query("SELECT TO_CHAR(data,'YYYY-MM-DD') AS dia,hora_inicio,hora_fim FROM producao WHERE numero_corte=929")).rows[0]
+      assert.deepEqual(registrada,{dia:ontem.data,hora_inicio:'07:30',hora_fim:'17:20'})
+      const trabalho=(await pool.query('SELECT * FROM trabalhos_corte WHERE id=$1',[t.id])).rows[0]
+      assert.equal(trabalho.status,'LANCADO');assert.ok(trabalho.producao_id)
+      assert.deepEqual(trabalho.iniciado_em,inicioOriginal);assert.ok(trabalho.inicio_real_em)
+      // Dois operadores clicando ao mesmo tempo recebem o mesmo início.
+      await pool.query("INSERT INTO cortes VALUES(930,'INICIO REAL FIXTURE','MESA 2',0)")
+      const simultaneos=await Promise.all(['ANA','SOFIA'].map(operador=>post('/cortes/930/trabalhos',{operador,turno:'1º TURNO',inicio_real:{data:ontem.data,hora_inicio:'07:15'}})))
+      assert.deepEqual(simultaneos.map(r=>r.status).sort(),[200,201])
+      const inicios=await Promise.all(simultaneos.map(r=>r.json()))
+      assert.equal(inicios[0].trabalho.id,inicios[1].trabalho.id)
+      assert.equal(inicios[0].trabalho.data,ontem.data);assert.equal(inicios[0].trabalho.hora_inicio,'07:15')
+      assert.equal((await post('/cortes/923/trabalhos',{operador:'TESTE',turno:'1º TURNO'})).status,409)
       await pool.query(`CREATE FUNCTION recusar_cor_fixture() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.cor='FALHA' THEN RAISE EXCEPTION 'Batch fixture failure'; END IF; RETURN NEW; END $$;
         CREATE TRIGGER recusar_cor_fixture BEFORE INSERT ON itens_corte FOR EACH ROW EXECUTE FUNCTION recusar_cor_fixture()`)
       assert.equal((await lote([pi('ROSA'),pi('FALHA')])).status,500)
