@@ -86,7 +86,6 @@ router.post("/producao", async (req, res) => {
       id: resultado.rows[0].id
     })
   } catch (erro) {
-    if((erro as any)?.code==="23505")return res.status(412).json({erro:"Já existe trabalho registrado para este operador, turno e data. Confira o início informado."})
     if(erro instanceof ErroProducaoSemelhante)return res.status(409).json({
       erro:erro.message,codigo:"PRODUCAO_SEMELHANTE",registros:erro.registros,confirmacao:erro.confirmacao
     })

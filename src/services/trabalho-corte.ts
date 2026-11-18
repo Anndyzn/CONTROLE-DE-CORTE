@@ -28,11 +28,9 @@ export async function assumirTrabalho(numero:number,dados:any){
     const operador=normalizar(dados.operador),turno=normalizar(dados.turno)
     const criado=await client.query(`INSERT INTO trabalhos_corte(numero_corte,mesa,operador,turno,inicio_real_em,data_trabalho)
       VALUES($1,$2,$3,$4,$5,COALESCE(($5::timestamptz AT TIME ZONE 'America/Sao_Paulo')::date,(CURRENT_TIMESTAMP AT TIME ZONE 'America/Sao_Paulo')::date))
-      ON CONFLICT(numero_corte,data_trabalho,turno,operador) DO NOTHING RETURNING id`,[numero,corte.mesa,operador,turno,inicioReal])
-    const consulta=criado.rows.length
-      ?await client.query(`SELECT ${campos} FROM trabalhos_corte WHERE id=$1`,[criado.rows[0].id])
-      :await client.query(`SELECT ${campos} FROM trabalhos_corte WHERE numero_corte=$1 AND data_trabalho=COALESCE(($4::timestamptz AT TIME ZONE 'America/Sao_Paulo')::date,(CURRENT_TIMESTAMP AT TIME ZONE 'America/Sao_Paulo')::date) AND turno=$2 AND operador=$3`,[numero,turno,operador,inicioReal])
-    return {trabalho:consulta.rows[0],novo:!!criado.rows.length}
+      RETURNING id`,[numero,corte.mesa,operador,turno,inicioReal])
+    const consulta=await client.query(`SELECT ${campos} FROM trabalhos_corte WHERE id=$1`,[criado.rows[0].id])
+    return {trabalho:consulta.rows[0],novo:true}
   })
 }
 
@@ -54,10 +52,13 @@ export async function prepararTrabalhosCorte(){
       iniciado_em TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
       data_trabalho DATE NOT NULL DEFAULT ((CURRENT_TIMESTAMP AT TIME ZONE 'America/Sao_Paulo')::date),
       status VARCHAR(20) NOT NULL DEFAULT 'EM_TRABALHO' CHECK(status IN('EM_TRABALHO','LANCADO')),
-      producao_id BIGINT,
-      UNIQUE(numero_corte,data_trabalho,turno,operador)
+      producao_id BIGINT
     )`)
     await c.query("ALTER TABLE trabalhos_corte ADD COLUMN IF NOT EXISTS inicio_real_em TIMESTAMPTZ")
+    // A exclusividade é do trabalho pendente, conferido sob bloqueio do corte.
+    // Registros concluídos não impedem o mesmo operador de assumir novamente.
+    await c.query("ALTER TABLE trabalhos_corte DROP CONSTRAINT IF EXISTS trabalhos_corte_numero_corte_data_trabalho_turno_operador_key")
+    await c.query("CREATE INDEX IF NOT EXISTS trabalhos_corte_pendentes_idx ON trabalhos_corte(numero_corte) WHERE status='EM_TRABALHO'")
     await c.query("ALTER TABLE trabalhos_corte ENABLE ROW LEVEL SECURITY")
     await c.query("COMMIT")
   }catch(e){await c.query("ROLLBACK");throw e}finally{c.release()}

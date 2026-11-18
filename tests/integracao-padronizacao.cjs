@@ -79,6 +79,12 @@ test('padronização real no PostgreSQL preserva dados, recusa prévia antiga e 
     const {prepararAcompanhamentoSankhya,default:acompanhamento}=require('../dist/routes/sankhya-acompanhamento.routes')
     await prepararNomesSankhya();await prepararLancamentosSankhya();await prepararAcompanhamentoSankhya()
     await require('../dist/services/trabalho-corte').prepararTrabalhosCorte()
+    // Simula o banco da versão anterior e confere a migração sem apagar dados.
+    await pool.query(`ALTER TABLE trabalhos_corte ADD CONSTRAINT trabalhos_corte_numero_corte_data_trabalho_turno_operador_key UNIQUE(numero_corte,data_trabalho,turno,operador);
+      INSERT INTO trabalhos_corte(numero_corte,mesa,operador,turno,status) VALUES(924,'MESA 3','MIGRACAO FIXTURE','1º TURNO','LANCADO')`)
+    await require('../dist/services/trabalho-corte').prepararTrabalhosCorte()
+    await require('../dist/services/trabalho-corte').prepararTrabalhosCorte()
+    assert.equal(Number((await pool.query("SELECT COUNT(*) FROM trabalhos_corte WHERE operador='MIGRACAO FIXTURE'")).rows[0].count),1)
     const acompanhados=async()=>(await pool.query('SELECT numero FROM sankhya_acompanhamento ORDER BY numero')).rows.map(r=>r.numero)
     assert.deepEqual(await acompanhados(),[922,924])
     await pool.query("INSERT INTO producao(numero_corte,status) VALUES(922,'FINALIZADO')")
@@ -179,6 +185,25 @@ test('padronização real no PostgreSQL preserva dados, recusa prévia antiga e 
       const inicios=await Promise.all(simultaneos.map(r=>r.json()))
       assert.equal(inicios[0].trabalho.id,inicios[1].trabalho.id)
       assert.equal(inicios[0].trabalho.data,ontem.data);assert.equal(inicios[0].trabalho.hora_inicio,'07:15')
+      // Concluir um lançamento libera novo início no mesmo corte, dia, turno e operador.
+      await pool.query("INSERT INTO cortes VALUES(931,'REASSUMIR FIXTURE','MESA 3',0)")
+      const assumirMesmo=()=>post('/cortes/931/trabalhos',{operador:'CICERA',turno:'1º TURNO'})
+      const primeiro=await assumirMesmo();assert.equal(primeiro.status,201)
+      const primeiroTrabalho=(await primeiro.json()).trabalho
+      const primeiraProducao=await produzir({...producao,numero_corte:931,data:primeiroTrabalho.data,
+        operador:primeiroTrabalho.operador,turno:primeiroTrabalho.turno,hora_inicio:primeiroTrabalho.hora_inicio,
+        hora_fim:primeiroTrabalho.hora_inicio,trabalho_id:primeiroTrabalho.id,producao_base_id:''})
+      assert.equal(primeiraProducao.status,201)
+      const novamente=await assumirMesmo();assert.equal(novamente.status,201)
+      const novoTrabalho=(await novamente.json()).trabalho
+      assert.notEqual(novoTrabalho.id,primeiroTrabalho.id);assert.equal(novoTrabalho.status,'EM_TRABALHO')
+      assert.equal(novoTrabalho.data,primeiroTrabalho.data)
+      const lancados=(await pool.query('SELECT id,status,producao_id FROM trabalhos_corte WHERE numero_corte=931 ORDER BY id')).rows
+      assert.equal(lancados.length,2);assert.equal(lancados[0].status,'LANCADO');assert.ok(lancados[0].producao_id)
+      const cliques=await Promise.all([assumirMesmo(),assumirMesmo()])
+      assert.ok(cliques.every(r=>r.status===200))
+      for(const clique of cliques)assert.equal((await clique.json()).trabalho.id,novoTrabalho.id)
+      assert.equal(Number((await pool.query('SELECT COUNT(*) FROM trabalhos_corte WHERE numero_corte=931')).rows[0].count),2)
       assert.equal((await post('/cortes/923/trabalhos',{operador:'TESTE',turno:'1º TURNO'})).status,409)
       await pool.query(`CREATE FUNCTION recusar_cor_fixture() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.cor='FALHA' THEN RAISE EXCEPTION 'Batch fixture failure'; END IF; RETURN NEW; END $$;
         CREATE TRIGGER recusar_cor_fixture BEFORE INSERT ON itens_corte FOR EACH ROW EXECUTE FUNCTION recusar_cor_fixture()`)
