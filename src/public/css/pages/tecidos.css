@@ -1,0 +1,53 @@
+.page-tecidos .tecidos-painel { padding: 26px; }
+.tecidos-topo,.tecidos-acoes,.tecidos-filtros,.tecidos-busca,.tecidos-abas,.tecidos-paginacao { display:flex;align-items:center;gap:10px; }
+.tecidos-topo { justify-content:space-between;align-items:flex-start;gap:24px; }
+.page-tecidos h2 { border:0;margin:0 0 6px;padding:0; }
+.tecidos-eyebrow { display:block;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-soft);margin-bottom:6px; }
+.tecidos-acoes { flex-shrink:0;justify-content:flex-end;flex-wrap:wrap; }
+.page-tecidos button { min-height:39px;min-width:0; }
+.page-tecidos label { text-transform:none;letter-spacing:0; }
+.tecidos-cadastro { margin-top:22px;padding:22px;border:1px solid #cbd9ec;border-radius:12px;background:#f7faff; }
+.tecidos-cadastro h3 { margin:0; }
+.tecidos-sem-borda { padding:0;margin:18px 0 0;border:0;min-width:0; }
+.tecidos-campos { display:grid;grid-template-columns:1.1fr 1.4fr 1fr .7fr;gap:16px; }
+.tecidos-opcional { font-size:11px;font-weight:400;color:var(--text-soft); }
+.page-tecidos .form-group { margin-bottom:16px; }
+.page-tecidos textarea { width:100%;resize:vertical;min-height:65px;border:1px solid var(--border-strong);border-radius:8px;padding:10px 12px;font:inherit;line-height:1.5; }
+.tecidos-defeitos { border:0;margin:0 0 18px;padding:0;display:flex;gap:8px;flex-wrap:wrap; }
+.tecidos-defeitos legend { font-size:13px;font-weight:600;margin-bottom:9px; }
+.tecidos-defeitos label { display:flex;align-items:center;gap:7px;cursor:pointer;padding:9px 15px;border:1px solid #d5dfed;border-radius:8px;background:#fff;font-size:13px; }
+.tecidos-defeitos label:has(:checked) { border-color:#245ccc;background:#edf3ff;color:#174ca5; }
+.page-tecidos input[type="checkbox"] { width:16px;height:16px;min-height:0;margin:0;accent-color:#245ccc; }
+.tecidos-salvar { border-top:1px solid #dfe6ef;padding-top:16px; }
+.tecidos-salvar .small-help { margin-right:auto; }
+.tecidos-filtros { justify-content:space-between;margin:25px 0 16px;flex-wrap:wrap; }
+.tecidos-busca { flex:0 1 560px; }
+.tecidos-busca input { flex:1;min-width:140px; }
+.tecidos-abas button[aria-pressed="false"] { background:#fff;color:var(--text-soft);box-shadow:none;border:1px solid #d4dfed; }
+.tecidos-abas button[aria-pressed="true"] { background:var(--primary-deep);color:#fff;border-color:var(--primary-deep); }
+.tecidos-resumo { padding:12px 15px;background:#f3f6fb;border:1px solid #e0e7f1;border-radius:9px;color:#48617f;font-size:13px;margin-bottom:17px; }
+.tecidos-resumo strong { color:#17375e; }
+.tecidos-tabela { overflow-x:auto;border:1px solid #dfe6ef;border-radius:11px; }
+.tecidos-tabela table { width:100%;min-width:870px;margin:0;border:0; }
+.tecidos-tabela th { white-space:nowrap; }
+.tecidos-tabela td { vertical-align:top;max-width:260px;overflow-wrap:anywhere;white-space:normal; }
+.tecidos-tabela td:nth-child(3) { white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums; }
+.tecidos-tabela td:first-child { font-weight:600;min-width:115px; }
+.page-tecidos .container .tecidos-tabela .tecidos-inicio-nf td { border-top:2px solid #bbcde3; }
+.tecidos-tabela td small { display:block;color:var(--text-soft);font-size:11px;margin-top:5px; }
+.tecidos-tabela td .tecidos-atendimento { color:#16704c; }
+.tecidos-tag { display:inline-block;margin:0 4px 4px 0;background:#fff3d5;color:#8d5b08;border:1px solid #f4e2b3;border-radius:5px;padding:3px 7px;font-size:11px;white-space:nowrap; }
+.tecidos-resolvido .tecidos-tag { background:#eaf7f0;color:#17694a;border-color:#cce8db; }
+.tecidos-vazio { text-align:center;padding:45px 15px;border:1px dashed #d3deec;border-radius:10px; }
+.tecidos-vazio strong { font-size:16px; }.tecidos-vazio p { margin-top:8px;color:var(--text-soft); }
+.tecidos-paginacao { justify-content:flex-end;margin-top:17px;font-size:12px; }
+.tecidos-dialog { width:min(510px,calc(100vw - 36px));border:1px solid #dfe6ef;border-radius:16px;padding:28px;box-shadow:0 25px 80px #122f4d40; }
+.tecidos-dialog::backdrop { background:#172c4670;backdrop-filter:blur(3px); }
+.tecidos-dialog p { line-height:1.6;margin:10px 0 20px; }
+.tecidos-dialog .tecidos-acoes { margin-top:20px; }
+#mensagemTecidos,#erroSituacaoTecido { padding:12px;border-radius:8px;background:#fff2f0;color:#a13025; }
+#mensagemTecidos[data-tipo="sucesso"] { background:#eaf7f0;color:#17694a; }
+.tecidos-leitor { position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%); }
+.page-tecidos [hidden] { display:none!important; }
+@media(max-width:1000px) { .tecidos-topo { flex-wrap:wrap; }.tecidos-campos { grid-template-columns:1fr 1fr; }.tecidos-busca { flex:1 1 100%; } }
+@media(max-width:600px) { .page-tecidos .tecidos-painel { padding:16px; }.tecidos-campos { grid-template-columns:1fr; }.tecidos-cadastro { padding:15px; }.tecidos-acoes,.tecidos-busca { flex-wrap:wrap; }.tecidos-busca input { flex-basis:100%; }.tecidos-salvar .small-help { flex-basis:100%; } }

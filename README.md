@@ -36,6 +36,10 @@ em cortes finalizados e criação de outro corte em mesa ocupada.
 - **Admin:** correções, reaberturas, exclusões, padronização de nomes e nomenclaturas
   sem vínculo. Histórico com antes/depois, responsável e motivo; padronizações
   realizadas juntas aparecem agrupadas.
+- **Tecidos com defeito:** uma peça ou rolo por registro, com NF, tecido, cor opcional,
+  metros, um ou mais defeitos e observação. Pendentes podem ser impressos em A4 paisagem.
+  Resolver mantém o registro em Resolvidos; reabrir devolve às pendências. O histórico
+  de atendimento é preservado no banco, incluindo observações de resoluções anteriores.
 
 O lançamento no Sankhya continua manual: este sistema não cria OPs nem movimenta
 estoque. O catálogo de códigos é local. Não há autenticação; o responsável nas
@@ -83,12 +87,15 @@ npm.cmd start
 npm.cmd test
 npm.cmd run test:padronizacao
 npm.cmd run test:backup
+npm.cmd run test:tecidos
 ```
 
 - `test`: compila e executa testes unitários e de interface simulada, sem banco real.
 - `test:padronizacao`: integração com PostgreSQL 17 descartável, incluindo nomes,
   vínculos, acompanhamento e trabalhos iniciados.
 - `test:backup`: testa backup e recuperação com dados fictícios em banco isolado.
+- `test:tecidos`: testa cadastro, reenvio, concorrência, resolução, reabertura e
+  impressão dos tecidos em PostgreSQL descartável; também exige Docker disponível.
 
 Os dois testes de integração exigem Docker disponível. O script manual
 `tests/integracao-sankhya-nomes.cjs` verifica planos SQL em transação somente leitura
