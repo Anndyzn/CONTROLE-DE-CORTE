@@ -44,6 +44,13 @@ em cortes finalizados e criação de outro corte em mesa ocupada.
   com reconexão e conferência automática a cada 15 segundos. Atualizações preservam
   os campos preenchidos, filtros e atendimento aberto. Ao fechar o atendimento,
   as mudanças pendentes são carregadas. O indicador no cabeçalho mostra a conexão.
+  **Excluir**, ao lado de Resolver/Reabrir, pede confirmação e retira somente aquela
+  peça das listas, totais e impressão. O registro e seu histórico ficam preservados
+  no banco com data de exclusão; a alteração também é avisada às outras telas.
+  Marque até 200 peças pendentes e use **Resolver selecionadas** para aplicar uma
+  observação comum. O cabeçalho marca somente a página atual; a seleção permanece
+  ao paginar e é limpa ao mudar filtros/abas ou clicar em Atualizar. O servidor
+  confere todas as versões antes de atender: um conflito ou falha desfaz o lote inteiro.
 
 O lançamento no Sankhya continua manual: este sistema não cria OPs nem movimenta
 estoque. O catálogo de códigos é local. Não há autenticação; o responsável nas

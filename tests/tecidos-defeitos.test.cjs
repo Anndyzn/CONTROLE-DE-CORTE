@@ -1,7 +1,7 @@
 const {test}=require('node:test')
 const assert=require('node:assert/strict')
 require.cache[require.resolve('../dist/database-pg')]={exports:{}}
-const {validarTecido,filtroTecidos}=require('../dist/services/tecidos-defeitos')
+const {validarTecido,filtroTecidos,validarSelecaoTecidos}=require('../dist/services/tecidos-defeitos')
 const base={nf:'000316056/3',tecido:' cetim ',cor:' branco ',metros:'50,8',defeitos:['Manchado','Sujo','Sujo'],observacao:' lateral '}
 test('tecido preserva NF e normaliza nomes, casas decimais e defeitos sem repetir',()=>{
   assert.deepEqual(validarTecido(base),{nf:'000316056/3',tecido:'CETIM',cor:'BRANCO',metros:50.8,defeitos:['Sujo','Manchado'],observacao:'lateral'})
@@ -22,4 +22,10 @@ test('filtro aceita busca literal e rejeita objetos e situação desconhecida',(
   assert.deepEqual(filtroTecidos('PENDENTE','  000%_  '),['PENDENTE','000%_'])
   assert.throws(()=>filtroTecidos('TODOS',''),e=>e.status===400)
   assert.throws(()=>filtroTecidos('PENDENTE',{}),e=>e.status===400)
+})
+
+test('seleção de atendimento aceita IDs do PostgreSQL e recusa vazios, duplicados, inválidos ou lote excessivo',()=>{
+  assert.deepEqual(validarSelecaoTecidos({itens:[{id:'7',versao:2},{id:9,versao:0}],observacao:'  Peças devolvidas  '}),{itens:[{id:7,versao:2},{id:9,versao:0}],observacao:'Peças devolvidas'})
+  for(const itens of [[],null,[{id:7,versao:0},{id:'7',versao:0}],[{id:'1e3',versao:0}],[{id:0,versao:0}],[{id:7,versao:-1}],[{id:7}],Array.from({length:201},(_,i)=>({id:i+1,versao:0}))]) assert.throws(()=>validarSelecaoTecidos({itens}),e=>e.status===400)
+  assert.throws(()=>validarSelecaoTecidos({itens:[{id:7,versao:0}],observacao:'a'.repeat(1001)}),e=>e.status===400)
 })

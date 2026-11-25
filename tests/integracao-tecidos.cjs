@@ -83,6 +83,43 @@ test('tecidos: PostgreSQL isolado valida cadastro, reenvio, impressão, atendime
     assert.equal(impressaoAgrupada.filter(i=>i.nf==='000316056/3').length,3)
     const primeiraPagina=(await req('/tecidos-defeitos')).data.itens
     assert.deepEqual(primeiraPagina.slice(0,3).map(i=>i.nf),['000316056/3','000316056/3','000316056/3'])
+    const telaExclusao=await abrirStream()
+    assert.equal((await req(`/tecidos-defeitos/${id}`,'DELETE',{})).status,400)
+    assert.equal((await req(`/tecidos-defeitos/${id}`,'DELETE',{versao:0})).status,412)
+    const exclusoes=await Promise.all([req(`/tecidos-defeitos/${id}`,'DELETE',{versao:2}),req(`/tecidos-defeitos/${id}`,'DELETE',{versao:2})])
+    assert.deepEqual(exclusoes.map(r=>r.status).sort(),[200,412])
+    await telaExclusao.esperar('alteracao');telaExclusao.fechar()
+    const aposExcluir=(await req('/tecidos-defeitos?imprimir=1')).data
+    assert.equal(aposExcluir.resumo.quantidade,53)
+    assert.ok(aposExcluir.itens.every(i=>i.id!==id))
+    assert.equal(aposExcluir.itens.filter(i=>i.nf==='000316056/3').length,2)
+    assert.equal((await req(caminhoSituacao,'PUT',{versao:3,status:'RESOLVIDO'})).status,412)
+    assert.equal((await req('/tecidos-defeitos','POST',base)).status,409)
+    const registroExcluido=(await pool.query('SELECT excluido_em FROM tecidos_defeitos WHERE id=$1',[id])).rows[0]
+    assert.ok(registroExcluido.excluido_em)
+    assert.equal((await pool.query('SELECT COUNT(*)::integer AS total FROM tecidos_defeitos_eventos WHERE tecido_defeito_id=$1',[id])).rows[0].total,2)
+    const pecaA=(await req('/tecidos-defeitos','POST',{...novo(),nf:'LOTE A'})).data.item
+    const pecaB=(await req('/tecidos-defeitos','POST',{...novo(),nf:'LOTE B'})).data.item
+    const selecionadas=[pecaA,pecaB].map(p=>({id:p.id,versao:0}))
+    const resolverLote=dados=>req('/tecidos-defeitos/resolver-lote','POST',dados)
+    assert.equal((await resolverLote({itens:[]})).status,400)
+    assert.equal((await resolverLote({itens:[selecionadas[0],selecionadas[0]]})).status,400)
+    assert.equal((await resolverLote({itens:[selecionadas[0],{...selecionadas[1],versao:99}]})).status,412)
+    assert.equal((await resolverLote({itens:[selecionadas[0],{id,versao:3}]})).status,412)
+    assert.equal((await resolverLote({itens:selecionadas,observacao:'FALHA'})).status,500)
+    const consultarLote=()=>pool.query('SELECT id,status,versao,resolucao,resolvido_em FROM tecidos_defeitos WHERE id=ANY($1::bigint[]) ORDER BY id',[selecionadas.map(i=>i.id)])
+    assert.ok((await consultarLote()).rows.every(i=>i.status==='PENDENTE'&&i.versao===0))
+    const telaLote=await abrirStream()
+    const resultadoLote=await resolverLote({itens:selecionadas,observacao:'Devolvidas ao fornecedor'})
+    assert.equal(resultadoLote.status,200);assert.equal(resultadoLote.data.quantidade,2)
+    await telaLote.esperar('alteracao');telaLote.fechar()
+    assert.ok((await consultarLote()).rows.every(i=>i.status==='RESOLVIDO'&&i.versao===1&&i.resolucao==='Devolvidas ao fornecedor'&&i.resolvido_em))
+    const eventosLote=(await pool.query('SELECT observacao FROM tecidos_defeitos_eventos WHERE tecido_defeito_id=ANY($1::bigint[])',[selecionadas.map(i=>i.id)])).rows
+    assert.equal(eventosLote.length,2);assert.ok(eventosLote.every(i=>i.observacao==='Devolvidas ao fornecedor'))
+    assert.equal((await resolverLote({itens:selecionadas})).status,412)
+    assert.equal((await req(`/tecidos-defeitos/${pecaA.id}/situacao`,'PUT',{status:'PENDENTE',versao:1})).status,200)
+    assert.equal((await resolverLote({itens:[{id:pecaA.id,versao:2},{id:pecaB.id,versao:1}]})).status,412)
+    assert.equal((await consultarLote()).rows[0].status,'PENDENTE')
     const protegidas=(await pool.query("SELECT relname,relrowsecurity FROM pg_class WHERE relname IN ('tecidos_defeitos','tecidos_defeitos_eventos')")).rows
     assert.equal(protegidas.length,2);assert.ok(protegidas.every(r=>r.relrowsecurity))
   } finally {

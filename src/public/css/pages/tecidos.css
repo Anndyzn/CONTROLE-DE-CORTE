@@ -29,12 +29,19 @@
 .tecidos-abas button[aria-pressed="true"] { background:var(--primary-deep);color:#fff;border-color:var(--primary-deep); }
 .tecidos-resumo { padding:12px 15px;background:#f3f6fb;border:1px solid #e0e7f1;border-radius:9px;color:#48617f;font-size:13px;margin-bottom:17px; }
 .tecidos-resumo strong { color:#17375e; }
+.tecidos-selecao { display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 14px;margin:12px 0;background:#edf3ff;border:1px solid #cbdcf6;border-radius:9px; }
+.tecidos-selecao .small-help { margin-right:auto; }
+.tecidos-tabela input[type="checkbox"] { vertical-align:middle;margin-right:8px;cursor:pointer; }
 .tecidos-tabela { overflow-x:auto;border:1px solid #dfe6ef;border-radius:11px; }
 .tecidos-tabela table { width:100%;min-width:870px;margin:0;border:0; }
 .tecidos-tabela th { white-space:nowrap; }
 .tecidos-tabela td { vertical-align:top;max-width:260px;overflow-wrap:anywhere;white-space:normal; }
 .tecidos-tabela td:nth-child(3) { white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums; }
 .tecidos-tabela td:first-child { font-weight:600;min-width:115px; }
+.tecidos-tabela td.tecidos-acoes-linha { white-space:nowrap; }
+.tecidos-acoes-linha button + button { margin-left:6px; }
+.page-tecidos button.btn-excluir-tecido { background:#fff1f1;border:1px solid #efc7c7;color:#aa2929; }
+.page-tecidos button.btn-excluir-tecido:hover:not(:disabled) { background:#ffe3e3; }
 .page-tecidos .container .tecidos-tabela .tecidos-inicio-nf td { border-top:2px solid #bbcde3; }
 .tecidos-tabela td small { display:block;color:var(--text-soft);font-size:11px;margin-top:5px; }
 .tecidos-tabela td .tecidos-atendimento { color:#16704c; }

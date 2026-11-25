@@ -1,6 +1,6 @@
 import { Router, Response } from "express"
 import { ErroRegra } from "../services/corte-bloqueado"
-import { cadastrarTecido, listarTecidos, alterarSituacaoTecido, sugerirTecidos } from "../services/tecidos-defeitos"
+import { cadastrarTecido, listarTecidos, alterarSituacaoTecido, sugerirTecidos, excluirTecido, resolverTecidosEmLote } from "../services/tecidos-defeitos"
 import { conectarTecidosRealtime, notificarTecidosAlterados } from "../services/tecidos-realtime"
 
 const router = Router()
@@ -28,6 +28,13 @@ router.post("/tecidos-defeitos", async (req, res) => {
   }
   catch (e) { falha(res, e) }
 })
+router.post("/tecidos-defeitos/resolver-lote", async (req, res) => {
+  try {
+    const resultado = await resolverTecidosEmLote(req.body)
+    notificarTecidosAlterados()
+    res.json(resultado)
+  } catch (e) { falha(res, e) }
+})
 router.put("/tecidos-defeitos/:id/situacao", async (req, res) => {
   try {
     const item = await alterarSituacaoTecido(Number(req.params.id), req.body)
@@ -35,5 +42,12 @@ router.put("/tecidos-defeitos/:id/situacao", async (req, res) => {
     res.json({ item })
   }
   catch (e) { falha(res, e) }
+})
+router.delete("/tecidos-defeitos/:id", async (req, res) => {
+  try {
+    const resultado = await excluirTecido(Number(req.params.id), req.body)
+    notificarTecidosAlterados()
+    res.json(resultado)
+  } catch (e) { falha(res, e) }
 })
 export default router

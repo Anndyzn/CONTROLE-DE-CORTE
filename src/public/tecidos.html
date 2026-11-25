@@ -56,7 +56,9 @@
       </div>
       <div class="tecidos-resumo" id="resumoTecidos" role="status">Carregando peças...</div>
       <p id="mensagemTecidos" role="status" aria-live="polite" hidden></p>
-      <div class="tecidos-tabela" id="areaTabelaTecidos" aria-busy="true"><table><thead><tr><th>NF</th><th>Tecido / cor</th><th>Metros</th><th>Defeito</th><th>Observação</th><th id="colunaDataTecido">Registrado em</th><th>Ação</th></tr></thead><tbody id="listaTecidos"></tbody></table></div>
+      <p id="ajudaSelecaoTecidos" class="small-help">Marque as peças para resolver várias de uma vez. A caixa do cabeçalho seleciona esta página.</p>
+      <div id="acoesSelecaoTecidos" class="tecidos-selecao" hidden><strong id="contadorSelecaoTecidos" role="status"></strong><span class="small-help">Uma observação para todas as peças selecionadas.</span><button id="limparSelecaoTecidos" class="btn-secondary" type="button">Limpar seleção</button><button id="resolverSelecaoTecidos" type="button">Resolver selecionadas</button></div>
+      <div class="tecidos-tabela" id="areaTabelaTecidos" aria-busy="true"><table><thead><tr><th><input type="checkbox" id="selecionarPaginaTecidos" aria-label="Selecionar todas as peças desta página" title="Selecionar esta página"> NF</th><th>Tecido / cor</th><th>Metros</th><th>Defeito</th><th>Observação</th><th id="colunaDataTecido">Registrado em</th><th>Ação</th></tr></thead><tbody id="listaTecidos"></tbody></table></div>
       <div class="tecidos-vazio" id="vazioTecidos" hidden><strong id="tituloVazioTecidos">Nenhuma peça pendente</strong><p id="textoVazioTecidos">As peças registradas aparecerão aqui até serem atendidas.</p></div>
       <div class="tecidos-paginacao" id="paginacaoTecidos" hidden><button type="button" class="btn-secondary" id="anteriorTecidos">Anterior</button><span id="paginaTecidos"></span><button type="button" class="btn-secondary" id="proximaTecidos">Próxima</button></div>
     </section>
@@ -65,7 +67,7 @@
   <dialog id="dialogSituacaoTecido" class="tecidos-dialog" aria-labelledby="tituloSituacaoTecido">
     <form id="formSituacaoTecido">
       <h2 id="tituloSituacaoTecido">Marcar como resolvido?</h2><p id="descricaoSituacaoTecido"></p>
-      <div class="form-group"><label for="obsSituacaoTecido">Observação do atendimento <span class="tecidos-opcional">opcional</span></label><textarea id="obsSituacaoTecido" maxlength="1000" rows="3" placeholder="Ex.: peça substituída pelo fornecedor."></textarea></div>
+      <div id="campoObsSituacaoTecido" class="form-group"><label for="obsSituacaoTecido">Observação do atendimento <span class="tecidos-opcional">opcional</span></label><textarea id="obsSituacaoTecido" maxlength="1000" rows="3" placeholder="Ex.: peça substituída pelo fornecedor."></textarea></div>
       <p id="erroSituacaoTecido" role="alert" hidden></p>
       <div class="tecidos-acoes"><button id="cancelarSituacaoTecido" type="button" class="btn-secondary">Cancelar</button><button id="confirmarSituacaoTecido" type="submit">Marcar como resolvido</button></div>
     </form>

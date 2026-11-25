@@ -24,11 +24,12 @@ function ambiente(){
   form.reset=()=>{nomes.forEach(id=>$(id).value='');defeitos.forEach(e=>e.checked=false)}
   form.reportValidity=()=>!defeitos[0].validity
   class DadosForm { *[Symbol.iterator](){for(const [i,nome]of ['nf','tecido','cor','metros','observacao'].entries())yield [nome,$(nomes[i]).value]} }
-  const chamadas=[],estado={lista:{itens:[],resumo:{quantidade:0,metros:'0'}},get:null,post:null,put:null,impresso:null}
+  const chamadas=[],estado={lista:{itens:[],resumo:{quantidade:0,metros:'0'}},get:null,post:null,put:null,del:null,impresso:null}
   const contexto={document:{getElementById:$,createElement:tag=>new El(tag)},URLSearchParams,crypto:{randomUUID},FormData:DadosForm,console,
     apiGet:async url=>{chamadas.push({url});if(estado.get)return estado.get(url);return url.includes('sugestoes')?{tecidos:[]}:estado.lista},
     apiPost:async(url,body)=>{chamadas.push({url,body});if(estado.post)return estado.post(url,body);return {item:{id:1}}},
     apiPut:async(url,body)=>{chamadas.push({url,body});if(estado.put)return estado.put(url,body);return {item:{id:1}}},
+    apiDelete:async(url,body)=>{chamadas.push({url,body,method:'DELETE'});if(estado.del)return estado.del(url,body);return {excluido:true}},
     imprimirTecidos:(...args)=>{estado.impresso=args},iniciarAtualizacaoTecidos:config=>{estado.realtime=config;return {retomar(){}}}}
   const codigo=fs.readFileSync('src/public/js/pages/tecidos/main.js','utf8').replace(/^import[^\n]*\n/gm,'')
   vm.runInNewContext(codigo,contexto)
@@ -92,4 +93,59 @@ test('atualização automática mantém campos, filtro e a lista anterior enquan
   terminar(a.estado.lista);assert.equal(await carga,true)
   assert.equal(a.$('buscaTecido').value,'0001');assert.equal(a.$('obsTecido').value,'Mancha lateral')
   a.$('dialogSituacaoTecido').open=true;assert.ok(a.estado.realtime.ocupado())
+})
+
+test('Excluir fica ao lado de Resolver e só envia após confirmação; falha mantém diálogo',async()=>{
+  const a=ambiente();await tick();a.estado.lista={itens:[item],resumo:{quantidade:1,metros:50}}
+  await a.evento('atualizarTecidos');await tick()
+  const botoes=a.$('listaTecidos').children[0].children.at(-1).children
+  assert.deepEqual(botoes.map(b=>b.textContent),['Resolver','Excluir'])
+  await botoes[1].listeners.click()
+  assert.equal(a.$('dialogSituacaoTecido').open,true);assert.equal(a.$('campoObsSituacaoTecido').hidden,true)
+  assert.equal(a.chamadas.filter(c=>c.method==='DELETE').length,0)
+  await a.evento('cancelarSituacaoTecido');assert.equal(a.chamadas.filter(c=>c.method==='DELETE').length,0)
+  await botoes[1].listeners.click();a.estado.del=async()=>{throw new Error('Conflito de versão')}
+  await a.evento('formSituacaoTecido','submit')
+  assert.equal(a.$('dialogSituacaoTecido').open,true);assert.equal(a.$('confirmarSituacaoTecido').disabled,false)
+  const envio=a.chamadas.find(c=>c.method==='DELETE');assert.equal(envio.url,'/tecidos-defeitos/7');assert.equal(envio.body.versao,2)
+  a.estado.del=null;a.estado.lista={itens:[],resumo:{quantidade:0,metros:0}}
+  await a.evento('formSituacaoTecido','submit');assert.equal(a.$('dialogSituacaoTecido').open,false)
+  assert.equal(a.$('listaTecidos').children.length,0)
+})
+
+test('seleciona várias peças e envia uma observação comum somente após confirmar',async()=>{
+  const a=ambiente();await tick();a.estado.lista={itens:[item,{...item,id:8,nf:'0002/3'}],resumo:{quantidade:2,metros:100}}
+  await a.evento('atualizarTecidos');await tick()
+  a.$('selecionarPaginaTecidos').checked=true;await a.evento('selecionarPaginaTecidos','change')
+  assert.equal(a.$('acoesSelecaoTecidos').hidden,false);assert.match(a.$('contadorSelecaoTecidos').textContent,/2 peça/)
+  await a.evento('resolverSelecaoTecidos')
+  assert.equal(a.$('dialogSituacaoTecido').open,true);assert.match(a.$('tituloSituacaoTecido').textContent,/2 peça/)
+  assert.equal(a.chamadas.filter(c=>c.url.endsWith('/resolver-lote')).length,0)
+  a.$('obsSituacaoTecido').value='Peças lavadas e liberadas'
+  a.estado.post=async()=>{throw new Error('Peça alterada por outra pessoa')}
+  await a.evento('formSituacaoTecido','submit')
+  assert.equal(a.$('dialogSituacaoTecido').open,true);assert.equal(a.$('obsSituacaoTecido').value,'Peças lavadas e liberadas')
+  const envio=a.chamadas.find(c=>c.url.endsWith('/resolver-lote'))
+  assert.equal(envio.body.itens.length,2);assert.equal(envio.body.observacao,'Peças lavadas e liberadas')
+  assert.equal(envio.body.itens[0].versao,2)
+  a.estado.post=null;a.estado.lista={itens:[],resumo:{quantidade:0,metros:0}}
+  await a.evento('formSituacaoTecido','submit')
+  assert.equal(a.$('dialogSituacaoTecido').open,false);assert.equal(a.$('acoesSelecaoTecidos').hidden,true)
+})
+
+test('seleção continua ao trocar de página, cabeçalho marca só a página e filtro limpa seleção',async()=>{
+  const a=ambiente();await tick();a.estado.lista={itens:[item],resumo:{quantidade:51,metros:2550}}
+  await a.evento('atualizarTecidos');await tick()
+  const check=a.$('listaTecidos').children[0].children[0].children[0]
+  check.checked=true;await check.listeners.change()
+  a.estado.lista={itens:[{...item,id:60}],resumo:{quantidade:51,metros:2550}}
+  await a.evento('proximaTecidos');await tick()
+  assert.match(a.$('contadorSelecaoTecidos').textContent,/1 peça/)
+  assert.equal(a.$('selecionarPaginaTecidos').checked,false)
+  a.$('selecionarPaginaTecidos').checked=true;await a.evento('selecionarPaginaTecidos','change')
+  assert.match(a.$('contadorSelecaoTecidos').textContent,/2 peça/)
+  await a.evento('resolverSelecaoTecidos');await a.evento('cancelarSituacaoTecido')
+  assert.match(a.$('contadorSelecaoTecidos').textContent,/2 peça/)
+  a.$('buscaTecido').value='CETIM';await a.evento('buscarTecidos','submit')
+  assert.equal(a.$('acoesSelecaoTecidos').hidden,true)
 })

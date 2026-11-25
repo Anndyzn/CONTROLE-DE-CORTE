@@ -50,6 +50,7 @@ export async function prepararTecidosDefeitos() {
       observacao TEXT NOT NULL DEFAULT '', criado_em TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
     )`)
     await c.query("CREATE INDEX IF NOT EXISTS tecidos_defeitos_status_idx ON tecidos_defeitos(status,id DESC)")
+    await c.query("ALTER TABLE tecidos_defeitos ADD COLUMN IF NOT EXISTS excluido_em TIMESTAMPTZ")
     await c.query("ALTER TABLE tecidos_defeitos ENABLE ROW LEVEL SECURITY")
     await c.query("ALTER TABLE tecidos_defeitos_eventos ENABLE ROW LEVEL SECURITY")
     await c.query("COMMIT")
@@ -67,6 +68,7 @@ export async function cadastrarTecido(dados: any) {
     VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT(chave_envio) DO NOTHING RETURNING *`, valores)
   if (r.rows.length) return r.rows[0]
   const anterior = (await db.query("SELECT * FROM tecidos_defeitos WHERE chave_envio=$1", [dados.chave_envio])).rows[0]
+  if (anterior?.excluido_em) throw new ErroRegra(409, "Esta peça foi excluída. Atualize a página antes de cadastrar outra peça.")
   if (!anterior || anterior.nf !== item.nf || anterior.tecido !== item.tecido || anterior.cor !== item.cor ||
     Number(anterior.metros) !== item.metros || anterior.observacao !== item.observacao || JSON.stringify(anterior.defeitos) !== JSON.stringify(item.defeitos)) {
     throw new ErroRegra(409, "Este envio já foi usado com outros dados. Atualize a lista antes de cadastrar novamente.")
@@ -80,7 +82,7 @@ export function filtroTecidos(status: unknown, busca: unknown) {
   return [status, busca.trim()]
 }
 
-const condicao = "status=$1 AND ($2='' OR strpos(lower(nf||' '||tecido||' '||cor),lower($2))>0)"
+const condicao = "excluido_em IS NULL AND status=$1 AND ($2='' OR strpos(lower(nf||' '||tecido||' '||cor),lower($2))>0)"
 
 export async function listarTecidos(status: unknown, busca: unknown, pagina: number, imprimir = false) {
   const valores = filtroTecidos(status, busca)
@@ -108,7 +110,7 @@ export async function alterarSituacaoTecido(id: number, dados: any) {
     await c.query("BEGIN")
     const anterior = (await c.query("SELECT * FROM tecidos_defeitos WHERE id=$1 FOR UPDATE", [id])).rows[0]
     if (!anterior) throw new ErroRegra(404, "Peça não encontrada.")
-    if (anterior.versao !== dados.versao || anterior.status === dados.status) throw new ErroRegra(412, "Esta peça já foi alterada. Atualize a lista.")
+    if (anterior.excluido_em || anterior.versao !== dados.versao || anterior.status === dados.status) throw new ErroRegra(412, "Esta peça já foi alterada ou excluída. Atualize a lista.")
     const r = await c.query(`UPDATE tecidos_defeitos SET status=$2,versao=versao+1,
       resolvido_em=CASE WHEN $2='RESOLVIDO' THEN CURRENT_TIMESTAMP ELSE NULL END,
       resolucao=CASE WHEN $2='RESOLVIDO' THEN $3 ELSE '' END WHERE id=$1 RETURNING *`, [id, dados.status, observacao])
@@ -119,9 +121,51 @@ export async function alterarSituacaoTecido(id: number, dados: any) {
   finally { c.release() }
 }
 
+export function validarSelecaoTecidos(dados: any) {
+  if (!Array.isArray(dados?.itens) || dados.itens.length < 1 || dados.itens.length > 200) throw new ErroRegra(400, "Selecione de 1 a 200 peças por atendimento.")
+  const itens = dados.itens.map((item: any) => {
+    const valor = item?.id
+    const id = typeof valor === "string" && /^[1-9]\d*$/.test(valor) ? Number(valor) : valor
+    if (!Number.isSafeInteger(id) || id < 1 || !Number.isSafeInteger(item?.versao) || item.versao < 0) throw new ErroRegra(400, "A seleção contém uma peça inválida. Atualize a lista.")
+    return { id: id as number, versao: item.versao as number }
+  }) as {id: number; versao: number}[]
+  if (new Set(itens.map(i => i.id)).size !== itens.length) throw new ErroRegra(400, "Uma peça foi selecionada mais de uma vez.")
+  return { itens, observacao: texto(dados?.observacao ?? "", "a observação do atendimento", 1000) }
+}
+
+export async function resolverTecidosEmLote(dados: any) {
+  const { itens, observacao } = validarSelecaoTecidos(dados)
+  const ids = itens.map(i => i.id).sort((a, b) => a - b)
+  const versoes = new Map(itens.map(i => [i.id, i.versao]))
+  const c = await db.connect()
+  try {
+    await c.query("BEGIN")
+    const atuais = (await c.query("SELECT id,versao,status,excluido_em FROM tecidos_defeitos WHERE id=ANY($1::bigint[]) ORDER BY id FOR UPDATE", [ids])).rows
+    if (atuais.length !== ids.length || atuais.some(i => i.excluido_em || i.status !== "PENDENTE" || i.versao !== versoes.get(Number(i.id)))) {
+      throw new ErroRegra(412, "Uma das peças foi alterada, resolvida ou excluída. Nenhuma peça foi alterada neste envio. Cancele, atualize a lista e confira a seleção.")
+    }
+    await c.query(`UPDATE tecidos_defeitos SET status='RESOLVIDO',resolvido_em=CURRENT_TIMESTAMP,
+      resolucao=$2,versao=versao+1 WHERE id=ANY($1::bigint[])`, [ids, observacao])
+    await c.query(`INSERT INTO tecidos_defeitos_eventos(tecido_defeito_id,status,observacao)
+      SELECT unnest($1::bigint[]),'RESOLVIDO',$2`, [ids, observacao])
+    await c.query("COMMIT")
+    return { quantidade: ids.length }
+  } catch (e) { await c.query("ROLLBACK"); throw e }
+  finally { c.release() }
+}
+
+export async function excluirTecido(id: number, dados: any) {
+  if (!Number.isSafeInteger(id) || id < 1) throw new ErroRegra(400, "Registro inválido.")
+  if (!Number.isSafeInteger(dados?.versao) || dados.versao < 0) throw new ErroRegra(400, "Atualize a lista antes de excluir.")
+  const r = await db.query(`UPDATE tecidos_defeitos SET excluido_em=CURRENT_TIMESTAMP,versao=versao+1
+    WHERE id=$1 AND versao=$2 AND excluido_em IS NULL RETURNING id`, [id, dados.versao])
+  if (!r.rows.length) throw new ErroRegra(412, "Esta peça foi alterada ou já foi excluída. Atualize a lista.")
+  return { excluido: true, id: r.rows[0].id }
+}
+
 export async function sugerirTecidos() {
   return (await db.query(`SELECT tecido FROM (
     SELECT upper(trim(tecido)) AS tecido FROM itens_corte WHERE tecido IS NOT NULL
-    UNION SELECT tecido FROM tecidos_defeitos
+    UNION SELECT tecido FROM tecidos_defeitos WHERE excluido_em IS NULL
   ) nomes WHERE tecido<>'' ORDER BY tecido LIMIT 500`)).rows.map(r => r.tecido)
 }
