@@ -40,6 +40,10 @@ em cortes finalizados e criação de outro corte em mesa ocupada.
   metros, um ou mais defeitos e observação. Pendentes podem ser impressos em A4 paisagem.
   Resolver mantém o registro em Resolvidos; reabrir devolve às pendências. O histórico
   de atendimento é preservado no banco, incluindo observações de resoluções anteriores.
+  A lista acompanha cadastros e atendimentos de outras abas por eventos do servidor,
+  com reconexão e conferência automática a cada 15 segundos. Atualizações preservam
+  os campos preenchidos, filtros e atendimento aberto. Ao fechar o atendimento,
+  as mudanças pendentes são carregadas. O indicador no cabeçalho mostra a conexão.
 
 O lançamento no Sankhya continua manual: este sistema não cria OPs nem movimenta
 estoque. O catálogo de códigos é local. Não há autenticação; o responsável nas

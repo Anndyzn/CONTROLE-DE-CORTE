@@ -1,11 +1,13 @@
 import { apiGet, apiPost, apiPut } from '../../core/api.js'
 import { imprimirTecidos } from './impressao.js'
+import { iniciarAtualizacaoTecidos } from './realtime.js'
 
 const $ = id => document.getElementById(id)
 const numero = v => Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 3 })
 const data = v => new Date(v).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', dateStyle: 'short', timeStyle: 'short' })
 let status = 'PENDENTE', busca = '', pagina = 1, total = 0, consulta = 0, selecionado = null, enviando = false
 let chave = crypto.randomUUID(), assinatura = ''
+let cargas = 0, sincronizacao = null
 const form = $('formTecido'), dialog = $('dialogSituacaoTecido')
 function mensagem(texto, tipo = 'erro') {
   $('mensagemTecidos').textContent = texto
@@ -55,13 +57,16 @@ function renderizar(itens) {
   $('anteriorTecidos').disabled = pagina <= 1
   $('proximaTecidos').disabled = pagina >= paginas
 }
-async function carregar() {
+async function carregar(silencioso = false) {
   const atual = ++consulta
+  cargas++
   $('areaTabelaTecidos').setAttribute('aria-busy', 'true')
   $('imprimirTecidos').disabled = true
   // Não deixa ações de uma aba anterior visíveis enquanto outra está carregando.
-  $('listaTecidos').replaceChildren(); $('vazioTecidos').hidden = true
-  $('resumoTecidos').textContent = 'Carregando peças...'
+  if (!silencioso) {
+    $('listaTecidos').replaceChildren(); $('vazioTecidos').hidden = true
+    $('resumoTecidos').textContent = 'Carregando peças...'
+  }
   try {
     const r = await apiGet(`/tecidos-defeitos?${new URLSearchParams({ status, busca, pagina })}`)
     if (atual !== consulta) return
@@ -70,11 +75,19 @@ async function carregar() {
     $('resumoTecidos').textContent = `${total} peça(s) ${status === 'PENDENTE' ? 'pendente(s)' : 'resolvida(s)'} · ${numero(r.resumo.metros)} m${busca ? ' · resultados da busca' : ''}`
     renderizar(r.itens)
     $('imprimirTecidos').disabled = !total
+    return true
   } catch (e) {
     if (atual !== consulta) return
-    $('resumoTecidos').textContent = 'Não foi possível carregar a lista. Use Atualizar para tentar novamente.'
-    mensagem(e.message)
-  } finally { if (atual === consulta) $('areaTabelaTecidos').setAttribute('aria-busy', 'false') }
+    if (!silencioso) {
+      $('resumoTecidos').textContent = 'Não foi possível carregar a lista. Use Atualizar para tentar novamente.'
+      mensagem(e.message)
+    }
+    return false
+  } finally {
+    cargas--
+    if (atual === consulta) $('areaTabelaTecidos').setAttribute('aria-busy', 'false')
+    sincronizacao?.retomar()
+  }
 }
 function trocarAba(nova) {
   status = nova; pagina = 1; mensagem('')
@@ -121,7 +134,7 @@ form.addEventListener('submit', async e => {
     mensagem('Peça registrada. Cada novo cadastro corresponde a outra peça ou rolo.', 'sucesso')
     if (adicionar) $('metrosTecido').focus()
   } catch (erro) { mensagem(erro.message) }
-  finally { enviando = false; $('camposTecido').disabled = false; $('fecharCadastroTecido').disabled = false; if (adicionar && !$('cadastroTecido').hidden) $('metrosTecido').focus() }
+  finally { enviando = false; $('camposTecido').disabled = false; $('fecharCadastroTecido').disabled = false; if (adicionar && !$('cadastroTecido').hidden) $('metrosTecido').focus(); sincronizacao?.retomar() }
 })
 function abrirSituacao(item) {
   selecionado = item
@@ -145,6 +158,7 @@ $('formSituacaoTecido').addEventListener('submit', async e => {
   finally { $('confirmarSituacaoTecido').disabled = false; $('cancelarSituacaoTecido').disabled = false; $('obsSituacaoTecido').disabled = false }
 })
 dialog.addEventListener('cancel', e => { if ($('confirmarSituacaoTecido').disabled) e.preventDefault() })
+dialog.addEventListener('close', () => sincronizacao?.retomar())
 $('cancelarSituacaoTecido').addEventListener('click', () => dialog.close())
 $('abrirCadastroTecido').addEventListener('click', () => cadastro($('cadastroTecido').hidden))
 $('fecharCadastroTecido').addEventListener('click', () => cadastro(false))
@@ -170,3 +184,11 @@ apiGet('/tecidos-defeitos/sugestoes').then(r => {
 }).catch(() => {}) // Sugestões são opcionais; o cadastro continua permitindo texto livre.
 atualizarRegras()
 carregar()
+sincronizacao = iniciarAtualizacaoTecidos({
+  atualizar: () => carregar(true),
+  ocupado: () => enviando || $('camposTecido').disabled || dialog.open || cargas > 0,
+  indicar: (texto, tipo) => {
+    $('syncTecidos').textContent = texto
+    $('syncTecidos').dataset.estado = tipo
+  }
+})

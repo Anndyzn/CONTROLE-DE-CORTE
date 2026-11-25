@@ -29,7 +29,7 @@ function ambiente(){
     apiGet:async url=>{chamadas.push({url});if(estado.get)return estado.get(url);return url.includes('sugestoes')?{tecidos:[]}:estado.lista},
     apiPost:async(url,body)=>{chamadas.push({url,body});if(estado.post)return estado.post(url,body);return {item:{id:1}}},
     apiPut:async(url,body)=>{chamadas.push({url,body});if(estado.put)return estado.put(url,body);return {item:{id:1}}},
-    imprimirTecidos:(...args)=>{estado.impresso=args}}
+    imprimirTecidos:(...args)=>{estado.impresso=args},iniciarAtualizacaoTecidos:config=>{estado.realtime=config;return {retomar(){}}}}
   const codigo=fs.readFileSync('src/public/js/pages/tecidos/main.js','utf8').replace(/^import[^\n]*\n/gm,'')
   vm.runInNewContext(codigo,contexto)
   return {$,defeitos,chamadas,estado,async evento(id,nome='click',value){return $(id).listeners[nome]({preventDefault(){},submitter:{value}})},preencher(){nomes.forEach((id,i)=>$(id).value=['000316056/3','CETIM','BRANCO','50,8','Mancha lateral'][i]);defeitos[1].checked=true}}
@@ -78,4 +78,18 @@ test('a lista mantém cada peça e separa visualmente somente ao mudar de NF',as
   assert.ok(!linhas[0].className.includes('tecidos-inicio-nf'))
   assert.ok(!linhas[1].className.includes('tecidos-inicio-nf'))
   assert.ok(linhas[2].className.includes('tecidos-inicio-nf'))
+})
+
+test('atualização automática mantém campos, filtro e a lista anterior enquanto consulta',async()=>{
+  const a=ambiente();await tick();a.preencher()
+  a.estado.lista={itens:[item],resumo:{quantidade:1,metros:50}}
+  a.$('buscaTecido').value='0001';await a.evento('buscarTecidos','submit')
+  const anterior=a.$('listaTecidos').children[0]
+  let terminar;a.estado.get=()=>new Promise(r=>terminar=r)
+  const carga=a.estado.realtime.atualizar()
+  assert.equal(a.$('listaTecidos').children[0],anterior)
+  assert.equal(a.$('nfTecido').value,'000316056/3');assert.equal(a.$('metrosTecido').value,'50,8')
+  terminar(a.estado.lista);assert.equal(await carga,true)
+  assert.equal(a.$('buscaTecido').value,'0001');assert.equal(a.$('obsTecido').value,'Mancha lateral')
+  a.$('dialogSituacaoTecido').open=true;assert.ok(a.estado.realtime.ocupado())
 })

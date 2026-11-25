@@ -8,6 +8,7 @@ const {executar}=require('../scripts/backup-lib.cjs')
 test('tecidos: PostgreSQL isolado valida cadastro, reenvio, impressão, atendimento e reabertura sem perder histórico',{timeout:120000},async()=>{
   const nome='corte-tecidos-fixture-'+crypto.randomBytes(8).toString('hex'),senha=crypto.randomBytes(32).toString('hex')
   let criado=false,pool,servidor
+  const streams=[]
   try {
     await executar('docker',['run','--detach','--rm','--name',nome,'--label','controle-corte.tecidos-test=true','--publish','127.0.0.1::5432','--tmpfs','/var/lib/postgresql/data:rw,nosuid,nodev,size=268435456','--env','POSTGRES_PASSWORD','--env','POSTGRES_USER=tecidos_fixture','--env','POSTGRES_DB=tecidos_fixture','postgres:17'],{env:{POSTGRES_PASSWORD:senha}})
     criado=true
@@ -23,10 +24,25 @@ test('tecidos: PostgreSQL isolado valida cadastro, reenvio, impressão, atendime
     servidor=await new Promise(resolve=>{const s=app.listen(0,'127.0.0.1',()=>resolve(s))})
     const url=`http://127.0.0.1:${servidor.address().port}`
     const req=async(path,method='GET',body)=>{const r=await fetch(url+path,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});return {status:r.status,data:await r.json()}}
+    async function abrirStream(){
+      const controller=new AbortController();streams.push(controller)
+      const r=await fetch(url+'/tecidos-defeitos/atualizacoes',{signal:controller.signal})
+      assert.match(r.headers.get('content-type'),/text\/event-stream/)
+      const reader=r.body.getReader();let buffer=''
+      const esperar=async evento=>{
+        const limite=setTimeout(()=>controller.abort(),5000)
+        try{while(!buffer.includes(`event: ${evento}\n`)){const {value,done}=await reader.read();if(done)throw new Error('Canal fechado antes do evento');buffer+=Buffer.from(value).toString('utf8')}
+          assert.ok(!buffer.includes('observacao'));assert.ok(!buffer.includes('nf"'));buffer=''
+        }finally{clearTimeout(limite)}
+      }
+      await esperar('conectado');return {esperar,fechar:()=>controller.abort()}
+    }
     const novo=()=>({chave_envio:crypto.randomUUID(),nf:'000316056/3',tecido:'CETIM',cor:'BRANCO',metros:'50,8',defeitos:['Manchado'],observacao:'<script>texto literal</script>'})
     const base=novo()
+    const [telaA,telaB]=await Promise.all([abrirStream(),abrirStream()])
     const [a,b]=await Promise.all([req('/tecidos-defeitos','POST',base),req('/tecidos-defeitos','POST',base)])
     assert.equal(a.status,201);assert.equal(b.status,201);assert.equal(a.data.item.id,b.data.item.id)
+    await Promise.all([telaA.esperar('alteracao'),telaB.esperar('alteracao')]);telaA.fechar();telaB.fechar()
     assert.equal(a.data.item.nf,'000316056/3')
     assert.equal((await req('/tecidos-defeitos','POST',{...base,metros:1})).status,409)
     assert.equal((await req('/tecidos-defeitos','POST',novo())).status,201) // Mesma NF, outra peça.
@@ -35,8 +51,10 @@ test('tecidos: PostgreSQL isolado valida cadastro, reenvio, impressão, atendime
     assert.equal(lista.resumo.quantidade,2);assert.equal(Number(lista.resumo.metros),101.6)
     const id=a.data.item.id,caminhoSituacao=`/tecidos-defeitos/${id}/situacao`
     const resolver={versao:0,status:'RESOLVIDO',observacao:'Peça substituída'}
+    const telaAtendimento=await abrirStream()
     const disputas=await Promise.all([req(caminhoSituacao,'PUT',resolver),req(caminhoSituacao,'PUT',resolver)])
     assert.deepEqual(disputas.map(r=>r.status).sort(),[200,412])
+    await telaAtendimento.esperar('alteracao');telaAtendimento.fechar()
     lista=(await req('/tecidos-defeitos?status=RESOLVIDO')).data
     assert.equal(lista.itens[0].resolucao,'Peça substituída');assert.ok(lista.itens[0].resolvido_em)
     assert.equal((await req(caminhoSituacao,'PUT',{versao:0,status:'PENDENTE'})).status,412)
@@ -68,6 +86,7 @@ test('tecidos: PostgreSQL isolado valida cadastro, reenvio, impressão, atendime
     const protegidas=(await pool.query("SELECT relname,relrowsecurity FROM pg_class WHERE relname IN ('tecidos_defeitos','tecidos_defeitos_eventos')")).rows
     assert.equal(protegidas.length,2);assert.ok(protegidas.every(r=>r.relrowsecurity))
   } finally {
+    streams.forEach(c=>c.abort())
     if(servidor)await new Promise(r=>servidor.close(r))
     if(pool)await pool.end()
     if(criado)await executar('docker',['rm','--force',nome])

@@ -1,8 +1,10 @@
 import { Router, Response } from "express"
 import { ErroRegra } from "../services/corte-bloqueado"
 import { cadastrarTecido, listarTecidos, alterarSituacaoTecido, sugerirTecidos } from "../services/tecidos-defeitos"
+import { conectarTecidosRealtime, notificarTecidosAlterados } from "../services/tecidos-realtime"
 
 const router = Router()
+router.get("/tecidos-defeitos/atualizacoes", conectarTecidosRealtime)
 function falha(res: Response, erro: unknown) {
   if (erro instanceof ErroRegra) return res.status(erro.status).json({ erro: erro.message })
   console.error("Falha em tecidos com defeito:", erro)
@@ -19,11 +21,19 @@ router.get("/tecidos-defeitos", async (req, res) => {
   } catch (e) { falha(res, e) }
 })
 router.post("/tecidos-defeitos", async (req, res) => {
-  try { res.status(201).json({ item: await cadastrarTecido(req.body) }) }
+  try {
+    const item = await cadastrarTecido(req.body)
+    notificarTecidosAlterados()
+    res.status(201).json({ item })
+  }
   catch (e) { falha(res, e) }
 })
 router.put("/tecidos-defeitos/:id/situacao", async (req, res) => {
-  try { res.json({ item: await alterarSituacaoTecido(Number(req.params.id), req.body) }) }
+  try {
+    const item = await alterarSituacaoTecido(Number(req.params.id), req.body)
+    notificarTecidosAlterados()
+    res.json({ item })
+  }
   catch (e) { falha(res, e) }
 })
 export default router

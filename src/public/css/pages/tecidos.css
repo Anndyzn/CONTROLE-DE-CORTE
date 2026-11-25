@@ -1,4 +1,6 @@
 .page-tecidos .tecidos-painel { padding: 26px; }
+#syncTecidos[data-estado="aviso"] { background:#fff5dd;color:#825400;border-color:#e7c991; }
+#syncTecidos[data-estado="erro"] { background:#fff0f0;color:#a72e2e;border-color:#efb7b7; }
 .tecidos-topo,.tecidos-acoes,.tecidos-filtros,.tecidos-busca,.tecidos-abas,.tecidos-paginacao { display:flex;align-items:center;gap:10px; }
 .tecidos-topo { justify-content:space-between;align-items:flex-start;gap:24px; }
 .page-tecidos h2 { border:0;margin:0 0 6px;padding:0; }
