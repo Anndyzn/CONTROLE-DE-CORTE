@@ -9,7 +9,7 @@ beforeEach(async()=>{
   const canal={on(tipo,filtro,callback){eventos[filtro.table]=callback;return this},subscribe(){return this}}
   globalThis.window={supabase:{createClient:()=>({channel:()=>canal})}}
   globalThis.__realtimeDeps={carregarCortesEmAndamento:async()=>atualizacoes++,buscarCorte:async(...args)=>buscas.push(args),carregarItensCorte:async numero=>itens.push(numero),SUPABASE_URL:'teste',SUPABASE_PUBLIC_KEY:'teste'}
-  const codigo=fs.readFileSync('src/public/js/core/realtime.js','utf8').replace(/^import[\s\S]*?from "[^"]+"\r?\n/gm,'')
+  const codigo=fs.readFileSync('src/public/js/core/realtime.js','utf8').replace(/^import[\s\S]*?from ["'][^"']+["']\r?\n/gm,'')
   const nomes=Object.keys(globalThis.__realtimeDeps).join(',')
   const modulo=await import(`data:text/javascript;base64,${Buffer.from(`const {${nomes}}=globalThis.__realtimeDeps;\n`+codigo).toString('base64')}#${++sequencia}`)
   modulo.inicializarRealtime()

@@ -30,6 +30,7 @@ import { inicializarSugestoesNomes } from "./nomes.js"
 import { inicializarVinculosPIs } from "./vinculos.js"
 import { inicializarGradePis } from "./grade-pis.js"
 import { inicializarTrabalhos } from "./trabalhos.js"
+import { inicializarResumoProducao } from "./resumo-producao.js"
 
 
 async function iniciarPagina() {
@@ -71,6 +72,7 @@ desabilitarProducao("SEM_CORTE")
   inicializarSugestoesNomes()
   inicializarVinculosPIs()
   inicializarTrabalhos({buscarCorte,carregarCortesEmAndamento})
+  inicializarResumoProducao()
 
 
   // ========================================

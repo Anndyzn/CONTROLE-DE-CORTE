@@ -141,7 +141,7 @@ export async function carregarHistoricoAlteracoes({mais = false} = {}) {
   if (mais && cursor) parametros.set("antes", cursor)
   botao.disabled = true
   carregando=true
-  if(!mais){lista.replaceChildren();registrosExibidos=[];cursor=null;botao.hidden=true}
+  lista.setAttribute('aria-busy', 'true')
   estado.hidden = false
   estado.textContent = "Carregando histórico..."
   try {
@@ -149,6 +149,7 @@ export async function carregarHistoricoAlteracoes({mais = false} = {}) {
     if (consulta !== sequencia) return
     if (!mais) {
       lista.replaceChildren()
+      registrosExibidos=[];cursor=null
       filtroAplicado = filtro
     }
     const ids=new Set(registrosExibidos.map(r=>String(r.id)))
@@ -161,9 +162,9 @@ export async function carregarHistoricoAlteracoes({mais = false} = {}) {
     estado.textContent = registrosExibidos.length ? `${registrosExibidos.length} alteração(ões) em ${grupos.length} operação(ões) exibida(s). ${dados.tem_mais?"Carregue anteriores para completar grupos e ver mais operações.":"Todo o histórico deste filtro foi exibido."}` : "Nenhuma alteração registrada para este filtro."
   } catch (erro) {
     if (consulta !== sequencia) return
-    estado.textContent = erro.message || "Não foi possível carregar o histórico."
+    estado.textContent = (erro.message || "Não foi possível carregar o histórico.") + (registrosExibidos.length ? ' Exibindo o último histórico recebido.' : '')
   } finally {
-    if (consulta === sequencia) {botao.disabled = false;carregando=false}
+    if (consulta === sequencia) {lista.setAttribute('aria-busy', 'false');botao.disabled = false;carregando=false}
   }
 }
 

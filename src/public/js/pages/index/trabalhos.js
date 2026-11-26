@@ -10,6 +10,21 @@ const fixos=["data","turno","operador","operadorOutro","horaInicio","preencherHo
 const numeroAtual=()=>campo("numeroCorteSelecionado").textContent.trim()
 const dataBr=d=>d.split("-").reverse().join("/")
 let selecionado=null,pendentes=[],sequencia=0,atualizarMesas,ultimoNumero=null,corteAtual=null
+const chavePreferenciaInicio = 'controle-corte.ultimo-inicio'
+
+function sugerirUltimoInicio(operador, turno) {
+  operador.value='';turno.value=''
+  try {
+    const salvo=JSON.parse(localStorage.getItem(chavePreferenciaInicio))
+    if(!salvo || typeof salvo.operador!=='string' || salvo.operador.length>200)return
+    if(salvo.operador!=='OUTRO'&&[...operador.options].some(o=>o.value===salvo.operador))operador.value=salvo.operador
+    else if(salvo.operador.trim()){
+      operador.value='OUTRO';campo('assumirOutro').value=salvo.operador
+      campo('assumirOutro').hidden=false;campo('assumirOutro').required=true
+    }
+    if([...turno.options].some(o=>o.value===salvo.turno))turno.value=salvo.turno
+  } catch { /* A sugestão é opcional; o formulário continua funcionando. */ }
+}
 
 function mostrarEstadoInicio(texto,{assumir=false,repetir=false}={}){
   campo("painelAssumirCorte").hidden=false
@@ -32,6 +47,7 @@ export function limparTrabalho(){
   selecionado=null
   campo("secaoProducao").classList.remove("producao-vinculada","aguardando-inicio")
   campo("trabalhoSelecionado").hidden=true
+  const acoes = campo("acoesInicioConfirmado"); if(acoes)acoes.open=false
 }
 
 const trabalhoAtual=()=>pendentes.find(t=>String(t.id)===campo("trabalhoPendente").value)??pendentes[0]
@@ -76,6 +92,7 @@ function preencherTrabalho(t,{dia=t.data,hora=t.hora_inicio,preservar=false,corr
   campo("painelTrabalhos").hidden=false;campo("painelAssumirCorte").hidden=true
   campo("trabalhoSelecionadoResumo").textContent=`${t.operador} · ${t.mesa} · ${t.turno} · ${dataBr(dia)} às ${hora}`
   campo("trabalhoSelecionado").hidden=false
+  const acoes = campo("acoesInicioConfirmado"); if(acoes)acoes.open=false
   campo("horaFim").focus()
 }
 
@@ -164,16 +181,21 @@ async function assumir(corte){
   operador.replaceChildren(...[...campo("operador").options].map(o=>o.cloneNode(true)))
   turno.replaceChildren(...[...campo("turno").options].map(o=>o.cloneNode(true)))
   campo("assumirOutro").value="";campo("assumirOutro").hidden=true;campo("assumirOutro").required=false
+  sugerirUltimoInicio(operador,turno)
   campo("assumirInicioReal").checked=false;campo("assumirCamposReais").hidden=true
   for(const id of ["assumirDataReal","assumirHoraReal"]){campo(id).value="";campo(id).required=false}
   operador.onchange=()=>{campo("assumirOutro").hidden=operador.value!=="OUTRO";campo("assumirOutro").required=operador.value==="OUTRO"}
   const confirmou=await new Promise(resolve=>{dialog.returnValue="";dialog.onclose=()=>resolve(dialog.returnValue==="assumir");dialog.showModal()})
   if(!confirmou)return
   try{
-    const r=await apiPost(`/cortes/${corte.numero}/trabalhos`,{
+    const dadosInicio={
       operador:operador.value==="OUTRO"?campo("assumirOutro").value:operador.value,turno:turno.value,
       ...(campo("assumirInicioReal").checked?{inicio_real:{data:campo("assumirDataReal").value,hora_inicio:campo("assumirHoraReal").value}}:{})
-    })
+    }
+    const r=await apiPost(`/cortes/${corte.numero}/trabalhos`,dadosInicio)
+    if(r.novo){
+      try{localStorage.setItem(chavePreferenciaInicio,JSON.stringify({operador:dadosInicio.operador.trim(),turno:dadosInicio.turno}))}catch{ /* Sem armazenamento, apenas não lembra a sugestão. */ }
+    }
     mostrarToast(r.novo?"Início registrado. Ao lançar a produção, confirme este horário e informe o término.":"Este corte já tem um início registrado. Abra a produção para continuar.","sucesso","Trabalho registrado")
     await atualizarMesas()
     if(numeroAtual()===String(corte.numero))await atualizarTrabalhos()

@@ -38,6 +38,21 @@ function ambiente(){
 const item={id:7,nf:'0001/3',tecido:'<img src=x onerror=alert(1)>',cor:'BRANCO',metros:50,defeitos:['Sujo'],observacao:'<script>teste</script>',status:'PENDENTE',versao:2,criado_em:'2026-11-25T11:00:00Z'}
 function textos(e){return [e.textContent??'',...e.children.flatMap(textos)].join(' ')}
 
+test('atualizar mantem a lista, mas trocar de aba retira as acoes anteriores',async()=>{
+  const a=ambiente();await tick();a.estado.lista={itens:[item],resumo:{quantidade:1,metros:50}}
+  await a.evento('atualizarTecidos');await tick()
+  const linha=a.$('listaTecidos').children[0]
+  let resolver;a.estado.get=()=>new Promise(r=>resolver=r)
+  await a.evento('atualizarTecidos')
+  assert.equal(a.$('listaTecidos').children[0],linha)
+  assert.equal(a.$('areaTabelaTecidos').attributes['aria-busy'],'true')
+  resolver(a.estado.lista);await tick()
+  assert.equal(a.$('areaTabelaTecidos').attributes['aria-busy'],'false')
+  const troca=a.evento('abaResolvidosTecido')
+  assert.equal(a.$('listaTecidos').children.length,0)
+  resolver({itens:[],resumo:{quantidade:0,metros:0}});await troca
+})
+
 test('lista exibe NF e observação como texto e abre confirmação com a peça correta',async()=>{
   const a=ambiente();await tick();a.estado.lista={itens:[item],resumo:{quantidade:1,metros:50}};await a.evento('atualizarTecidos')
   await tick();assert.match(textos(a.$('listaTecidos')),/0001\/3/);assert.match(textos(a.$('listaTecidos')),/<script>teste<\/script>/)

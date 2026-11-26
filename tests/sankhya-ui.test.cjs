@@ -13,7 +13,7 @@ class E {
 }
 beforeEach(async()=>{
  els={};chamadas=[];mostrados=[]
- for(const id of ['estadoSankhya','copiaManualSankhya','textoCopiaSankhya'])els[id]=new E()
+ for(const id of ['estadoSankhya','copiaManualSankhya','textoCopiaSankhya','tentarCorteSankhya'])els[id]=new E()
  globalThis.document={getElementById:id=>els[id],createElement:()=>new E()}
  globalThis.window={location:{search:''}}
  obter=async u=>u==='/sankhya/cortes'?[{numero:932,produto:'EDREDON'}]:u==='/sankhya/catalogo'?{produtos:[]}:{corte:{numero:932,produto:'EDREDON'},itens:[]}
@@ -43,8 +43,21 @@ test('falha limpa resultado e permite nova consulta, sem gravações',async()=>{
  obter=async()=>{throw Error('Corte não encontrado')}
  await buscar();assert.match(els.estadoSankhya.textContent,/não encontrado/)
  assert.equal(mostrados.length,0)
+ assert.equal(els.tentarCorteSankhya.hidden,false)
+ obter=async u=>u==='/sankhya/catalogo'?{produtos:[]}:{corte:{numero:932,produto:'EDREDON'},itens:[]}
+ await els.tentarCorteSankhya.eventos.click()
+ assert.equal(mostrados.length,1);assert.equal(els.tentarCorteSankhya.hidden,true)
 })
 test('tela sem corte não consulta lista antiga nem depende de formulário de busca',()=>{
  assert.deepEqual(chamadas,[])
  assert.equal(mostrados.length,0)
+})
+
+test('catalogo inicia junto aos vinculos sem esperar a primeira resposta',async()=>{
+ const resolver={};obter=u=>new Promise(r=>resolver[u]=r)
+ await buscar()
+ assert.ok(resolver['/sankhya/catalogo']);assert.ok(resolver['/sankhya/cortes/932/vinculos'])
+ resolver['/sankhya/catalogo']({produtos:[]})
+ resolver['/sankhya/cortes/932/vinculos']({corte:{numero:932,produto:'EDREDON'},itens:[]})
+ await new Promise(r=>setImmediate(r));assert.equal(mostrados.length,1)
 })

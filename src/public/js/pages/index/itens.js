@@ -36,8 +36,10 @@ let conferindoItens=false
 
 export async function carregarItensCorte(numeroCorte, {aindaAtual = () => true} = {}) {
   try {
-    const finalizacao =
-      await apiGet(`/cortes/${numeroCorte}/finalizacao-itens`)
+    const [finalizacao, itens] = await Promise.all([
+      apiGet(`/cortes/${numeroCorte}/finalizacao-itens`),
+      apiGet(`/itens-corte/${numeroCorte}`)
+    ])
     if (!aindaAtual()) return 0
 
     const itensFinalizados =
@@ -46,10 +48,6 @@ export async function carregarItensCorte(numeroCorte, {aindaAtual = () => true} 
     if(proxima)proxima.hidden=!itensFinalizados
     const link=document.getElementById("abrirSankhyaPis")
     if(link)link.href=`sankhya.html?corte=${encodeURIComponent(numeroCorte)}`
-
-    const itens =
-      await apiGet(`/itens-corte/${numeroCorte}`)
-    if (!aindaAtual()) return 0
 
     const tabela =
       document.getElementById("listaItensCorte")
@@ -398,11 +396,11 @@ export async function salvarItemCorte({continuar=false}={}) {
     mostrarToast(
       itemEditandoId
         ? "O item do corte foi atualizado."
-        : continuar ? "PI salvo. Selecione a cor do próximo PI." : "Item salvo. Adicione outro PI ou registre os itens do corte.",
+        : continuar ? "Selecione a cor do próximo PI." : "Adicione outro PI ou confirme os PIs quando terminar.",
       "sucesso",
       itemEditandoId
         ? "Item atualizado"
-        : "PI adicionado",
+        : "PI salvo",
       5000
     )
 
@@ -485,9 +483,9 @@ export async function finalizarItensCorte() {
     )
 
     mostrarToast(
-      "Os PIs foram registrados e agora estão bloqueados para alteração.",
+      "Itens bloqueados para alteração. Confira os códigos na aba Sankhya.",
       "sucesso",
-      "Corte concluído",
+      "PIs confirmados",
       6000
     )
 

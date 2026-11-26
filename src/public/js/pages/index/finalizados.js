@@ -5,6 +5,7 @@ let periodoSelecionado = "hoje"
 let abrirCorte = null
 let ultimaConsulta = 0
 let ultimaConsultaPis=0
+let pisRecebidos=false
 export async function carregarPisPendentes(){
   const painel=document.getElementById("painelPisPendentes"),lista=document.getElementById("listaPisPendentes"),estado=document.getElementById("estadoPisPendentes")
   if(!painel||!lista||!estado)return
@@ -12,6 +13,7 @@ export async function carregarPisPendentes(){
   try{
     const dados=await apiGet("/cortes-pis-pendentes")
     if(consulta!==ultimaConsultaPis)return
+    pisRecebidos=true
     painel.hidden=!dados.cortes.length;lista.replaceChildren()
     const total=document.getElementById("totalPisPendentes")
     if(total)total.textContent=String(dados.cortes.length)
@@ -24,7 +26,12 @@ export async function carregarPisPendentes(){
       b.addEventListener("click",async()=>{document.getElementById("numeroCorte").value=c.numero;await abrirCorte?.(c.numero)})
       lista.append(b)
     }
-  }catch(e){if(consulta!==ultimaConsultaPis)return;painel.hidden=false;painel.open=true;lista.replaceChildren();const total=document.getElementById("totalPisPendentes");if(total)total.textContent="—";estado.textContent=e.message||"Não foi possível consultar os cortes sem PIs."}
+  }catch(e){
+    if(consulta!==ultimaConsultaPis)return
+    painel.hidden=false;painel.open=true
+    if(!pisRecebidos){lista.replaceChildren();const total=document.getElementById("totalPisPendentes");if(total)total.textContent="—"}
+    estado.textContent=pisRecebidos?'Não foi possível atualizar. Exibindo os últimos dados recebidos.':e.message||"Não foi possível consultar os cortes sem PIs."
+  }
 }
 
 function renderizarResumo() {
@@ -96,6 +103,11 @@ export async function carregarResumoFinalizados() {
     renderizarResumo()
   } catch (erro) {
     if (consulta !== ultimaConsulta) return
+    if (dadosResumo) {
+      estado.hidden=false
+      estado.textContent='Não foi possível atualizar. Exibindo os últimos cortes recebidos.'
+      return
+    }
     dadosResumo = null
     document.getElementById("listaFinalizadosRecentes").replaceChildren()
     document.getElementById("totalFinalizadosRecentes").textContent = "—"

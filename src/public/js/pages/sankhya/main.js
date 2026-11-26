@@ -31,25 +31,32 @@ async function atualizarProdutos() {
 async function buscar(numero) {
   if (ocupado) return
   ocupado = true
+  const tentar = el('tentarCorteSankhya')
+  if (tentar) { tentar.disabled = true; tentar.hidden = true }
   dados = null; limparCodigosCorte(); el("copiaManualSankhya").hidden = true
   if(el("editarVinculosCorteSankhya"))el("editarVinculosCorteSankhya").hidden=true
   el("estadoSankhya").textContent = "Consultando corte..."
   el("estadoSankhya").hidden = false
   try {
-    dados = await apiGet(`/sankhya/cortes/${encodeURIComponent(numero)}/vinculos`)
+    const [corte, produtos] = await Promise.all([
+      apiGet(`/sankhya/cortes/${encodeURIComponent(numero)}/vinculos`),
+      catalogo()
+    ])
+    dados = corte
     const editar=el("editarVinculosCorteSankhya")
     if(editar){editar.href=`sankhya.html?corte=${dados.corte.numero}&vincular=${encodeURIComponent(dados.corte.produto)}`;editar.hidden=false}
-    await atualizarProdutos()
+    await mostrarCodigosCorte(dados, produtos, copiar)
     el("estadoSankhya").textContent = `Corte ${dados.corte.numero} — ${dados.corte.produto}`
   } catch (erro) {
     dados = null; limparCodigosCorte()
     if(el("editarVinculosCorteSankhya"))el("editarVinculosCorteSankhya").hidden=true
     el("estadoSankhya").textContent = erro.message
     mostrarToast(erro.message, "erro")
-  } finally { ocupado = false }
+  } finally { ocupado = false; if (tentar) { tentar.disabled = false; tentar.hidden = Boolean(dados) } }
 }
 inicializarNomenclaturasSankhya(catalogo, () => { atualizarProdutos().catch(erro=>mostrarToast(erro.message,"erro")) })
 const numeroInicial = new URLSearchParams(window.location?.search ?? "").get("corte")
+el('tentarCorteSankhya')?.addEventListener('click', () => buscar(numeroInicial))
 if (numeroInicial && /^[1-9]\d{0,9}$/.test(numeroInicial) && Number(numeroInicial)<=2147483647) {
   buscar(numeroInicial)
 }

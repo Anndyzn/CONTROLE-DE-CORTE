@@ -6,9 +6,11 @@ const t={id:1,numero_corte:929,mesa:'MESA 1',operador:'TESTE',turno:'1º TURNO',
 function elemento(){
  const classes=new Set()
  return {value:'',textContent:'',hidden:false,disabled:false,children:[],options:[],style:{},classList:{add:(...c)=>c.forEach(x=>classes.add(x)),remove:(...c)=>c.forEach(x=>classes.delete(x)),contains:c=>classes.has(c)},
- replaceChildren(...c){this.children=c},append(...c){this.children.push(...c)},focus(){this.focado=true},addEventListener(){},reportValidity(){return false}}
+ replaceChildren(...c){this.children=c;this.options=c},append(...c){this.children.push(...c)},focus(){this.focado=true},addEventListener(){},reportValidity(){return false}}
 }
 beforeEach(async()=>{
+ const memoria=new Map()
+ globalThis.localStorage={getItem:k=>memoria.get(k)??null,setItem:(k,v)=>memoria.set(k,v)}
  elementos=Object.fromEntries(['numeroCorteSelecionado','data','turno','operador','operadorOutro','horaInicio','preencherHoraInicio','secaoProducao','trabalhoSelecionado','trabalhoSelecionadoResumo','horaFim','folhaInicio','folhaParouInput','statusProducao','painelTrabalhos','cancelarTrabalho','atualizarTrabalhos','trabalhoPendente','escolhaTrabalho','conferenciaInicio','trabalhoInicioResumo','trabalhoInicioHorario','inicioRealData','inicioRealHora','camposInicioReal','usarInicioTrabalho','corrigirInicioTrabalho','limparProducao','assumirInicioReal','assumirCamposReais','assumirDataReal','assumirHoraReal'].map(id=>[id,elemento()]))
  elementos.numeroCorteSelecionado.textContent='929'
  for(const id of ['painelAssumirCorte','estadoInicioTrabalho','assumirCorteSelecionado','recarregarInicioTrabalho','dialogAssumir','assumirOperador','assumirTurno','assumirTitulo','assumirOutro','cancelarInicioPendente','corrigirInicioConfirmado','cancelarInicioConfirmado'])elementos[id]=elemento()
@@ -36,6 +38,49 @@ test('concluir mantém o dia e o início originais, atualiza folha e pede o tér
  assert.equal(elementos.operador.disabled,true);assert.equal(elementos.horaInicio.disabled,true)
  assert.deepEqual(modulo.dadosTrabalho(),{trabalho_id:1,trabalho_versao:0,producao_base_id:8})
  assert.match(elementos.trabalhoSelecionadoResumo.textContent,/TESTE.*MESA 1.*17\/11\/2026/)
+})
+
+test('assumir sugere o ultimo operador e turno sem reaproveitar horarios reais',async()=>{
+ localStorage.setItem('controle-corte.ultimo-inicio',JSON.stringify({operador:'TESTE',turno:t.turno}))
+ consulta=async()=>({trabalhos:[]});await modulo.atualizarTrabalhos()
+ let chamadas=0;postar=async()=>{chamadas++;return {novo:true}}
+ elementos.dialogAssumir.showModal=()=>{
+   assert.equal(elementos.assumirOperador.value,'TESTE');assert.equal(elementos.assumirTurno.value,t.turno)
+   assert.equal(elementos.assumirInicioReal.checked,false);assert.equal(elementos.assumirHoraReal.value,'')
+   elementos.dialogAssumir.returnValue='cancelar';elementos.dialogAssumir.onclose()
+ }
+ await elementos.assumirCorteSelecionado.onclick();assert.equal(chamadas,0)
+})
+
+test('outro operador e lembrado somente apos assumir com sucesso',async()=>{
+ consulta=async()=>({trabalhos:[]});await modulo.atualizarTrabalhos()
+ elementos.dialogAssumir.showModal=()=>{
+   elementos.assumirOperador.value='OUTRO';elementos.assumirOutro.value='NOVA PESSOA';elementos.assumirTurno.value=t.turno
+   elementos.dialogAssumir.returnValue='assumir';elementos.dialogAssumir.onclose()
+ }
+ postar=async()=>{throw Error('Falha de rede')}
+ await elementos.assumirCorteSelecionado.onclick();assert.equal(localStorage.getItem('controle-corte.ultimo-inicio'),null)
+ postar=async()=>({novo:true,trabalho:t})
+ await elementos.assumirCorteSelecionado.onclick()
+ assert.equal(JSON.parse(localStorage.getItem('controle-corte.ultimo-inicio')).operador,'NOVA PESSOA')
+ elementos.dialogAssumir.showModal=()=>{
+   assert.equal(elementos.assumirOperador.value,'OUTRO');assert.equal(elementos.assumirOutro.value,'NOVA PESSOA')
+   assert.equal(elementos.assumirOutro.hidden,false);assert.equal(elementos.assumirOutro.required,true)
+   elementos.dialogAssumir.returnValue='cancelar';elementos.dialogAssumir.onclose()
+ }
+ await elementos.assumirCorteSelecionado.onclick()
+})
+
+test('armazenamento bloqueado nao impede assumir e nao preenche dados por engano',async()=>{
+ globalThis.localStorage={getItem(){throw Error('Bloqueado')},setItem(){throw Error('Bloqueado')}}
+ consulta=async()=>({trabalhos:[]});await modulo.atualizarTrabalhos()
+ let enviou=false;postar=async()=>{enviou=true;return {novo:true,trabalho:t}}
+ elementos.dialogAssumir.showModal=()=>{
+   assert.equal(elementos.assumirOperador.value,'');assert.equal(elementos.assumirTurno.value,'')
+   elementos.assumirOperador.value='TESTE';elementos.assumirTurno.value=t.turno
+   elementos.dialogAssumir.returnValue='assumir';elementos.dialogAssumir.onclose()
+ }
+ await elementos.assumirCorteSelecionado.onclick();assert.equal(enviou,true)
 })
 test('cancelar a conferência preserva os campos sem selecionar trabalho',async()=>{
  elementos.horaFim.value='17:00';confirmacao=async()=>false

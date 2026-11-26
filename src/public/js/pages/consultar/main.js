@@ -1,18 +1,10 @@
 import {
   inicializarFiltros,
   carregarResultadosConsulta,
-  obterCorteConsultaAtual
+  atualizarDetalhesConsulta
 } from "./filtros.js"
 import { inicializarTabelasResponsivas } from "../../core/tabelas.js"
-
-import {
-  carregarHistoricoConsulta,
-  carregarItensConsulta
-} from "./historico.js"
-
-import {
-  carregarDashboardCorte
-} from "./dashboard.js"
+import { carregarBibliotecaRealtime } from '../../core/biblioteca-realtime.js'
 
 import {
   SUPABASE_PUBLIC_KEY,
@@ -50,18 +42,11 @@ function atualizarStatusConsulta(
 }
 
 
-function inicializarRealtimeConsulta() {
+async function inicializarRealtimeConsulta() {
   if (!window.supabase) {
-    console.error(
-      "Supabase não carregado"
-    )
-
-    atualizarStatusConsulta(
-      "Sem tempo real",
-      "error"
-    )
-
-    return
+    atualizarStatusConsulta('Conectando', 'warning')
+    try { await carregarBibliotecaRealtime() }
+    catch { atualizarStatusConsulta('Sem tempo real', 'error'); return }
   }
 
 
@@ -97,7 +82,7 @@ function inicializarRealtimeConsulta() {
           "Consulta Realtime: corte alterado"
         )
 
-        await carregarResultadosConsulta()
+        await Promise.all([carregarResultadosConsulta({silencioso:true}), atualizarDetalhesConsulta()])
       }
     )
 
@@ -116,22 +101,7 @@ function inicializarRealtimeConsulta() {
         )
 
 
-        await carregarResultadosConsulta()
-
-
-        const numero =
-          obterCorteConsultaAtual()
-
-
-        if (numero) {
-          await carregarHistoricoConsulta(
-            numero
-          )
-
-          await carregarDashboardCorte(
-            numero
-          )
-        }
+        await Promise.all([carregarResultadosConsulta({silencioso:true}), atualizarDetalhesConsulta()])
       }
     )
 
@@ -150,19 +120,7 @@ function inicializarRealtimeConsulta() {
         )
 
 
-        const numero =
-          obterCorteConsultaAtual()
-
-
-        if (numero) {
-          await carregarItensConsulta(
-            numero
-          )
-
-          await carregarDashboardCorte(
-            numero
-          )
-        }
+        await atualizarDetalhesConsulta()
       }
     )
 

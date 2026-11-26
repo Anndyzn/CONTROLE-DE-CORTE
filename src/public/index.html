@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Controle de Corte</title>
+  <script type="module" src="js/core/layout.js"></script>
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="stylesheet" href="css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -95,7 +96,7 @@
               <span class="andamento-seta" aria-hidden="true">⌄</span>
             </span>
           </summary>
-
+          <p id="estadoListaAndamento" class="lista-atualizacao" role="status" hidden></p>
           <div class="table-wrap">
             <table>
               <thead>
@@ -325,10 +326,18 @@
           <div class="inicio-acoes"><button type="button" id="usarInicioTrabalho">Usar meu horário de início</button><button type="button" id="corrigirInicioTrabalho" class="btn-secondary">Corrigir início</button><button type="button" id="cancelarInicioPendente" class="inicio-link inicio-link-perigo">Cancelar início</button></div>
         </div>
         <div id="trabalhoSelecionado" hidden>
-          <div class="inicio-cabecalho"><strong>✓ Início confirmado</strong><button type="button" id="cancelarTrabalho" class="inicio-link">Alterar início</button></div>
-          <p id="trabalhoSelecionadoResumo"></p>
-          <span class="small-help">Agora informe o término real, a folha final e o status. Se atravessou a meia-noite, informe a hora do dia seguinte.</span>
-          <div class="inicio-acoes"><button type="button" id="corrigirInicioConfirmado" class="inicio-link">Corrigir início</button><button type="button" id="cancelarInicioConfirmado" class="inicio-link inicio-link-perigo">Cancelar início</button></div>
+          <div class="inicio-confirmado-linha">
+            <div><span class="inicio-confirmado-selo">✓ Início confirmado</span><p id="trabalhoSelecionadoResumo"></p></div>
+            <details class="inicio-editar" id="acoesInicioConfirmado">
+              <summary>Editar início</summary>
+              <div class="inicio-editar-opcoes">
+                <button type="button" id="corrigirInicioConfirmado" class="inicio-link">Corrigir dados do início</button>
+                <button type="button" id="cancelarTrabalho" class="inicio-link">Escolher outro início</button>
+                <button type="button" id="cancelarInicioConfirmado" class="inicio-link inicio-link-perigo">Cancelar início registrado</button>
+              </div>
+            </details>
+          </div>
+          <span class="small-help">Preencha o término real, a folha final e a situação do corte. Se passou da meia-noite, use a hora do dia seguinte.</span>
         </div>
       </div>
       <div class="producao-grid">
@@ -447,7 +456,12 @@
         <button id="conferirHistoricoDuplicidade" type="button" class="btn-secondary">Conferir histórico do corte</button>
       </aside>
       <div class="producao-actions">
-        <span class="small-help">Confira data, operador e folhas antes de salvar.</span>
+        <div id="resumoAntesSalvar" class="producao-resumo-salvar" hidden>
+          <span class="producao-resumo-rotulo">Confira antes de salvar</span>
+          <strong id="resumoProducaoLinha"></strong>
+          <span id="resumoProducaoDetalhe"></span>
+          <span id="resumoProducaoSituacao"></span>
+        </div>
         <button type="button" id="salvarProducao" class="primary-action">
           Salvar produção
         </button>
@@ -706,6 +720,7 @@
     <form method="dialog">
       <h2 id="assumirTitulo">Assumir trabalho</h2>
       <p>A data e a hora de início serão registradas agora. Lance a produção ao terminar.</p>
+      <p class="small-help">Sugerimos o último operador e turno usados neste navegador. Confira os dados antes de assumir.</p>
       <div class="form-group"><label for="assumirOperador">Operador</label><select id="assumirOperador" required></select><input id="assumirOutro" placeholder="Nome do operador" maxlength="200" aria-label="Outro operador" hidden></div>
       <div class="form-group"><label for="assumirTurno">Turno</label><select id="assumirTurno" required></select></div>
       <label class="inicio-opcao"><input type="checkbox" id="assumirInicioReal"> Já estava trabalhando neste corte</label>
@@ -716,7 +731,6 @@
       <div class="confirmacao-acoes"><button type="submit" value="cancelar" formnovalidate class="confirmacao-cancelar">Cancelar</button><button type="submit" value="assumir">Assumir agora</button></div>
     </form>
   </dialog>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script
     type="module"

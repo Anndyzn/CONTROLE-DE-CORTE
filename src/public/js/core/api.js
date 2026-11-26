@@ -1,18 +1,30 @@
+const consultasEmAndamento = new Map()
+
 function notificarAlteracao(body) {
+  // Uma leitura iniciada antes da gravação não deve ser reutilizada depois dela.
+  consultasEmAndamento.clear()
   if (body?.responsavel && body?.motivo) {
     document.dispatchEvent(new Event("alteracao-administrativa"))
   }
 }
 
 export async function apiGet(url) {
-  const resposta = await fetch(url)
-  const dados = await resposta.json()
-
-  if (!resposta.ok) {
-    throw new Error(dados.erro || "Erro ao buscar dados")
+  let consulta = consultasEmAndamento.get(url)
+  if (!consulta) {
+    consulta = (async () => {
+      const resposta = await fetch(url)
+      const dados = await resposta.json()
+      if (!resposta.ok) throw new Error(dados.erro || "Erro ao buscar dados")
+      return dados
+    })()
+    consultasEmAndamento.set(url, consulta)
   }
-
-  return dados
+  try {
+    // Compartilha a rede, mas cada tela recebe seus próprios objetos para edição.
+    return structuredClone(await consulta)
+  } finally {
+    if (consultasEmAndamento.get(url) === consulta) consultasEmAndamento.delete(url)
+  }
 }
 
 export async function apiPost(

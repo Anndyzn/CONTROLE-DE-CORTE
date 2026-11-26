@@ -4,7 +4,7 @@ const fs = require('node:fs')
 let modulo, elementos, consultar, verificarMesa, carregarItens, gravacoes, configuracao, atualizacoes, falhas, sequencia=0
 function elemento(tag='div') {
   return {tag,value:'',textContent:'',disabled:false,hidden:true,dataset:{},style:{},eventos:{},children:[],
-    classList:{add(){},remove(){}},focus(){this.focado=true},scrollIntoView(){this.rolou=true},
+    attributes:{},setAttribute(n,v){this.attributes[n]=v},classList:{add(){},remove(){}},focus(){this.focado=true},scrollIntoView(){this.rolou=true},
     addEventListener(nome,fn){this.eventos[nome]=fn},appendChild(filho){this.children.push(filho)},
     querySelector(){return this.botao ??= elemento('button')},
     set innerHTML(valor){this.html=valor;this.children=tag==='tr'?Array.from({length:6},()=>elemento('td')):[]},

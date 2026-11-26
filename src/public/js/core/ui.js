@@ -7,8 +7,14 @@ export function definirCarregamento(
 
   if (carregando) {
     botao.disabled = true
-    botao.dataset.textoOriginal =
-      botao.textContent
+    if (botao.dataset.carregando !== '1') {
+      botao.dataset.textoOriginal = botao.textContent
+      botao.dataset.larguraAnterior = botao.style.minWidth
+      const largura = botao.getBoundingClientRect().width
+      if (largura > 0) botao.style.minWidth = `${largura}px`
+    }
+    botao.dataset.carregando = '1'
+    botao.setAttribute('aria-busy', 'true')
 
     botao.textContent = "Aguarde..."
   } else {
@@ -17,6 +23,9 @@ export function definirCarregamento(
     botao.textContent =
       botao.dataset.textoOriginal ||
       textoOriginal
+    if (botao.dataset.carregando === '1') botao.style.minWidth = botao.dataset.larguraAnterior || ''
+    delete botao.dataset.carregando
+    botao.setAttribute('aria-busy', 'false')
   }
 }
 

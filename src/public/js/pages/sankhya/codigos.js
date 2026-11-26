@@ -2,16 +2,21 @@ import { apiGet, apiPut, apiPost } from "../../core/api.js"
 import { confirmarAcao } from "../../core/confirmacao.js"
 import { mostrarToast } from "../../core/ui.js"
 let sequencia = 0
+let numeroExibido = null
 const el = id => document.getElementById(id)
 function texto(tag, valor) { const e=document.createElement(tag);e.textContent=valor;return e }
 export async function mostrarCodigosCorte(dados,catalogo,copiar){
   const seq=++sequencia,painel=el("codigosCorteSankhya"),lista=el("listaCodigosCorteSankhya")
-  painel.hidden=false;lista.replaceChildren(texto("p","Carregando produtos e marcações..."))
+  painel.hidden=false
+  lista.setAttribute('aria-busy', 'true'); lista.inert=true
+  if (numeroExibido !== String(dados.corte.numero)) lista.replaceChildren(texto("p","Carregando produtos e marcações..."))
   const [nomes,estados]=await Promise.allSettled([
     apiGet(`/sankhya/nomenclaturas?${new URLSearchParams({nome:dados.corte.produto})}`),
     apiGet(`/sankhya/cortes/${dados.corte.numero}/lancamentos`)
   ])
   if(seq!==sequencia)return
+  lista.setAttribute('aria-busy', 'false'); lista.inert=false
+  numeroExibido=String(dados.corte.numero)
   const opcoes=nomes.status==="fulfilled"?nomes.value.nomes?.[0]?.opcoes??[]:[]
   lista.replaceChildren()
   if(!dados.itens.length){
@@ -109,4 +114,4 @@ export async function mostrarCodigosCorte(dados,catalogo,copiar){
     renderizar()
   }
 }
-export function limparCodigosCorte(){sequencia++;el("codigosCorteSankhya").hidden=true;el("listaCodigosCorteSankhya").replaceChildren()}
+export function limparCodigosCorte(){sequencia++;numeroExibido=null;el("codigosCorteSankhya").hidden=true;const lista=el("listaCodigosCorteSankhya");lista.inert=false;lista.setAttribute('aria-busy','false');lista.replaceChildren()}

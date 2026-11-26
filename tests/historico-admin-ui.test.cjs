@@ -4,6 +4,7 @@ const fs=require('node:fs')
 let els,modulo,obter,chamadas,seq=0
 class E {
  constructor(){this.children=[];this.value='';this.eventos={}}
+ setAttribute(nome,valor){this[nome]=valor}
  append(...itens){this.children.push(...itens)}
  replaceChildren(...itens){this.children=itens}
  addEventListener(n,f){this.eventos[n]=f}
@@ -76,6 +77,6 @@ test('resposta atrasada não troca lista atual; erro de novo filtro não deixa r
  assert.equal(els.listaHistoricoAdmin.children.length,1)
  obter=async()=>{throw Error('Sem conexão')}
  await modulo.carregarHistoricoAlteracoes()
- assert.equal(els.listaHistoricoAdmin.children.length,0);assert.match(els.estadoHistoricoAdmin.textContent,/Sem conexão/)
+ assert.equal(els.listaHistoricoAdmin.children.length,1);assert.match(els.estadoHistoricoAdmin.textContent,/Sem conexão.*último histórico/)
  assert.equal(els.maisHistoricoAdmin.hidden,true)
 })

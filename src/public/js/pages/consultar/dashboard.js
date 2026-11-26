@@ -92,19 +92,15 @@ function formatarQuantidadeDashboard(valor) {
 // DASHBOARD
 // ========================================
 
-export async function carregarDashboardCorte(
-  numeroCorte
-) {
+let consultaDashboard = 0
+export async function carregarDashboardCorte(numeroCorte, {aindaAtual = () => true} = {}) {
+  const consulta = ++consultaDashboard
   try {
-    const historico =
-      await apiGet(
-        `/producao/${numeroCorte}`
-      )
-
-    const itens =
-      await apiGet(
-        `/itens-corte/${numeroCorte}`
-      )
+    const [historico, itens] = await Promise.all([
+      apiGet(`/producao/${numeroCorte}`),
+      apiGet(`/itens-corte/${numeroCorte}`)
+    ])
+    if (consulta !== consultaDashboard || !aindaAtual()) return
 
 
     const totalFolhas =

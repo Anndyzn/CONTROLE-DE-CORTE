@@ -54,7 +54,7 @@ test('esconde Assumir enquanto há início pendente e mantém acesso ao lançame
  modulo.inicializarControleMesas({assumirTrabalho:async()=>{},abrirCorte:async()=>{}})
  modulo.atualizarOcupacaoMesas([{numero:929,mesa:'MESA 1',produto:'TESTE',trabalho_pendente:true}])
  assert.doesNotMatch(elementos.painelMesas.textContent,/Assumir hoje/)
- assert.match(elementos.painelMesas.textContent,/Lançar produção/)
+ assert.match(elementos.painelMesas.textContent,/Concluir trabalho/)
  modulo.atualizarOcupacaoMesas([{numero:929,mesa:'MESA 1',produto:'TESTE',trabalho_pendente:false}])
  assert.match(elementos.painelMesas.textContent,/Assumir hoje/)
 })
@@ -223,7 +223,7 @@ test('idade da produção distingue ontem, vários dias e datas futuras com os d
 test('corte sem produção é identificado; uma prévia indisponível não é confundida com ausência de lançamentos', () => {
   modulo.atualizarOcupacaoMesas([{...corteComProducao(),ultima_producao:null}])
   let card = elementos.painelMesas.children[0]
-  assert.match(card.textContent, /Sem produção registrada.*Lançar produção/)
+  assert.match(card.textContent, /Sem produção registrada neste corte/)
   assert.doesNotMatch(card.textContent,/Operador|Folhas/)
   modulo.atualizarOcupacaoMesas([{numero:922,produto:'VEU GOTA',mesa:'MESA 1'}])
   card = elementos.painelMesas.children[0]
@@ -274,8 +274,8 @@ test('os cartões abrem o corte correto e preparam um novo somente na mesa livre
   const cards=elementos.painelMesas.children
   const abrir=cards[0].children[1].children[0].children[3]
   const novo=cards[1].children[2]
-  assert.equal(abrir.textContent,'Lançar produção')
-  assert.equal(abrir.attributes['aria-label'],'Lançar produção no corte 922 da MESA 1')
+  assert.equal(abrir.textContent,'Abrir corte')
+  assert.equal(abrir.attributes['aria-label'],'Abrir corte · corte 922 da MESA 1')
   await abrir.events.click()
   await novo.events.click()
   assert.deepEqual(abertas,[922])

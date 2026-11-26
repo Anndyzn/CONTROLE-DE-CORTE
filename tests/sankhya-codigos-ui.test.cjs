@@ -26,6 +26,16 @@ const mostrar=()=>modulo.mostrarCodigosCorte(dados(),catalogo,t=>copias.push(t))
 const card=()=>els.listaCodigosCorteSankhya.children[0]
 const campo=()=>card().children.find(e=>e.className==='sankhya-selecao-produtos')
 const linhas=()=>card().children.filter(e=>e.className==='sankhya-possibilidade')
+
+test('recarregar o mesmo corte preserva a lista e bloqueia acoes ate chegar a resposta',async()=>{
+ await mostrar();const anterior=card(),resolver=[]
+ obter=()=>new Promise(r=>resolver.push(r))
+ const carga=mostrar()
+ assert.equal(card(),anterior);assert.equal(els.listaCodigosCorteSankhya.inert,true)
+ resolver[0]({nomes:[]});resolver[1]({itens:[estado]});await carga
+ assert.equal(els.listaCodigosCorteSankhya.inert,false)
+ assert.equal(els.listaCodigosCorteSankhya['aria-busy'],'false')
+})
 test('atalho solicita replicação dos dois produtos para outras cores sem controles ou quantidades',async()=>{
  estado.codigos=[6073,6069]
  const d=dados();d.itens.push({...d.itens[0],id:2,cor:'BEGE'})

@@ -322,14 +322,14 @@ export async function salvarProducao() {
 
     mostrarToast(
       status === "FINALIZADO"
-        ? "Última produção registrada. Agora informe os PIs cortados."
-        : "Produção do turno registrada com sucesso.",
+        ? "Agora cadastre e confirme os PIs cortados."
+        : "Produção do turno registrada.",
 
       "sucesso",
 
       status === "FINALIZADO"
         ? "Produção finalizada"
-        : "Lançamento concluído",
+        : "Produção salva",
 
       6000
     )

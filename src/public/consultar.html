@@ -6,6 +6,7 @@
   <title>Consultar Cortes</title>
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="stylesheet" href="css/style.css">
+  <script type="module" src="js/core/layout.js"></script>
 </head>
 <body class="page-consultar">
   <div class="container">
@@ -150,6 +151,7 @@
           Exporte os resultados da última busca, com todos os cortes encontrados e seus detalhes, mesmo os que ainda não aparecem na lista.
         </p>
 
+        <p id="estadoConsulta" class="lista-atualizacao" role="status" hidden></p>
         <div class="table-wrap tabela-consulta">
           <table>
             <thead>
@@ -296,7 +298,6 @@
 
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script
     type="module"

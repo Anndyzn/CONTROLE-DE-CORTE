@@ -61,7 +61,7 @@ function previaUltimaProducao(corte) {
     const mensagem = document.createElement("p")
     mensagem.className = "mesa-producao-vazia"
     mensagem.textContent = producao === null
-      ? "Sem produção registrada. Use Lançar produção para iniciar."
+      ? "Sem produção registrada neste corte."
       : "Prévia indisponível. Use Atualizar para consultar a última produção."
     previa.append(mensagem)
     return previa
@@ -186,16 +186,19 @@ function renderizarPainelMesas() {
         const produto = document.createElement("span")
         produto.textContent = corte.produto || "Produto não informado"
         item.append(numero, produto, previaUltimaProducao(corte))
-        if (acoesMesas.abrirCorte) {
-          const abrir = botaoAcaoMesa("Lançar produção", () => acoesMesas.abrirCorte(corte.numero), true)
-          abrir.setAttribute("aria-label", `Lançar produção no corte ${corte.numero} da ${mesa}`)
-          item.append(abrir)
-        }
-        if(acoesMesas.assumirTrabalho&&!corte.trabalho_pendente&&!corte.trabalho_hoje?.length){
+        const iniciado = corte.trabalho_pendente || corte.trabalho_hoje?.length || corte.trabalhos_pendentes_anteriores?.length
+        if(acoesMesas.assumirTrabalho&&!iniciado){
           const assumir=botaoAcaoMesa("Assumir hoje",()=>acoesMesas.assumirTrabalho(corte),true)
-          assumir.className+=" mesa-assumir btn-secondary"
+          assumir.className+=" mesa-assumir"
           assumir.setAttribute("aria-label",`Assumir o trabalho no corte ${corte.numero} da ${mesa} hoje`)
           item.append(assumir)
+        }
+        if (acoesMesas.abrirCorte) {
+          const rotulo = iniciado ? "Concluir trabalho" : "Abrir corte"
+          const abrir = botaoAcaoMesa(rotulo, () => acoesMesas.abrirCorte(corte.numero), true)
+          if (!iniciado && acoesMesas.assumirTrabalho) abrir.className += " btn-secondary mesa-abrir"
+          abrir.setAttribute("aria-label", `${rotulo} · corte ${corte.numero} da ${mesa}`)
+          item.append(abrir)
         }
         lista.append(item)
       }

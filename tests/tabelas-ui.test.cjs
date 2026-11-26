@@ -6,8 +6,8 @@ test('adaptação mantém as células e ações, rotula novos registros e trata 
   const elemento=(textContent='')=>({textContent,dataset:{},colSpan:1,atributos:{},classes:new Set(),
     setAttribute(nome,valor){this.atributos[nome]=valor},
     get classList(){return {add:n=>this.classes.add(n),toggle:(n,ativo)=>ativo?this.classes.add(n):this.classes.delete(n)}}})
-  const headers=['Número','Produto','Ações'].map(elemento)
-  const linha=elemento();linha.cells=[elemento('917'),elemento('LISO'),elemento('Abrir')]
+  const headers=['Número','Produto','Ações','Metragem (m)','Quantidade','Folha parou'].map(elemento)
+  const linha=elemento();linha.cells=[elemento('917'),elemento('LISO'),elemento('Abrir'),elemento('12,5'),elemento('20'),elemento('8')]
   let cliques=0
   linha.cells[2].onclick=()=>cliques++
   const original=linha.cells[2]
@@ -26,6 +26,12 @@ test('adaptação mantém as células e ações, rotula novos registros e trata 
   assert.equal(linha.cells[2],original)
   linha.cells[2].onclick();assert.equal(cliques,1)
   assert.ok(linha.cells[2].classes.has('tabela-acoes'))
+  assert.ok(linha.cells[1].classes.has('tabela-texto'))
+  for(const indice of [3,4,5]){
+    assert.ok(linha.cells[indice].classes.has('tabela-numero'))
+    assert.ok(headers[indice].classes.has('tabela-numero'))
+  }
+  assert.ok(!linha.cells[0].classes.has('tabela-numero'))
   assert.equal(vazia.cells[0].dataset.label,undefined)
   assert.equal(tabela.atributos.role,'table')
   assert.equal(headers[0].atributos.scope,'col')

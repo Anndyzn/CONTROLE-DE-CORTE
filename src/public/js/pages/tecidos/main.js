@@ -8,6 +8,7 @@ const data = v => new Date(v).toLocaleString('pt-BR', { timeZone: 'America/Sao_P
 let status = 'PENDENTE', busca = '', pagina = 1, total = 0, consulta = 0, selecionado = null, enviando = false
 let chave = crypto.randomUUID(), assinatura = ''
 let cargas = 0, sincronizacao = null
+let filtroExibido = null
 let acaoTecido = 'situacao'
 const selecaoTecidos = new Map(), checksTecidos = new Map()
 let pecasVisiveis = []
@@ -93,15 +94,19 @@ function renderizar(itens) {
 }
 async function carregar(silencioso = false) {
   const atual = ++consulta
+  const filtroAtual = JSON.stringify([status, busca, pagina])
+  const manterLista = filtroExibido === filtroAtual
   cargas++
   $('areaTabelaTecidos').setAttribute('aria-busy', 'true')
   $('imprimirTecidos').disabled = true
   // Não deixa ações de uma aba anterior visíveis enquanto outra está carregando.
-  if (!silencioso) {
+  if (!silencioso && !manterLista) {
+    filtroExibido = null
     pecasVisiveis = []; checksTecidos.clear(); atualizarSelecaoTecidos()
     $('listaTecidos').replaceChildren(); $('vazioTecidos').hidden = true
     $('resumoTecidos').textContent = 'Carregando peças...'
   }
+  if (!silencioso && manterLista) $('resumoTecidos').textContent = 'Atualizando peças…'
   try {
     const r = await apiGet(`/tecidos-defeitos?${new URLSearchParams({ status, busca, pagina })}`)
     if (atual !== consulta) return
@@ -109,12 +114,13 @@ async function carregar(silencioso = false) {
     if (pagina > 1 && (pagina - 1) * 50 >= total) { pagina--; return carregar() }
     $('resumoTecidos').textContent = `${total} peça(s) ${status === 'PENDENTE' ? 'pendente(s)' : 'resolvida(s)'} · ${numero(r.resumo.metros)} m${busca ? ' · resultados da busca' : ''}`
     renderizar(r.itens)
+    filtroExibido = filtroAtual
     $('imprimirTecidos').disabled = !total
     return true
   } catch (e) {
     if (atual !== consulta) return
     if (!silencioso) {
-      $('resumoTecidos').textContent = 'Não foi possível carregar a lista. Use Atualizar para tentar novamente.'
+      $('resumoTecidos').textContent = manterLista ? 'Não foi possível atualizar. Exibindo a última lista recebida. Use Atualizar para tentar novamente.' : 'Não foi possível carregar a lista. Use Atualizar para tentar novamente.'
       mensagem(e.message)
     }
     return false

@@ -97,8 +97,8 @@ test('resumo vazio e falha de carregamento têm mensagens diferentes', async t =
   t.mock.method(console, 'error', () => {})
   api = async () => { throw new Error('Falha de conexão') }
   await modulo.carregarResumoFinalizados()
-  assert.match(elementos.estadoFinalizadosRecentes.textContent, /Não foi possível carregar/)
-  assert.equal(elementos.totalFinalizadosRecentes.textContent, '—')
+  assert.match(elementos.estadoFinalizadosRecentes.textContent, /Não foi possível atualizar.*últimos cortes/)
+  assert.equal(elementos.totalFinalizadosRecentes.textContent, '0 cortes')
 })
 
 test('resposta antiga não substitui uma atualização mais recente', async () => {

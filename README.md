@@ -20,6 +20,40 @@ em cortes finalizados e criação de outro corte em mesa ocupada.
 
 ## Recursos por tela
 
+A navegação usa um menu lateral que pode ser recolhido e lembra a preferência neste
+navegador. Na Home, a busca fica compacta acima das mesas. Abrir um corte destaca a
+área de lançamento; **Voltar às mesas** e **Continuar corte** alternam a visualização
+sem limpar os campos ou o corte selecionado, recuperando a posição de rolagem.
+No corte, a barra de atalhos leva a Produção, PIs e Histórico. Os painéis de andamento,
+finalizados e PIs pendentes lembram se foram deixados abertos ou recolhidos neste
+navegador. As animações respeitam a preferência por movimento reduzido do computador.
+As mesas destacam **Assumir hoje** ou **Concluir trabalho**, conforme o início pendente.
+O cartão do corte indica o próximo passo; o início confirmado aparece resumido e
+as correções ficam em **Editar início**, mantendo os campos finais em preenchimento.
+Junto a **Salvar produção**, um resumo acompanha o preenchimento com operador,
+mesa, horários, data, turno, folhas e situação, indicando término no dia seguinte
+quando atravessa a meia-noite. O resumo não altera os dados nem substitui as validações.
+Ao assumir, o último operador e turno registrados com sucesso neste navegador são
+sugeridos para conferência. Datas e horários reais não são reaproveitados.
+De segunda a sexta, às 06h e às 07h30 de Brasília, lembretes na tela oferecem **Ver mesas**.
+Eles também aparecem ao abrir ou retomar o sistema na hora seguinte ao início de cada
+turno (06h–07h e 07h30–08h30). Fechar um não dispensa o outro. Cada lembrete pode ser
+fechado até o próximo dia útil neste navegador. Depende de o sistema estar aberto; não é
+uma notificação do Windows. A preferência é compartilhada entre abas deste navegador.
+Nas tabelas, quantidades e metragens ficam alinhadas à direita; nomes longos quebram
+linha e os cabeçalhos acompanham a rolagem. Atualizações preservam a lista visível
+quando o contexto continua o mesmo, com aviso explícito se forem mantidos dados
+anteriores por falha na consulta. Trocar a aba de tecidos limpa as ações da aba anterior.
+Leituras independentes de histórico, PIs, resumo e catálogo são iniciadas em paralelo.
+Requisições GET simultâneas para o mesmo endereço compartilham a rede, com objetos
+separados para cada consumidor; não há cache persistente de resultados, e gravações
+invalidam o compartilhamento anterior. A Consulta mantém detalhes, paginação e filtros
+aplicados durante atualizações em segundo plano. A biblioteca de tempo real carrega
+separadamente, sem bloquear a abertura da Home e da Consulta. No Sankhya, uma falha
+ao carregar o corte oferece **Tentar novamente**.
+O menu horizontal original permanece disponível se o módulo de
+layout não carregar.
+
 - **Início:** ocupação das mesas, última produção, trabalho iniciado, cortes em
   andamento, busca por número e finalizados de hoje ou até dois dias anteriores.
   O cartão **Cortes finalizados sem PIs** acompanha cortes sem itens cadastrados,

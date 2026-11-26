@@ -41,6 +41,7 @@ const blocoItensCorte =
   document.getElementById("blocoItensCorte")
 let buscaCorteAtual = 0
 let consultaAndamentoAtual = 0
+let andamentoRecebido = false
 let gerandoNovoCorte = false
 
 function definirCorteSelecionadoAtivo(ativo) {
@@ -250,15 +251,11 @@ export async function buscarCorte(numeroCorte, {rolar = true} = {}) {
 
     renderizarStatus(statusAtual)
 
-    await carregarHistorico(numeroCorte, {aindaAtual})
-    if (!aindaAtual()) return
-
-    const quantidadeItens =
-      await carregarItensCorte(numeroCorte, {aindaAtual})
-    if (!aindaAtual()) return
-
-    const itensJaFinalizados =
-      await carregarFinalizacaoItens(numeroCorte)
+    const [, quantidadeItens, itensJaFinalizados] = await Promise.all([
+      carregarHistorico(numeroCorte, {aindaAtual}),
+      carregarItensCorte(numeroCorte, {aindaAtual}),
+      carregarFinalizacaoItens(numeroCorte)
+    ])
     if (!aindaAtual()) return
 
     const producaoFinalizada =
@@ -396,9 +393,12 @@ export async function carregarCortesEmAndamento({
   if (!tabela) {
     return
   }
+  tabela.setAttribute('aria-busy', 'true')
+  const estadoLista = document.getElementById('estadoListaAndamento')
+  if (estadoLista && mostrarCarregamento) { estadoLista.hidden = false; estadoLista.textContent = 'Atualizando cortes…' }
 
   try {
-    if (mostrarCarregamento && tabela) {
+    if (mostrarCarregamento && !andamentoRecebido) {
       tabela.innerHTML = `
         <tr>
           <td colspan="6">
@@ -412,6 +412,8 @@ export async function carregarCortesEmAndamento({
       await apiGet("/cortes-em-andamento")
     if (consulta !== consultaAndamentoAtual) return
 
+    andamentoRecebido = true
+    if (estadoLista) { estadoLista.hidden = true; estadoLista.textContent = '' }
     atualizarOcupacaoMesas(cortes)
     const total = document.getElementById("totalCortesEmAndamento")
     if (total) total.textContent = `${cortes.length} ${cortes.length === 1 ? "corte" : "cortes"}`
@@ -559,7 +561,8 @@ export async function carregarCortesEmAndamento({
       erro
     )
 
-    if (tabela) {
+    if (estadoLista) { estadoLista.hidden = false; estadoLista.textContent = andamentoRecebido ? 'Não foi possível atualizar. Exibindo os últimos dados recebidos.' : 'Não foi possível consultar os cortes. Tente atualizar novamente.' }
+    if (!andamentoRecebido) {
       tabela.innerHTML = `
         <tr>
           <td colspan="6">
@@ -577,7 +580,10 @@ export async function carregarCortesEmAndamento({
       )
     }
   } finally {
-    if (consulta === consultaAndamentoAtual) carregarResumoFinalizados()
+    if (consulta === consultaAndamentoAtual) {
+      tabela.setAttribute('aria-busy', 'false')
+      carregarResumoFinalizados()
+    }
   }
 }
 

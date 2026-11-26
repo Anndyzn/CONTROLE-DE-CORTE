@@ -11,6 +11,7 @@ import {
   SUPABASE_PUBLIC_KEY,
   SUPABASE_URL
 } from "./supabase-config.js"
+import { carregarBibliotecaRealtime } from './biblioteca-realtime.js'
 
 
 let canalRealtime = null
@@ -54,18 +55,11 @@ function atualizarStatusSincronizacao(
 }
 
 
-export function inicializarRealtime() {
+export async function inicializarRealtime() {
   if (!window.supabase) {
-    console.error(
-      "Biblioteca do Supabase não foi carregada."
-    )
-
-    atualizarStatusSincronizacao(
-      "Sem tempo real",
-      "error"
-    )
-
-    return
+    atualizarStatusSincronizacao('Conectando', 'warning')
+    try { await carregarBibliotecaRealtime() }
+    catch { atualizarStatusSincronizacao('Sem tempo real', 'error'); return }
   }
 
 
@@ -106,19 +100,15 @@ export function inicializarRealtime() {
 
 
         // Atualiza lista superior
-        await carregarCortesEmAndamento()
-
-
         // Se existe um corte aberto,
         // atualiza também suas informações.
         const numeroCorteAtual = numeroCorteSelecionado()
 
 
-        if (numeroCorteAtual) {
-          await buscarCorte(
-            numeroCorteAtual, {rolar:false}
-          )
-        }
+        await Promise.all([
+          carregarCortesEmAndamento(),
+          numeroCorteAtual ? buscarCorte(numeroCorteAtual, {rolar:false}) : Promise.resolve()
+        ])
       }
     )
 
@@ -142,17 +132,13 @@ export function inicializarRealtime() {
         )
 
 
-        await carregarCortesEmAndamento()
-
-
         const numeroCorteAtual = numeroCorteSelecionado()
 
 
-        if (numeroCorteAtual) {
-          await buscarCorte(
-            numeroCorteAtual, {rolar:false}
-          )
-        }
+        await Promise.all([
+          carregarCortesEmAndamento(),
+          numeroCorteAtual ? buscarCorte(numeroCorteAtual, {rolar:false}) : Promise.resolve()
+        ])
       }
     )
 

@@ -13,10 +13,13 @@ import {
 // HISTÓRICO DE PRODUÇÃO
 // ========================================
 
-export async function carregarHistoricoConsulta(numeroCorte) {
+let consultaHistorico = 0, consultaItens = 0
+export async function carregarHistoricoConsulta(numeroCorte, {aindaAtual = () => true} = {}) {
+  const consulta = ++consultaHistorico
   try {
     const historico =
       await apiGet(`/producao/${numeroCorte}`)
+    if (consulta !== consultaHistorico || !aindaAtual()) return []
 
     const tabela =
       document.getElementById("historicoConsulta")
@@ -102,10 +105,12 @@ export async function carregarHistoricoConsulta(numeroCorte) {
 // ITENS / PIs DO CORTE
 // ========================================
 
-export async function carregarItensConsulta(numeroCorte) {
+export async function carregarItensConsulta(numeroCorte, {aindaAtual = () => true} = {}) {
+  const consulta = ++consultaItens
   try {
     const itens =
       await apiGet(`/itens-corte/${numeroCorte}`)
+    if (consulta !== consultaItens || !aindaAtual()) return []
 
     const tabela =
       document.getElementById("itensConsulta")

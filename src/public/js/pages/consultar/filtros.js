@@ -40,6 +40,7 @@ let consultaComProduto =
 
 let parametrosConsultaAplicada = null
 let sequenciaConsulta = 0
+let sequenciaDetalhes = 0, parametrosUltimaConsulta = null, buscaManualPendente = false
 let atualizarExportacao = () => {}
 const camposMemoria=["filtroNumero","filtroProduto","filtroDataInicial","filtroDataFinal","filtroStatus"]
 let restauracaoConsulta=null
@@ -68,6 +69,7 @@ export function obterCorteConsultaAtual() {
 // ========================================
 
 function limparDetalhesCorte() {
+  sequenciaDetalhes++
   corteConsultaAtual =
     null
 
@@ -152,8 +154,11 @@ async function abrirDetalhesCorte(
   posicaoLista=window.scrollY
   guardarConsulta()
   try {
+    if (String(corteConsultaAtual) !== String(item.numero)) limparDetalhesCorte()
     corteConsultaAtual =
       item.numero
+    const consulta = ++sequenciaDetalhes
+    const aindaAtual = () => consulta === sequenciaDetalhes && String(corteConsultaAtual) === String(item.numero)
 
 
     destacarLinhaSelecionada(
@@ -161,19 +166,12 @@ async function abrirDetalhesCorte(
     )
 
 
-    await carregarHistoricoConsulta(
-      item.numero
-    )
-
-
-    await carregarItensConsulta(
-      item.numero
-    )
-
-
-    await carregarDashboardCorte(
-      item.numero
-    )
+    await Promise.all([
+      carregarHistoricoConsulta(item.numero, {aindaAtual}),
+      carregarItensConsulta(item.numero, {aindaAtual}),
+      carregarDashboardCorte(item.numero, {aindaAtual})
+    ])
+    if (!aindaAtual()) return
 
 
     const detalheCorte =
@@ -189,6 +187,7 @@ async function abrirDetalhesCorte(
 
 
     setTimeout(() => {
+      if (!aindaAtual()) return
       detalheCorte
         ?.scrollIntoView({
           behavior: "smooth",
@@ -208,6 +207,17 @@ async function abrirDetalhesCorte(
 // ========================================
 // RESULTADOS DA CONSULTA
 // ========================================
+
+export async function atualizarDetalhesConsulta() {
+  const numero = corteConsultaAtual, consulta = sequenciaDetalhes
+  if (!numero) return
+  const aindaAtual = () => consulta === sequenciaDetalhes && String(corteConsultaAtual) === String(numero)
+  await Promise.all([
+    carregarHistoricoConsulta(numero, {aindaAtual}),
+    carregarItensConsulta(numero, {aindaAtual}),
+    carregarDashboardCorte(numero, {aindaAtual})
+  ])
+}
 
 function obterClasseStatus(status) {
   return status === "FINALIZADO"
@@ -418,11 +428,16 @@ function carregarMaisResultadosConsulta() {
 // CARREGAR RESULTADOS DA CONSULTA
 // ========================================
 
-export async function carregarResultadosConsulta() {
-  posicaoLista=null
+export async function carregarResultadosConsulta({silencioso = false} = {}) {
+  if (silencioso && (buscaManualPendente || parametrosUltimaConsulta === null)) return
+  if (!silencioso) buscaManualPendente = true
+  if (!silencioso) posicaoLista=null
   const sequencia = ++sequenciaConsulta
-  parametrosConsultaAplicada = null
-  atualizarExportacao()
+  const estado = document.getElementById('estadoConsulta')
+  const tabelaResultados = document.getElementById('resultadoFiltros')
+  tabelaResultados?.setAttribute('aria-busy', 'true')
+  if (estado) { estado.hidden = false; estado.textContent = resultadosConsulta.length ? 'Atualizando resultados…' : 'Buscando cortes…' }
+  if (!silencioso) { parametrosConsultaAplicada = null; atualizarExportacao() }
   const botaoBuscar =
     document.getElementById(
       "buscarFiltros"
@@ -471,7 +486,7 @@ export async function carregarResultadosConsulta() {
     campoStatus?.value ?? ""
 
 
-  const params =
+  let params =
     new URLSearchParams()
 
 
@@ -515,8 +530,9 @@ export async function carregarResultadosConsulta() {
   }
 
 
+  if (silencioso) params = new URLSearchParams(parametrosUltimaConsulta)
   try {
-    definirCarregamento(
+    if (!silencioso) definirCarregamento(
       botaoBuscar,
       true,
       "Buscar"
@@ -527,7 +543,7 @@ export async function carregarResultadosConsulta() {
         "resultadoFiltros"
       )
 
-    if (tabela) {
+    if (tabela && !resultadosConsulta.length) {
       tabela.innerHTML = `
         <tr>
           <td colspan="6">
@@ -543,6 +559,7 @@ export async function carregarResultadosConsulta() {
       )
 
     if (sequencia !== sequenciaConsulta) return
+    parametrosUltimaConsulta = params.toString()
     parametrosConsultaAplicada = resultados.length ? params.toString() : null
     atualizarExportacao()
 
@@ -561,30 +578,28 @@ export async function carregarResultadosConsulta() {
     resultadosConsulta =
       resultados
 
-    consultaComProduto =
-      Boolean(produto)
+    consultaComProduto = Boolean(params.get('produto'))
 
-    quantidadeResultadosVisiveis =
-      consultaComProduto
-        ? resultadosConsulta.length
-        : QUANTIDADE_POR_PAGINA
+    if (consultaComProduto) quantidadeResultadosVisiveis = resultadosConsulta.length
+    else if (!silencioso) quantidadeResultadosVisiveis = QUANTIDADE_POR_PAGINA
 
 
-    limparDetalhesCorte()
+    if (!silencioso) limparDetalhesCorte()
 
     renderizarResultadosConsulta()
-    if (restauracaoConsulta) {
+    if (estado) { estado.textContent = ''; estado.hidden = true }
+    if (restauracaoConsulta && !silencioso) {
       quantidadeResultadosVisiveis=Math.max(QUANTIDADE_POR_PAGINA,Math.min(Number(restauracaoConsulta.exibidos)||20,resultadosConsulta.length))
       renderizarResultadosConsulta()
       const posicao=Number(restauracaoConsulta.scroll)||0
       requestAnimationFrame(()=>window.scrollTo(0,posicao))
       restauracaoConsulta=null
     }
-    guardarConsulta()
+    if (!silencioso) guardarConsulta()
 
   } catch (erro) {
     if (sequencia !== sequenciaConsulta) return
-    parametrosConsultaAplicada = null
+    if (!silencioso) parametrosConsultaAplicada = null
     atualizarExportacao()
     console.error(
       "Erro ao consultar cortes:",
@@ -596,7 +611,7 @@ export async function carregarResultadosConsulta() {
         "resultadoFiltros"
       )
 
-    if (tabela) {
+    if (tabela && !resultadosConsulta.length) {
       tabela.innerHTML = `
         <tr>
           <td colspan="6">
@@ -611,12 +626,14 @@ export async function carregarResultadosConsulta() {
         "totalConsulta"
       )
 
-    if (totalConsulta) {
+    if (totalConsulta && !resultadosConsulta.length) {
       totalConsulta.textContent =
         "0"
     }
 
-    document
+    if (estado) { estado.hidden = false; estado.textContent = resultadosConsulta.length ? 'Não foi possível atualizar. A lista exibida é da busca anterior. Tente novamente.' : 'Não foi possível buscar os cortes. Tente novamente.' }
+
+    if (!resultadosConsulta.length) document
       .getElementById(
         "consultaCarregarMais"
       )
@@ -633,7 +650,9 @@ export async function carregarResultadosConsulta() {
     )
 
   } finally {
-    if (sequencia === sequenciaConsulta) definirCarregamento(
+    if (sequencia === sequenciaConsulta) tabelaResultados?.setAttribute('aria-busy', 'false')
+    if (sequencia === sequenciaConsulta && !silencioso) buscaManualPendente = false
+    if (sequencia === sequenciaConsulta && !silencioso) definirCarregamento(
       botaoBuscar,
       false,
       "Buscar"

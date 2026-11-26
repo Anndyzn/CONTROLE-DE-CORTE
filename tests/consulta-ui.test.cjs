@@ -4,12 +4,12 @@ const fs = require('node:fs')
 let elementos, consultar, obterExportacao, modulo, sequencia=0
 function elemento() {
   return {value:'',textContent:'',disabled:false,dataset:{},style:{setProperty(nome,valor){this[nome]=valor}},
-    children:[],eventos:{},classList:{add(){},remove(){}},focus(){},
+    attributes:{},setAttribute(n,v){this.attributes[n]=v},children:[],eventos:{},classList:{add(){},remove(){}},focus(){},scrollIntoView(){},
     set innerHTML(valor){this.html=valor;this.children=[]},get innerHTML(){return this.html},
     appendChild(filho){this.children.push(filho)},addEventListener(nome,fn){this.eventos[nome]=fn}}
 }
 beforeEach(async()=>{
-  elementos=Object.fromEntries(['buscarFiltros','limparFiltros','carregarMaisCortes','filtroNumero','filtroProduto','filtroDataInicial','filtroDataFinal','filtroStatus','resultadoFiltros','totalConsulta','consultaCarregarMais','consultaExibidos','detalheCorte','dashboardCorte','historicoConsulta','itensConsulta'].map(id=>[id,elemento()]))
+  elementos=Object.fromEntries(['estadoConsulta','buscarFiltros','limparFiltros','carregarMaisCortes','filtroNumero','filtroProduto','filtroDataInicial','filtroDataFinal','filtroStatus','resultadoFiltros','totalConsulta','consultaCarregarMais','consultaExibidos','detalheCorte','dashboardCorte','historicoConsulta','itensConsulta'].map(id=>[id,elemento()]))
   globalThis.document={getElementById:id=>elementos[id],querySelectorAll:()=>[],createElement:()=>{
     const row=elemento()
     Object.defineProperty(row,'innerHTML',{set(valor){this.html=valor;this.children=Array.from({length:6},elemento)},get(){return this.html}})
@@ -69,4 +69,49 @@ test('restores filters, expanded results and list position from this browser ses
  assert.equal(position,350)
  elementos.limparFiltros.eventos.click()
  assert.equal(elementos.filtroDataInicial.value,'')
+})
+
+test('atualizar preserva as linhas durante a espera e a falha identifica os dados anteriores',async()=>{
+ consultar=async()=>[{numero:917,produto:'MANTA',status:'FINALIZADO'}]
+ await modulo.carregarResultadosConsulta()
+ const linha=elementos.resultadoFiltros.children[0]
+ let resolver;consultar=()=>new Promise(r=>resolver=r)
+ const carga=modulo.carregarResultadosConsulta()
+ assert.equal(elementos.resultadoFiltros.children[0],linha)
+ assert.equal(elementos.resultadoFiltros.attributes['aria-busy'],'true')
+ resolver([{numero:918,produto:'CETIM'}]);await carga
+ assert.equal(elementos.resultadoFiltros.attributes['aria-busy'],'false')
+ assert.equal(elementos.estadoConsulta.hidden,true)
+ const atual=elementos.resultadoFiltros.children[0]
+ consultar=async()=>{throw Error('Rede indisponivel')}
+ await modulo.carregarResultadosConsulta()
+ assert.equal(elementos.resultadoFiltros.children[0],atual)
+ assert.equal(elementos.totalConsulta.textContent,1)
+ assert.match(elementos.estadoConsulta.textContent,/busca anterior/)
+ assert.equal(obterExportacao(),null)
+})
+
+test('tempo real preserva detalhes, paginacao e a busca aplicada, sem usar filtros em edicao',async()=>{
+ elementos.filtroStatus.value='FINALIZADO'
+ const resultados=Array.from({length:45},(_,i)=>({numero:917+i,produto:'MANTA',status:'FINALIZADO'}))
+ consultar=async()=>resultados;await modulo.carregarResultadosConsulta()
+ elementos.carregarMaisCortes.eventos.click()
+ await elementos.resultadoFiltros.children[0].eventos.click()
+ assert.equal(modulo.obterCorteConsultaAtual(),917)
+ elementos.filtroProduto.value='TEXTO AINDA NAO BUSCADO'
+ consultar=async url=>{assert.ok(url.endsWith('status=FINALIZADO'));return resultados}
+ await modulo.carregarResultadosConsulta({silencioso:true})
+ assert.equal(elementos.resultadoFiltros.children.length,40)
+ assert.equal(modulo.obterCorteConsultaAtual(),917)
+ assert.equal(elementos.detalheCorte.style.display,'grid')
+ assert.equal(obterExportacao(),'status=FINALIZADO')
+ assert.equal(elementos.filtroProduto.value,'TEXTO AINDA NAO BUSCADO')
+})
+
+test('busca por produto inclui novos resultados tambem na atualizacao silenciosa',async()=>{
+ elementos.filtroProduto.value='MANTA'
+ consultar=async()=>Array.from({length:25},(_,i)=>({numero:i+1,produto:'MANTA'}))
+ await modulo.carregarResultadosConsulta();assert.equal(elementos.resultadoFiltros.children.length,25)
+ consultar=async()=>Array.from({length:30},(_,i)=>({numero:i+1,produto:'MANTA'}))
+ await modulo.carregarResultadosConsulta({silencioso:true});assert.equal(elementos.resultadoFiltros.children.length,30)
 })
